@@ -247,7 +247,7 @@ Monitoring, Logging, and Runtime Security - 20%
 ### Containers and Kubernetes Security Training
 
 1. [Killer.sh CKS practice exam](https://killer.sh/cks)
-2. Kim Wüstkamp's on Udemy [Kubernetes CKS 2023 Complete Course - Theory - Practice](https://www.udemy.com/course/certified-kubernetes-security-specialist/)
+2. [Kim Wüstkamp's on Udemy: Kubernetes CKS 2023 Complete Course - Theory - Practice](https://www.udemy.com/course/certified-kubernetes-security-specialist/)
 3. [Linux Foundation Kubernetes Security essentials LFS 260](https://training.linuxfoundation.org/training/kubernetes-security-essentials-lfs260/)
 4. [KodeCloud "Certified Kubernetes Security Specialist (CKS)](https://kodekloud.com/courses/certified-kubernetes-security-specialist-cks/)
 5. [Falco 101](https://learn.sysdig.com/falco-101)
