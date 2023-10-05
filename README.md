@@ -1,20 +1,27 @@
 # Certified Kubernetes Security Specialist (CKS) in 2023-2024
 
+
+A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes practitioner (must be CKA certified) who has demonstrated competence on a broad range of best practices for securing container-based applications and Kubernetes platforms during build, deployment, and runtime.
+
 <p align="center">
   <img width="360" src="kubernetes-security-specialist-logo-300x285.png">
 </p>
 
 ## Certification
- 
-The official website is https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist
 
+- Duration: two (2) hours
+- Number of questions: 15-20 hands-on performance-based tasks
+- Passing score: 67%
+- Certification validity: two (2) years
+- Prerequisite: valid CKA
+- Cost: $375 USD, One (1) year exam eligibility, with a free retake within the year.
+- [The official website with certification](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist)
+- [CNCF Exam Curriculum repository ](https://github.com/cncf/curriculum/)
 
-Extra docs:
-	https://github.com/walidshaari/Certified-Kubernetes-Security-Specialist
-
+### Structure of certification
 
 Cluster Setup - 10%
-	Use Network security policies to restrict cluster level access:
+	Use Network security policies to restrict cluster-level access:
 		- https://kubernetes.io/docs/concepts/services-networking/network-policies/
 		- https://github.com/ahmetb/kubernetes-network-policy-recipes
 		- https://reuvenharrison.medium.com/an-introduction-to-kubernetes-network-policies-for-security-people-ba92dd4c809d
@@ -29,7 +36,7 @@ Cluster Setup - 10%
 		- https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
 	
 	Protect node metadata and endpoints:
-		Prevent unauthenticated / unauthorised to api-server (authorization-mode, .. son on):
+		Prevent unauthenticated/unauthorised to api-server (authorization-mode, .. son on):
 			- https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access
 			- https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/
 			- https://kubernetes.io/docs/concepts/services-networking/network-policies/
@@ -81,20 +88,20 @@ System Hardening - 15%
 	Minimize external access to the network:
 		- https://kubernetes.io/docs/concepts/services-networking/network-policies/
 
-	Appropriately use kernel hardening tools such as AppArmor, seccomp:
+	Appropriately use kernel hardening tools such as AppArmor, and SecComp:
 		https://kubernetes.io/docs/concepts/security/pod-security-admission/
 
-		apparmor:
+		AppArmor:
 			- https://kubernetes.io/docs/tutorials/security/apparmor/
 			- https://gitlab.com/apparmor/apparmor/-/wikis/Documentation
-		seccomp:
+		SecComp:
 			- https://kubernetes.io/docs/tutorials/security/seccomp/
 		
 		- https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation
 
 
 Minimize Microservice Vulnerabilities - 20%
-	Setup appropriate OS level security domains:
+	Setup appropriate OS-level security domains:
 		PSP: 
 			- https://kubernetes.io/docs/concepts/policy/pod-security-policy/
 		
@@ -111,7 +118,7 @@ Minimize Microservice Vulnerabilities - 20%
 		- https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
 
 	Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers):
-		runTime: 
+		Runtime: 
 			- https://kubernetes.io/docs/concepts/containers/runtime-class/
 			- https://github.com/kubernetes/enhancements/blob/5dcf841b85f49aa8290529f1957ab8bc33f8b855/keps/sig-node/585-runtime-class/README.md#examples
 			- https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md#examples
@@ -119,14 +126,14 @@ Minimize Microservice Vulnerabilities - 20%
 		gVisor: 
 			- https://gvisor.dev/docs/user_guide/install/
 
-	Implement pod to pod encryption by use of mTLS:
+	Implement pod-to-pod encryption by use of mTLS:
 		- https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/
 		- https://www.istioworkshop.io/11-security/01-mtls/
 
-		istio: 
+		Istio: 
 			- https://developer.ibm.com/technologies/containers/tutorials/istio-security-mtls/
 		
-		linkerd: 
+		Linkerd: 
 			-https://linkerd.io/2/features/automatic-mtls/
 
 
@@ -178,7 +185,7 @@ Supply Chain Security - 20%
 			- https://github.com/aquasecurity/trivy
 
 
-Monitoring, Logging and Runtime Security - 20%
+Monitoring, Logging, and Runtime Security - 20%
 	Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities:
 		- https://kubernetes.io/docs/tutorials/security/seccomp/
 		- https://sysdig.com/blog/how-to-detect-kubernetes-vulnerability-cve-2019-11246-using-falco/
@@ -188,12 +195,12 @@ Monitoring, Logging and Runtime Security - 20%
 		- https://github.com/falcosecurity/charts
 		- https://falco.org/blog/detect-cve-2020-8557/
 
-	Detect threats within physical infrastructure, apps, networks, data, users and workloads:
+	Detect threats within a physical infrastructure, apps, networks, data, users, and workloads:
 		- https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/
 		- https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling
 		- https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
 
-	Detect all phases of attack regardless where it occurs and how it spreads:
+	Detect all phases of attack regardless of where it occurs and how it spreads:
 		- https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
 		- https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/
 		- https://www.cncf.io/online-programs/mitigating-kubernetes-attacks/
@@ -203,7 +210,7 @@ Monitoring, Logging and Runtime Security - 20%
 		- https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/
 		- https://www.youtube.com/watch?v=HWv8ZKLCawM&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D
 
-	Perform deep analytical investigation and identification of bad actors within environment:
+	Perform deep analytical investigation and identification of bad actors within the environment:
 		- https://docs.sysdig.com/en/
 		- https://kubernetes.io/blog/2015/11/monitoring-kubernetes-with-sysdig/
 		- https://www.youtube.com/watch?v=VEFaGjfjfyc&ab_channel=Sysdig
