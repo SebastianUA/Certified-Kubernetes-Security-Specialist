@@ -9,12 +9,14 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 
 ## Certification
 
-- Duration: two (2) hours
+- Duration of Exam: 120 minutes
 - Number of questions: 15-20 hands-on performance-based tasks
 - Passing score: 67%
-- Certification validity: two (2) years
+- Certification validity: 2 years
 - Prerequisite: valid CKA
-- Cost: $375 USD, One (1) year exam eligibility, with a free retake within the year.
+- Cost: $395 USD
+- 12 Month Exam Eligibility, with a free retake within the year.
+- Software Version: Kubernetes v1.27
 - [The official website with certification](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist)
 - [CNCF Exam Curriculum repository ](https://github.com/cncf/curriculum/)
 
