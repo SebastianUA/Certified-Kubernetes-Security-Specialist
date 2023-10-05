@@ -4,9 +4,9 @@
   <img width="360" src="kubernetes-security-specialist-logo-300x285.png">
 </p>
 
-
-Cert: 
-	https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/
+## Certification
+ 
+The official website is https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist
 
 
 Extra docs:
@@ -221,3 +221,36 @@ Monitoring, Logging and Runtime Security - 20%
 		- https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
 		- https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/
 		- https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/
+
+## Additional useful material
+
+### Books
+
+1. [Aqua Security Liz Rice:Free Container Security Book](https://info.aquasec.com/container-security-book)
+1. [Learn Kubernetes security: Securely orchestrate, scale, and manage your microservices in Kubernetes deployments](https://www.amazon.com/Learn-Kubernetes-Security-orchestrate-microservices/dp/1839216506)
+1. [Let's Learn CKS Scenarios](https://gumroad.com/l/cksbook)
+
+### Youtube Videos
+
+1. [Kubernetes Security Best Practices - Ian Lewis, Google](https://youtu.be/wqsUfvRyYpw)
+2. [Learn Kubernetes Security](https://www.youtube.com/playlist?list=PLeLcvrwLe1859Rje9gHrD1KEp4y5OXApB)
+3. [Let's Learn Kubernetes Security](https://youtu.be/VjlvS-qiz_U)
+4. [Webinar | Certified Kubernetes Security Specialist (CKS), January 2022](https://youtu.be/Qqoe-PbuQcs)
+
+### Containers and Kubernetes Security Training
+
+1. [Killer.sh CKS practice exam](https://killer.sh/cks)
+2. Kim Wüstkamp's on Udemy [Kubernetes CKS 2023 Complete Course - Theory - Practice](https://www.udemy.com/course/certified-kubernetes-security-specialist/)
+3. [Linux Foundation Kubernetes Security essentials LFS 260](https://training.linuxfoundation.org/training/kubernetes-security-essentials-lfs260/)
+4. [KodeCloud "Certified Kubernetes Security Specialist (CKS)](https://kodekloud.com/courses/certified-kubernetes-security-specialist-cks/)
+5. [Falco 101](https://learn.sysdig.com/falco-101)
+6. [Killer Shell CKS - Interactive Scenarios for Kubernetes Security](https://killercoda.com/killer-shell-cks)
+7. [Linux Foundation Kubernetes Certifications Now Include Exam Simulator](https://training.linuxfoundation.org/announcements/linux-foundation-kubernetes-certifications-now-include-exam-simulator)
+
+
+## Authors
+
+Created and maintained by [Vitalii Natarov](https://github.com/SebastianUA). An email: [vitaliy.natarov@yahoo.com](vitaliy.natarov@yahoo.com).
+
+## License
+Apache 2 Licensed. See [LICENSE](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/blob/main/LICENSE) for full details.
