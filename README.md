@@ -349,7 +349,7 @@ Examples:
 	```
 </details>
 
- - <details><summary>Example_2: Working cluster roles and cluster role bindings:</summary>
+ - <details><summary>Example_2: Working with RBAC (cluster roles and cluster role bindings):</summary>
 	
 	```
 	k create clusterrole cluster_role --verb=get,list,watch --resource=pods
@@ -360,7 +360,7 @@ Examples:
 You must know to how:
 - To create roles & role bindings.
 - To create cluster roles & cluster role bindings.
-- To create service account and greant it with some permission.
+- To create service account and grant it with some permission.
 - To find needed resources and change/add permissions.
 
 **Useful official documentation**
@@ -461,217 +461,326 @@ You must know to how:
 
 ## System Hardening - 15%
 ### 1. Minimize host OS footprint (reduce attack surface)
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules
-
+Examples:
+ - <details><summary>Example_1: Use Seccomp:</summary>
+	
+	```
+	TBD
+	```
 </details>
+
+ - <details><summary>Example_2: Use AppArmor:</summary>
+	
+	```
+	TBD
+	```
+</details>
+
+ - <details><summary>Example_3: PSA enforces:</summary>
+	
+	```
+	TBD
+	```
+</details>
+
+ - <details><summary>Example_4: Apply host updates:</summary>
+	
+	```
+	TBD
+	```
+</details>
+
+ - <details><summary>Example_5: Install minimal required OS fingerprint:</summary>
+	
+	```
+	TBD
+	```
+</details>
+
+ - <details><summary>Example_6: Identify and address open ports:</summary>
+	
+	```
+	TBD
+	```
+</details>
+
+ - <details><summary>Example_7: Remove unnecessary packages:</summary>
+	
+	```
+	TBD
+	```
+</details>
+
+
+**Useful official documentation**
+
+- [securing-a-cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules)
+
 
 ### 2. Minimize IAM roles
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/reference/access-authn-authz/authentication/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [access-authn-authz](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
 
 ### 3. Minimize external access to the network
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/concepts/services-networking/network-policies/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [network-policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
 ### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/concepts/security/pod-security-admission/
-	2. AppArmor:
-		- https://kubernetes.io/docs/tutorials/security/apparmor/
-			- https://gitlab.com/apparmor/apparmor/-/wikis/Documentation
-		3. SecComp:
-	 		- https://kubernetes.io/docs/tutorials/security/seccomp/
-	   	4. https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [pod-security-admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/)
+- [apparmor](https://kubernetes.io/docs/tutorials/security/apparmor/)
+- [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
+
+**Useful non-official documentation**
+
+- [apparmor](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
+- [Container Security](https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation)
 
 ## Minimize Microservice Vulnerabilities - 20%
+
 ### 1. Setup appropriate OS-level security domains
-<details><summary>Useful documentation</summary>
 
-	1. PSP: 
-		- https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-		
-	2. OPA: 
-		- https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/
-		- https://www.openpolicyagent.org/docs/latest/kubernetes-primer/
-	
-	3. Security Context: 
-		- https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		- https://sysdig.com/blog/kubernetes-security-psp-network-policy/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- None
+
+**Useful non-official documentation**
+
+- [opa-gatekeeper-policy-and-governance-for-kubernetes](https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/)
+- [openpolicyagent](https://www.openpolicyagent.org/docs/latest/kubernetes-primer/)
+- [security context for pods](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [kubernetes-security-psp-network-policy](https://sysdig.com/blog/kubernetes-security-psp-network-policy/)
+
 
 ### 2. Manage Kubernetes secrets
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/concepts/configuration/secret/
-	2. https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
+TBD! 
 
-</details>
+**Useful official documentation**
+
+- [secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
+- [encrypt-data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
+
+**Useful non-official documentation**
+
+- None
 
 ### 3. Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
-<details><summary>Useful documentation</summary>
 
-	1. Runtime: 
-		- https://kubernetes.io/docs/concepts/containers/runtime-class/
-		- https://github.com/kubernetes/enhancements/blob/5dcf841b85f49aa8290529f1957ab8bc33f8b855/keps/sig-node/585-runtime-class/README.md#examples
-		- https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md#examples
-	
-	2. gVisor: 
-		- https://gvisor.dev/docs/user_guide/install/
-</details>
+TBD!
+
+**Useful official documentation**
+
+- [runtime-class](https://kubernetes.io/docs/concepts/containers/runtime-class/)
+- [encrypt-data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
+
+**Useful non-official documentation**
+
+- [gvisor](https://gvisor.dev/docs/user_guide/install/)
+- [runtime-class-examples](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md#examples)
+
 
 ### 4. Implement pod-to-pod encryption by use of mTLS
-<details><summary>Useful documentation</summary>
 
-	1. mTLS:
-		- https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/
-		- https://www.istioworkshop.io/11-security/01-mtls/
-	2. Istio: 
-		- https://developer.ibm.com/technologies/containers/tutorials/istio-security-mtls/
-	
-	3. Linkerd: 
-		- https://linkerd.io/2/features/automatic-mtls/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [mTLS](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/)
+
+**Useful non-official documentation**
+
+- [mTLS](https://www.istioworkshop.io/11-security/01-mtls/)
+- [Istio](https://developer.ibm.com/technologies/containers/tutorials/istio-security-mtls/)
+- [Linkerd](https://linkerd.io/2/features/automatic-mtls/)
+
 
 ## Supply Chain Security - 20% 
+
 ### 1. Minimize base image footprint
-<details><summary>Useful documentation</summary>
 
-	1. https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers
-	2. https://learnk8s.io/blog/smaller-docker-images
-	3. https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images
-	4. https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible
-	5. https://docs.docker.com/build/building/multi-stage/
-	6. https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34
+Use distroless, UBI minimal, Alpine, or relavent to your app nodejs, python but the minimal build.
+Do not include uncessary software not required for container during runtime e.g build tools and utilities, troubleshooting and debug binaries.
 
-</details>
+TBD!
+
+**Useful official documentation**
+
+- None
+
+**Useful non-official documentation**
+
+- [7-best-practices-for-building-containers](https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers)
+- [smaller-docker-images](https://learnk8s.io/blog/smaller-docker-images)
+-[kubernetes-best-practices-how-and-why-to-build-small-container-images](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images)
+-[best-practices-for-building-containers](https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible)
+-[multi-stages](https://docs.docker.com/build/building/multi-stage/)
+-[tips-to-reduce-docker-image-sizes](https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34)
 
 ### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook
-	2. https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/#why-do-i-need-admission-controllers
-	3. https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
-	4. https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
-	5. https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/
-
+Examples:
+ - <details><summary>Example_1: Use ImagePolicyWebhook:</summary>
+	
+	```
+	TBD
+	```
 </details>
+
+**Useful official documentation**
+
+- [admission-controllers#imagepolicywebhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook)
+- [extensible-admission-controllers](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+
+**Useful non-official documentation**
+
+- [why-do-i-need-admission-controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/#why-do-i-need-admission-controllers)
+
 
 ### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
-<details><summary>Useful documentation</summary>
 
-	1. statically analyse:
-		- https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml
-	2. kubehunter: 
-		- https://github.com/aquasecurity/kube-hunter
-	
-	3. kubesec: 
-		- https://kubesec.io/
-	
-	4. trivy:
-		- https://github.com/aquasecurity/trivy
-	
-	5. checkov:
-		- https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/
-	
-	6. clair:
-		- https://github.com/quay/clair
-	
-	7. kube-score:
-		- https://kube-score.com/
+TBD!
 
-</details>
+**Useful official documentation**
 
+- None
+
+**Useful non-official documentation**
+
+- [statically analyse](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml)
+- [kubehunter](https://github.com/aquasecurity/kube-hunter)
+- [kubesec](https://kubesec.io/)
+- [trivy](https://github.com/aquasecurity/trivy)
+- [checkov](https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/)
+- [clair](https://github.com/quay/clair)
+- [kube-score](https://kube-score.com/)
+	
 ### 4. Scan images for known vulnerabilities 
-<details><summary>Useful documentation</summary>
 
-	1. scan images and run ids:
-		- https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#10-scan-images-and-run-ids
-	2. anchore:
-		- https://github.com/anchore/anchore-cli#command-line-examples
-	
-	3. trivy:
-		- https://github.com/aquasecurity/trivy
+TBD!
 
-</details>
+**Useful official documentation**
+
+- None
+
+**Useful non-official documentation**
+
+- [scan images and run ids](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#10-scan-images-and-run-ids)
+- [anchore](https://github.com/anchore/anchore-cli#command-line-examples)
+- [trivy](https://github.com/aquasecurity/trivy)
 
 ## Monitoring, Logging, and Runtime Security - 20%
+
 ### 1. Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/tutorials/security/seccomp/
-	2. https://sysdig.com/blog/how-to-detect-kubernetes-vulnerability-cve-2019-11246-using-falco/
-	3. https://learn.sysdig.com/falco-101
-	4. https://github.com/falcosecurity/charts/tree/master/falco
-	5. https://github.com/falcosecurity/charts
-	6. https://falco.org/blog/detect-cve-2020-8557/
+Perform behavioural analytics of syscall process and file activities at the host and container level to detect malicious activities.
 
+Examples:
+ - <details><summary>Example_1: Use seccomp:</summary>
+	
+	```
+	TBD
+	```
 </details>
+
+**Useful official documentation**
+
+- [seccomp]( https://kubernetes.io/docs/tutorials/security/seccomp/)
+- [falco](https://falco.org/docs/)
+
+**Useful non-official documentation**
+
+- [how-to-detect-kubernetes-vulnerability-with-falco](https://sysdig.com/blog/how-to-detect-kubernetes-vulnerability-cve-2019-11246-using-falco/)
+- [falco-101](https://learn.sysdig.com/falco-101)
+- [helm-chart-falco](https://github.com/falcosecurity/charts/tree/master/falco)
+- [detect-cve-2020-8557](https://falco.org/blog/detect-cve-2020-8557/)
 
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
-<details><summary>Useful documentation</summary>
 
-	1. https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/
-	2. https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling
-	3. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- None
+
+**Useful non-official documentation**
+
+- [common-kubernetes-config-security-threats](https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/)
+- [guidance-on-kubernetes-threat-modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
+- [attack-matrix-kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
 
 ### 3. Detect all phases of attack regardless of where it occurs and how it spreads
-<details><summary>Useful documentation</summary>
 
-	1. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
-	2. https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/
-	3. https://www.cncf.io/online-programs/mitigating-kubernetes-attacks/
-	4. https://www.optiv.com/insights/source-zero/blog/anatomy-kubernetes-attack-how-untrusted-docker-images-fail-us
-	5. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
-	6. https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/
-	7. https://www.youtube.com/watch?v=HWv8ZKLCawM&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D
+TBD!
 
-</details>
+**Useful official documentation**
+
+- None
+
+**Useful non-official documentation**
+
+- [attack-matrix-kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
+- [mitre-attck-framework-for-container-runtime-security-with-sysdig-falco](https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/)
+- [mitigating-kubernetes-attacks](https://www.cncf.io/online-programs/mitigating-kubernetes-attacks/)
+- [anatomy-kubernetes-attack-how-untrusted-docker-images-fail-us](https://www.optiv.com/insights/source-zero/blog/anatomy-kubernetes-attack-how-untrusted-docker-images-fail-us)
+- [Webinar: Mitigating Kubernetes attacks](https://www.youtube.com/watch?v=HWv8ZKLCawM&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D)
 
 ### 4. Perform deep analytical investigation and identification of bad actors within the environment
-<details><summary>Useful documentation</summary>
 
-	1. https://docs.sysdig.com/en/
-	2. https://kubernetes.io/blog/2015/11/monitoring-kubernetes-with-sysdig/
-	3. https://www.youtube.com/watch?v=VEFaGjfjfyc&ab_channel=Sysdig
-	4. https://www.redhat.com/en/topics/containers/kubernetes-security
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [sysdig](https://docs.sysdig.com/en/)
+
+**Useful non-official documentation**
+
+- [monitoring-kubernetes-with-sysdig](https://kubernetes.io/blog/2015/11/monitoring-kubernetes-with-sysdig/)
+- [CNCF Webinar: Getting started with container runtime security using Falco](https://www.youtube.com/watch?v=VEFaGjfjfyc&ab_channel=Sysdig)
+- [kubernetes-security](https://www.redhat.com/en/topics/containers/kubernetes-security)
 
 ### 5. Ensure immutability of containers at runtime
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/blog/2018/03/principles-of-container-app-design/
-	2. https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_atomic_host/7/html/container_security_guide/keeping_containers_fresh_and_updateable#leveraging_kubernetes_and_openshift_to_ensure_that_containers_are_immutable
-	3. https://medium.com/sroze/why-i-think-we-should-all-use-immutable-docker-images-9f4fdcb5212f
-	4. https://techbeacon.com/enterprise-it/immutable-infrastructure-your-systems-can-rise-dead
-	5. ? Falco: https://falco.org/docs/
-	6. ? Sysdig: https://docs.sysdig.com/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [Falco](https://falco.org/docs/)
+- [Sysdig](https://docs.sysdig.com/)
+
+**Useful non-official documentation**
+
+- [principles-of-container-app-design](https://kubernetes.io/blog/2018/03/principles-of-container-app-design/)
+- [why-i-think-we-should-all-use-immutable-docker-images](https://medium.com/sroze/why-i-think-we-should-all-use-immutable-docker-images-9f4fdcb5212f)
+- [immutable-infrastructure-your-systems-can-rise-dead](https://techbeacon.com/enterprise-it/immutable-infrastructure-your-systems-can-rise-dead)
 
 ### 6. Use Audit Logs to monitor access
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
-	2. https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/
-	3. https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/
+TBD!
 
-</details>
+**Useful official documentation**
+
+- [audit](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/)
+
+**Useful non-official documentation**
+
+- [kubernetes-audit-logging](https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/)
+- [monitor-kubernetes-audit-logs](https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/)
 
 # Additional useful material
 
