@@ -7,7 +7,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
   <img width="360" src="kubernetes-security-specialist.png">
 </p>
 
-## Certification
+# Certification
 
 - Duration of Exam: **120 minutes**
 - Number of questions: **15-20 hands-on performance-based tasks**
@@ -23,11 +23,11 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 - [Candidate Handbook](https://docs.linuxfoundation.org/tc-docs/certification/lf-handbook2)
 - [Verify Certification](https://training.linuxfoundation.org/certification/verify/)
 
-### Structure of certification
+# Structure of certification
 
-#### Cluster Setup - 10%
+## Cluster Setup - 10%
 
-###### 1. [Use Network security policies to restrict cluster level access](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+### 1. Use Network security policies to restrict cluster level access
 
 Examples:
  - <details><summary>Example_1: Create default deny networking policy with <b>deny-all</b> name in <b>monitoring</b> namespace:</summary>
@@ -42,7 +42,7 @@ Examples:
 	spec:
 	podSelector: {}
 	policyTypes:
-		- Egress
+	   - Egress
 	egress: {}
 	```
 
@@ -58,13 +58,13 @@ Examples:
 	name: api-allow
 	spec:
 	podSelector:
-		matchLabels:
-		run: my-app
+	   matchLabels:
+	   run: my-app
 	ingress:
 	- from:
 		- podSelector:
 			matchLabels:
-				run: app2
+			   run: app2
 	```
 
 </details>
@@ -85,13 +85,74 @@ Other examples you can find in [hands-on with Kubernetes network policy](https:/
 
 - [Testing Kubernetes network policies behavior](https://github.com/Tufin/test-network-policies/tree/master)
 
-###### 2. Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
+### 2. Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
 
 Examples:
- - <details><summary>Example_1: Fix issues that provided in CIS file:</summary>
+ - <details><summary>Example_1: Fix issues that provided in CIS file (some example of the file):</summary>
 	
 	```
-	TBD
+	[INFO] 1 Master Node Security Configuration
+	[INFO] 1.2 API Server
+	[FAIL] 1.2.20 Ensure that the --profiling argument is set to false (Automated)
+
+	== Remediations master ==
+	1.2.20 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
+	on the master node and set the below parameter.
+	--profiling=false
+
+
+	== Summary master ==
+	0 checks PASS
+	1 checks FAIL
+	0 checks WARN
+	0 checks INFO
+
+	== Summary total ==
+	0 checks PASS
+	1 checks FAIL
+	0 checks WARN
+	0 checks INFO
+	```
+</details>
+
+ - <details><summary>Example_2: Fix issues of 1.3.2 part with <b>kube-bench</b>:</summary>
+	
+	```
+	$ kube-bench run --targets master --check 1.3.2 
+
+	[INFO] 1 Master Node Security Configuration
+	[INFO] 1.3 Controller Manager
+	[FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
+
+	== Remediations master ==
+	1.3.2 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
+	on the master node and set the below parameter.
+	--profiling=false
+
+
+	== Summary master ==
+	0 checks PASS
+	1 checks FAIL
+	0 checks WARN
+	0 checks INFO
+
+	== Summary total ==
+	0 checks PASS
+	1 checks FAIL
+	0 checks WARN
+	0 checks INFO
+	```
+
+	Then, going to fix:
+	```
+	...
+	containers:
+	- command:
+		- kube-apiserver
+		- --profiling=false
+	...
+		image: registry.k8s.io/kube-apiserver:v1.22.2
+	...
 	```
 
 </details>
@@ -101,13 +162,32 @@ Examples:
 - [cisecurity website](https://www.cisecurity.org/benchmark/kubernetes)
 - [kube-bench](https://github.com/aquasecurity/kube-bench)
 
-###### 3. [Properly set up Ingress objects with security control](https://kubernetes.io/docs/concepts/services-networking/ingress)
+### 3. Properly set up Ingress objects with security control
 
 Examples:
- - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace:</summary>
+ - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service:</summary>
 	
 	```
-	TBD
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: Ingress
+	metadata:
+	name: ingress-app1
+	namespace: app1
+	annotations:
+		nginx.ingress.kubernetes.io/rewrite-target: /
+	spec:
+	ingressClassName: nginx
+	rules:
+	- http:
+		paths:
+		- path: /health
+			pathType: Prefix
+			backend:
+			service:
+				name: app1-svc
+				port:
+				number: 80
 	```
 
 </details>
@@ -115,23 +195,50 @@ Examples:
  - <details><summary>Example_2: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace (with TLS):</summary>
 	
 	```
-	TBD
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: Ingress
+	metadata:
+	name: ingress-app1
+	namespace: app1
+	annotations:
+		nginx.ingress.kubernetes.io/rewrite-target: /
+	spec:
+	ingressClassName: nginx
+	tls:
+	- hosts:
+		- "local.domail.name"
+		secretName: local-domain-tls
+	rules:
+	- http:
+		paths:
+		- path: /health
+			pathType: Prefix
+			backend:
+			service:
+				name: app1-svc
+				port:
+				number: 80
 	```
 
 </details>
 
-**NOTE**: You should create the needed secret for Ingress
+**NOTE:** You should create the needed <b>local-domain-tls</b> secret for Ingress with certifications:
+```
+$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=local.domail.name/O=local.domail.name"
+$ kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
+```
 
 **Useful non-official documentation**
 
 - [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress)
 - [ingress with tls](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
 
-###### 4. [Protect node metadata and endpoints](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+### 4. Protect node metadata and endpoints
 It's part of networking policy where you can restrict access to metadata/endpoints.
 
 Examples:
- - <details><summary>Create metadata restriction with networking policy of <b>deny-all-allow-metadata-access</b> name in <b>monitoring</b> namespace to deny all except <p>1.1.1.1</p> IP:</summary>
+ - <details><summary>Create metadata restriction with networking policy of <b>deny-all-allow-metadata-access</b> name in <b>monitoring</b> namespace to deny all except <b>1.1.1.1</b> IP:</summary>
 	
 	```
 	---
@@ -165,7 +272,9 @@ Examples:
 - [kubelet-authn-authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
 
 
-###### 5. [Minimize the use of and access to, GUI elements](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/#accessing-the-dashboard-ui)
+### 5. Minimize the use of and access to, GUI elements
+
+Nothing specific to add to this topic.
 
 **Useful official documentation**
 - [web-ui-dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
@@ -173,13 +282,15 @@ Examples:
 **Useful non-official documentation**
 - [on-securing-the-kubernetes-dashboard](https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca)
 
-###### 6. Verify platform binaries before deploying 
+### 6. Verify platform binaries before deploying 
 
 Examples:
  - <details><summary>Compare binary file of kubelet on the current host and with kubelet 1.27 that you must download from official release:</summary>
 	
 	```
-	sha512sum $(find /proc/PID_ID/root | grep kube-api
+	$ sha512sum $(which kubelet) | cut -c-10
+	$ wget -O kubelet https://dl.k8s.io/$(/usr/bin/kubelet --version | cut -d " " -f2)/bin/linux/$(uname -m)/kubelet 
+	$ sha512sum ./kubelet | cut -c -10
 	```
 
 </details>
@@ -187,8 +298,8 @@ Examples:
 **Useful non-official documentation**
 - [kubernetes-releases](https://github.com/kubernetes/kubernetes/releases)
 
-#### Cluster Hardening - 15%
-###### 1. Restrict access to Kubernetes API
+## Cluster Hardening - 15%
+### 1. Restrict access to Kubernetes API
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/concepts/security/controlling-access/
@@ -202,7 +313,7 @@ Examples:
 	5. https://kubernetes.io/docs/concepts/cluster-administration/certificates/
 </details>
 
-###### 2. Use Role Based Access Controls to minimize exposure
+### 2. Use Role Based Access Controls to minimize exposure
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/reference/access-authn-authz/rbac/
@@ -214,7 +325,7 @@ Examples:
 	4. https://github.com/David-VTUK/CKA-StudyGuide/blob/master/RevisionTopics/01-Cluster%20Architcture%2C%20Installation%20and%20Configuration.md
 </details>
 
-###### 3. Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
+### 3. Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server
@@ -228,29 +339,29 @@ Examples:
 	2. https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
 </details>
 
-#### System Hardening - 15%
-###### 1. Minimize host OS footprint (reduce attack surface)
+## System Hardening - 15%
+### 1. Minimize host OS footprint (reduce attack surface)
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules
 
 </details>
 
-###### 2. Minimize IAM roles
+### 2. Minimize IAM roles
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/reference/access-authn-authz/authentication/
 
 </details>
 
-###### 3. Minimize external access to the network
+### 3. Minimize external access to the network
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/concepts/services-networking/network-policies/
 
 </details>
 
-###### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
+### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/concepts/security/pod-security-admission/
@@ -263,8 +374,8 @@ Examples:
 
 </details>
 
-#### Minimize Microservice Vulnerabilities - 20%
-###### 1. Setup appropriate OS-level security domains
+## Minimize Microservice Vulnerabilities - 20%
+### 1. Setup appropriate OS-level security domains
 <details><summary>Useful documentation</summary>
 
 	1. PSP: 
@@ -280,7 +391,7 @@ Examples:
 
 </details>
 
-###### 2. Manage Kubernetes secrets
+### 2. Manage Kubernetes secrets
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/concepts/configuration/secret/
@@ -288,7 +399,7 @@ Examples:
 
 </details>
 
-###### 3. Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
+### 3. Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
 <details><summary>Useful documentation</summary>
 
 	1. Runtime: 
@@ -300,7 +411,7 @@ Examples:
 		- https://gvisor.dev/docs/user_guide/install/
 </details>
 
-###### 4. Implement pod-to-pod encryption by use of mTLS
+### 4. Implement pod-to-pod encryption by use of mTLS
 <details><summary>Useful documentation</summary>
 
 	1. mTLS:
@@ -314,8 +425,8 @@ Examples:
 
 </details>
 
-#### Supply Chain Security - 20% 
-###### 1. Minimize base image footprint
+## Supply Chain Security - 20% 
+### 1. Minimize base image footprint
 <details><summary>Useful documentation</summary>
 
 	1. https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers
@@ -327,7 +438,7 @@ Examples:
 
 </details>
 
-###### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
+### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook
@@ -338,7 +449,7 @@ Examples:
 
 </details>
 
-###### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
+### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
 <details><summary>Useful documentation</summary>
 
 	1. statically analyse:
@@ -363,7 +474,7 @@ Examples:
 
 </details>
 
-###### 4. Scan images for known vulnerabilities 
+### 4. Scan images for known vulnerabilities 
 <details><summary>Useful documentation</summary>
 
 	1. scan images and run ids:
@@ -376,8 +487,8 @@ Examples:
 
 </details>
 
-#### Monitoring, Logging, and Runtime Security - 20%
-###### 1. Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities
+## Monitoring, Logging, and Runtime Security - 20%
+### 1. Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/tutorials/security/seccomp/
@@ -389,7 +500,7 @@ Examples:
 
 </details>
 
-###### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
+### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 <details><summary>Useful documentation</summary>
 
 	1. https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/
@@ -398,7 +509,7 @@ Examples:
 
 </details>
 
-###### 3. Detect all phases of attack regardless of where it occurs and how it spreads
+### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 <details><summary>Useful documentation</summary>
 
 	1. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
@@ -411,7 +522,7 @@ Examples:
 
 </details>
 
-###### 4. Perform deep analytical investigation and identification of bad actors within the environment
+### 4. Perform deep analytical investigation and identification of bad actors within the environment
 <details><summary>Useful documentation</summary>
 
 	1. https://docs.sysdig.com/en/
@@ -421,7 +532,7 @@ Examples:
 
 </details>
 
-###### 5. Ensure immutability of containers at runtime
+### 5. Ensure immutability of containers at runtime
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/blog/2018/03/principles-of-container-app-design/
@@ -433,7 +544,7 @@ Examples:
 
 </details>
 
-###### 6. Use Audit Logs to monitor access
+### 6. Use Audit Logs to monitor access
 <details><summary>Useful documentation</summary>
 
 	1. https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
@@ -442,22 +553,26 @@ Examples:
 
 </details>
 
-## Additional useful material
+# Additional useful material
 
-### Books
+## Articles
+
+1. [cheatsheet for kubernetes](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+
+## Books
 
 1. [Aqua Security Liz Rice:Free Container Security Book](https://info.aquasec.com/container-security-book)
 1. [Learn Kubernetes security: Securely orchestrate, scale, and manage your microservices in Kubernetes deployments](https://www.amazon.com/Learn-Kubernetes-Security-orchestrate-microservices/dp/1839216506)
 1. [Let's Learn CKS Scenarios](https://gumroad.com/l/cksbook)
 
-### Videos
+## Videos
 
 1. [Kubernetes Security Best Practices - Ian Lewis, Google](https://youtu.be/wqsUfvRyYpw)
 2. [Learn Kubernetes Security](https://www.youtube.com/playlist?list=PLeLcvrwLe1859Rje9gHrD1KEp4y5OXApB)
 3. [Let's Learn Kubernetes Security](https://youtu.be/VjlvS-qiz_U)
 4. [Webinar | Certified Kubernetes Security Specialist (CKS), January 2022](https://youtu.be/Qqoe-PbuQcs)
 
-### Containers and Kubernetes Security Training
+## Containers and Kubernetes Security Training
 
 1. [Killer.sh CKS practice exam](https://killer.sh/cks)
 2. [Kim Wüstkamp's on Udemy: Kubernetes CKS 2023 Complete Course - Theory - Practice](https://www.udemy.com/course/certified-kubernetes-security-specialist/)
@@ -468,9 +583,9 @@ Examples:
 7. [Linux Foundation Kubernetes Certifications Now Include Exam Simulator](https://training.linuxfoundation.org/announcements/linux-foundation-kubernetes-certifications-now-include-exam-simulator)
 
 
-## Authors
+# Authors
 
 Created and maintained by [Vitalii Natarov](https://github.com/SebastianUA). An email: [vitaliy.natarov@yahoo.com](vitaliy.natarov@yahoo.com).
 
-## License
+# License
 Apache 2 Licensed. See [LICENSE](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/blob/main/LICENSE) for full details.
