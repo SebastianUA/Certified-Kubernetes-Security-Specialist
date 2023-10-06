@@ -26,56 +26,171 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 ### Structure of certification
 
 #### Cluster Setup - 10%
-##### 1. [Use Network security policies to restrict cluster level access](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
-<details><summary>Useful documentation</summary>
-	1. https://kubernetes.io/docs/concepts/services-networking/network-policies/
+###### 1. [Use Network security policies to restrict cluster level access](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
-	2. https://github.com/ahmetb/kubernetes-network-policy-recipes
+Examples:
+ - <details><summary>Example_1: Create default deny networking policy with <b>deny-all</b> name in <b>monitoring</b> namespace:</summary>
+	
+	```
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: NetworkPolicy
+	metadata:
+	name: deny-all
+	namespace: monitoring
+	spec:
+	podSelector: {}
+	policyTypes:
+		- Egress
+	egress: {}
+	```
 
-	3. https://reuvenharrison.medium.com/an-introduction-to-kubernetes-network-policies-for-security-people-ba92dd4c809d
-
-	4. https://github.com/Tufin/test-network-policies/tree/master
 </details>
+ 
+ - <details><summary>Example_2: Create networking policy with <b>api-allow</b> name and create a restriction access to <b>api-allow</b> application that has deployed on <b>default</b> namespace and allow access only from <b>app2</b> pods:</summary>
+	
+	```
+	---
+	kind: NetworkPolicy
+	apiVersion: networking.k8s.io/v1
+	metadata:
+	name: api-allow
+	spec:
+	podSelector:
+		matchLabels:
+		run: my-app
+	ingress:
+	- from:
+		- podSelector:
+			matchLabels:
+				run: app2
+	```
+
+</details>
+
+Other examples you can find in [hands-on with Kubernetes network policy](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/Kubernetes-network-policy).
+
+**Useful official documentation**
+
+- [network-policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+
+**Useful non-official documentation**
+
+- [networking policy editor](https://editor.networkpolicy.io)
+
+- [kubernetes network policy recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes)
+
+- [An Introduction to Kubernetes Network Policies for Security People](https://reuvenharrison.medium.com/an-introduction-to-kubernetes-network-policies-for-security-people-ba92dd4c809d)
+
+- [Testing Kubernetes network policies behavior](https://github.com/Tufin/test-network-policies/tree/master)
 
 ###### 2. Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
-<details><summary>Useful documentation</summary>
-	1. https://www.cisecurity.org/benchmark/kubernetes
 
-	2. https://github.com/aquasecurity/kube-bench
+Examples:
+ - <details><summary>Example_1: Fix issues that provided in CIS file:</summary>
+	
+	```
+	TBD
+	```
+
 </details>
 
-###### 3. Properly set up Ingress objects with security control
-<details><summary>Useful documentation</summary>
-	1. https://kubernetes.io/docs/concepts/services-networking/ingress
+**Useful non-official documentation**
 
-	2. https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+- [cisecurity website](https://www.cisecurity.org/benchmark/kubernetes)
+- [kube-bench](https://github.com/aquasecurity/kube-bench)
+
+###### 3. [Properly set up Ingress objects with security control](https://kubernetes.io/docs/concepts/services-networking/ingress)
+
+Examples:
+ - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace:</summary>
+	
+	```
+	TBD
+	```
+
+</details>
+ 
+ - <details><summary>Example_2: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace (with TLS):</summary>
+	
+	```
+	TBD
+	```
+
 </details>
 
-###### 4. Protect node metadata and endpoints
-<details><summary>Useful documentation</summary>
-	1. https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access
+**NOTE**: You should create the needed secret for Ingress
 
-	2. https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/
+**Useful non-official documentation**
 
-	3. https://kubernetes.io/docs/concepts/services-networking/network-policies/
+- [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress)
+- [ingress with tls](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
+
+###### 4. [Protect node metadata and endpoints](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+It's part of networking policy where you can restrict access to metadata/endpoints.
+
+Examples:
+ - <details><summary>Create metadata restriction with networking policy of <b>deny-all-allow-metadata-access</b> name in <b>monitoring</b> namespace to deny all except <p>1.1.1.1</p> IP:</summary>
+	
+	```
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: NetworkPolicy
+	metadata:
+  		name: deny-all-allow-metadata-access
+		namespace: monitoring
+	spec:
+  		podSelector: {}
+  		policyTypes:
+  		- Egress
+  		egress:
+  		- to:
+    	  - ipBlock:
+      		cidr: 0.0.0.0/0
+            except:
+      		- 1.1.1.1/32
+	```
+
 </details>
 
-###### 5. Minimize the use of and access to, GUI elements
-<details><summary>Useful documentation</summary>
-	1. https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/#accessing-the-dashboard-ui
+**Useful official documentation**
 
-	2. https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca
-</details>
+- [network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+
+**Useful non-official documentation**
+
+- [restricting-cloud-metadata-api-access](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access)
+
+- [kubelet-authn-authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
+
+
+###### 5. [Minimize the use of and access to, GUI elements](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/#accessing-the-dashboard-ui)
+
+**Useful official documentation**
+- [web-ui-dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
+
+**Useful non-official documentation**
+- [on-securing-the-kubernetes-dashboard](https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca)
 
 ###### 6. Verify platform binaries before deploying 
-<details><summary>Useful documentation</summary>
-	1. sha256sum tmp.txt and diff with another SHA SUM.
+
+Examples:
+ - <details><summary>Compare binary file of kubelet on the current host and with kubelet 1.27 that you must download from official release:</summary>
+	
+	```
+	sha512sum $(find /proc/PID_ID/root | grep kube-api
+	```
+
 </details>
+
+**Useful non-official documentation**
+- [kubernetes-releases](https://github.com/kubernetes/kubernetes/releases)
 
 #### Cluster Hardening - 15%
 ###### 1. Restrict access to Kubernetes API
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/concepts/security/controlling-access/
 
 	2. https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests
@@ -89,6 +204,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 
 ###### 2. Use Role Based Access Controls to minimize exposure
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/reference/access-authn-authz/rbac/
 
 	2. https://rbac.dev/
@@ -100,6 +216,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 
 ###### 3. Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server
 	2. https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/
 	3. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -114,21 +231,28 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 #### System Hardening - 15%
 ###### 1. Minimize host OS footprint (reduce attack surface)
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules
+
 </details>
 
 ###### 2. Minimize IAM roles
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/reference/access-authn-authz/authentication/
+
 </details>
 
 ###### 3. Minimize external access to the network
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/concepts/services-networking/network-policies/
+
 </details>
 
 ###### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/concepts/security/pod-security-admission/
 	2. AppArmor:
 		- https://kubernetes.io/docs/tutorials/security/apparmor/
@@ -136,11 +260,13 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 		3. SecComp:
 	 		- https://kubernetes.io/docs/tutorials/security/seccomp/
 	   	4. https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation
+
 </details>
 
 #### Minimize Microservice Vulnerabilities - 20%
 ###### 1. Setup appropriate OS-level security domains
 <details><summary>Useful documentation</summary>
+
 	1. PSP: 
 		- https://kubernetes.io/docs/concepts/policy/pod-security-policy/
 		
@@ -151,16 +277,20 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 	3. Security Context: 
 		- https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 		- https://sysdig.com/blog/kubernetes-security-psp-network-policy/
+
 </details>
 
 ###### 2. Manage Kubernetes secrets
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/concepts/configuration/secret/
 	2. https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
+
 </details>
 
 ###### 3. Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
 <details><summary>Useful documentation</summary>
+
 	1. Runtime: 
 		- https://kubernetes.io/docs/concepts/containers/runtime-class/
 		- https://github.com/kubernetes/enhancements/blob/5dcf841b85f49aa8290529f1957ab8bc33f8b855/keps/sig-node/585-runtime-class/README.md#examples
@@ -172,6 +302,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 
 ###### 4. Implement pod-to-pod encryption by use of mTLS
 <details><summary>Useful documentation</summary>
+
 	1. mTLS:
 		- https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/
 		- https://www.istioworkshop.io/11-security/01-mtls/
@@ -180,30 +311,36 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 	
 	3. Linkerd: 
 		- https://linkerd.io/2/features/automatic-mtls/
+
 </details>
 
 #### Supply Chain Security - 20% 
 ###### 1. Minimize base image footprint
 <details><summary>Useful documentation</summary>
+
 	1. https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers
 	2. https://learnk8s.io/blog/smaller-docker-images
 	3. https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images
 	4. https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible
 	5. https://docs.docker.com/build/building/multi-stage/
 	6. https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34
+
 </details>
 
 ###### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook
 	2. https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/#why-do-i-need-admission-controllers
 	3. https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
 	4. https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
 	5. https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/
+
 </details>
 
 ###### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
 <details><summary>Useful documentation</summary>
+
 	1. statically analyse:
 		- https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml
 	2. kubehunter: 
@@ -223,10 +360,12 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 	
 	7. kube-score:
 		- https://kube-score.com/
+
 </details>
 
 ###### 4. Scan images for known vulnerabilities 
 <details><summary>Useful documentation</summary>
+
 	1. scan images and run ids:
 		- https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#10-scan-images-and-run-ids
 	2. anchore:
@@ -234,28 +373,34 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 	
 	3. trivy:
 		- https://github.com/aquasecurity/trivy
+
 </details>
 
 #### Monitoring, Logging, and Runtime Security - 20%
 ###### 1. Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/tutorials/security/seccomp/
 	2. https://sysdig.com/blog/how-to-detect-kubernetes-vulnerability-cve-2019-11246-using-falco/
 	3. https://learn.sysdig.com/falco-101
 	4. https://github.com/falcosecurity/charts/tree/master/falco
 	5. https://github.com/falcosecurity/charts
 	6. https://falco.org/blog/detect-cve-2020-8557/
+
 </details>
 
 ###### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 <details><summary>Useful documentation</summary>
+
 	1. https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/
 	2. https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling
 	3. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
+
 </details>
 
 ###### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 <details><summary>Useful documentation</summary>
+
 	1. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
 	2. https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/
 	3. https://www.cncf.io/online-programs/mitigating-kubernetes-attacks/
@@ -263,31 +408,38 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 	5. https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/
 	6. https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/
 	7. https://www.youtube.com/watch?v=HWv8ZKLCawM&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D
+
 </details>
 
 ###### 4. Perform deep analytical investigation and identification of bad actors within the environment
 <details><summary>Useful documentation</summary>
+
 	1. https://docs.sysdig.com/en/
 	2. https://kubernetes.io/blog/2015/11/monitoring-kubernetes-with-sysdig/
 	3. https://www.youtube.com/watch?v=VEFaGjfjfyc&ab_channel=Sysdig
 	4. https://www.redhat.com/en/topics/containers/kubernetes-security
+
 </details>
 
 ###### 5. Ensure immutability of containers at runtime
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/blog/2018/03/principles-of-container-app-design/
 	2. https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux_atomic_host/7/html/container_security_guide/keeping_containers_fresh_and_updateable#leveraging_kubernetes_and_openshift_to_ensure_that_containers_are_immutable
 	3. https://medium.com/sroze/why-i-think-we-should-all-use-immutable-docker-images-9f4fdcb5212f
 	4. https://techbeacon.com/enterprise-it/immutable-infrastructure-your-systems-can-rise-dead
 	5. ? Falco: https://falco.org/docs/
 	6. ? Sysdig: https://docs.sysdig.com/
+
 </details>
 
 ###### 6. Use Audit Logs to monitor access
 <details><summary>Useful documentation</summary>
+
 	1. https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
 	2. https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/
 	3. https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/
+
 </details>
 
 ## Additional useful material
