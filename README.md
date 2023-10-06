@@ -300,44 +300,164 @@ Examples:
 
 ## Cluster Hardening - 15%
 ### 1. Restrict access to Kubernetes API
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/concepts/security/controlling-access/
-
-	2. https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests
-
-	3. https://kubernetes.io/docs/concepts/security/controlling-access/#api-server-ports-and-ips
-
-	4. https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user
-
-	5. https://kubernetes.io/docs/concepts/cluster-administration/certificates/
+Examples:
+ - <details><summary>Example_1: Check if anonymous access is enabled (if so, - it should be disabled):</summary>
+	
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
+	```
 </details>
+
+ - <details><summary>Example_2: Check if insecure port is using (if so, - it should be changed to 0):</summary>
+	
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
+	```
+</details>
+
+ - <details><summary>Example_3: Check if Node restriction is enabled (if so, - it should NodeRestriction):</summary>
+	
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "enable-admission-plugins"
+	```
+</details>
+
+TBD more soon!
+
+**Useful official documentation**
+
+- [controlling-access](https://kubernetes.io/docs/concepts/security/controlling-access/)
+- [controlling-access#api-server-ports-and-ips](https://kubernetes.io/docs/concepts/security/controlling-access/#api-server-ports-and-ips)
+- [Block anonymous requests](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests)
+- [certificates](https://kubernetes.io/docs/tasks/administer-cluster/certificates/)
+- [certificate signing requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user)
+
+**Useful non-official documentation**
+
+- None
+
 
 ### 2. Use Role Based Access Controls to minimize exposure
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/reference/access-authn-authz/rbac/
-
-	2. https://rbac.dev/
-
-	3. https://docs.bitnami.com/tutorials/simplify-kubernetes-resource-access-rbac-impersonation/
-
-	4. https://github.com/David-VTUK/CKA-StudyGuide/blob/master/RevisionTopics/01-Cluster%20Architcture%2C%20Installation%20and%20Configuration.md
+Examples:
+ - <details><summary>Example_1: Working with RBAC (roles and role bindings):</summary>
+	
+	```
+	k create role role_name --verb=get,list,watch --resource=pods
+	k create rolebinding role_name_binding --role=role_name --user=captain --group=group1
+	```
 </details>
+
+ - <details><summary>Example_2: Working cluster roles and cluster role bindings:</summary>
+	
+	```
+	k create clusterrole cluster_role --verb=get,list,watch --resource=pods
+	k create clusterrolebinding cluster_role_binding --clusterrole=cluster_role --user=cap
+	```
+</details>
+
+You must know to how:
+- To create roles & role bindings.
+- To create cluster roles & cluster role bindings.
+- To create service account and greant it with some permission.
+- To find needed resources and change/add permissions.
+
+**Useful official documentation**
+
+- [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+
+**Useful non-official documentation**
+
+- [advocacy site for Kubernetes RBAC](https://rbac.dev/)
+- [simplify-kubernetes-resource-access-rbac-impersonation](https://docs.bitnami.com/tutorials/simplify-kubernetes-resource-access-rbac-impersonation/)
+- [Manage Role Based Access Control (RBAC)](https://github.com/David-VTUK/CKA-StudyGuide/blob/master/RevisionTopics/01-Cluster%20Architcture,%20Installation%20and%20Configuration.md#manage-role-based-access-control-rbac)
 
 ### 3. Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
-<details><summary>Useful documentation</summary>
 
-	1. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server
-	2. https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/
-	3. https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-	4. https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules
-		5. https://kubernetes.io/docs/reference/access-authn-authz/rbac/#default-roles-and-role-bindings
+Examples:
+ - <details><summary>Example_1: Opt out of automounting API credentials for a service account (Opt out at service account scope):</summary>
 	
-	Update Kubernetes frequently:
-	1. https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/
-	2. https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
+	```
+	---
+	apiVersion: v1
+	kind: ServiceAccount
+	metadata:
+	name: build-robot
+	automountServiceAccountToken: false
+	```
 </details>
+
+ - <details><summary>Example_2: Opt out of automounting API credentials for a service account (Opt out at pod scope):</summary>
+	
+	```
+	---
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	name: cks-pod
+	spec:
+	serviceAccountName: default
+	automountServiceAccountToken: false
+	```
+</details>
+
+**Useful official documentation**
+
+- [Authorization Modes](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#authorization-modules)
+- [Use the default service account to access the API server](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server)
+- [Managing Service Accounts](https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/)
+- [Configure Service Accounts for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
+- [Default roles and role bindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#default-roles-and-role-bindings)
+
+**Useful non-official documentation**
+
+- [advocacy site for Kubernetes RBAC](https://rbac.dev/)
+
+You must know to how:
+- To create service account and greant it with some permission.
+- To find needed resources and change/add permissions.
+
+### 4. Update Kubernetes frequently
+
+Examples:
+ - <details><summary>Example_1: K8S upgrades(Controlplane):</summary>
+	
+	```
+	k drain master --ignore-deamonsets
+	apt update -y
+	apt-cache show kubeadm | grep 1.22
+	apt install kubeadm=1.22.5-00 kubelet=1.22.5-00 kubectl=1.22.5-00
+
+	kubeadm upgrade plan
+	kubeadm upgrade apply v1.22.5
+
+	k uncordon master
+	```
+</details>
+
+ - <details><summary>Example_2: K8S upgrades(Nodes):</summary>
+	
+	```
+	k drain node --ignore-deamonsets
+	apt update -y
+	apt-cache show kubeadm | grep 1.22
+	apt install kubeadm=1.22.5-00 kubelet=1.22.5-00 kubectl=1.22.5-00
+
+	kubeadm upgrade node
+
+	service kubelet restart
+	```
+</details>
+
+**Useful official documentation**
+
+- [kubeadm upgrade](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/)
+- [kubeadm upgrade](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/)
+
+
+You must know to how:
+- Upgrade the K8S clusters
 
 ## System Hardening - 15%
 ### 1. Minimize host OS footprint (reduce attack surface)
