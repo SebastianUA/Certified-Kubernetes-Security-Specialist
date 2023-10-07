@@ -472,9 +472,20 @@ Examples:
 
  - <details><summary>Example_2: Use AppArmor:</summary>
 	
-	```
-	create, load and work with profiles
-	```
+	<details><summary> Get AppArmor profiles:</summary>
+		
+		$ apparmor_status
+   
+		$ aa-status
+
+	</details>
+
+	<details><summary> Load AppArmor profile:</summary>
+		
+		$ apparmor_parser -q apparmor_config
+
+	</details>
+
 </details>
 
  - <details><summary>Example_3: PSA enforces:</summary>
@@ -583,7 +594,50 @@ TBD!
 
 ### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
 
-TBD!
+Examples:
+ - <details><summary>Example_1: Working with Privilege Escalation:</summary>
+	
+	<details><summary> An example of configuration:</summary>
+		
+		---
+		apiVersion: apps/v1
+		kind: Deployment
+		metadata:
+		name: pod-with-apparmor
+		namespace: apparmor
+		spec:
+		replicas: 3
+		selector:
+			matchLabels:
+			app: pod-with-apparmor
+		strategy: {}
+		template:
+			metadata:
+			labels:
+				app: pod-with-apparmor
+			annotations:
+				container.apparmor.security.beta.kubernetes.io/httpd: localhost/docker-default
+			spec:
+			containers:
+			- image: httpd:latest
+				name: httpd
+
+	</details>
+
+	<details><summary> Apply the prepared configuration file:</summary>
+		
+		k apply -f pod-with-apparmor.yaml
+
+	</details>
+
+	<details><summary> Checks:</summary>
+		$ crictl ps -a | grep httpd
+
+		$ crictl inspect e428e2a3e9324 | grep apparmor
+          "apparmor_profile": "localhost/docker-default"
+        "apparmorProfile": "docker-default",
+
+	</details>
 
 **Useful official documentation**
 
@@ -598,7 +652,82 @@ TBD!
 
 ### 5. Principle of least privilege
 
-TBD!
+Examples:
+ - <details><summary>Example_1: Working with Privilege Escalation:</summary>
+	
+	<details><summary> An example of configuration:</summary>
+		
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		labels:
+			run: my-ro-pod
+		name: application
+		namespace: sun
+		spec:
+		containers:
+		- command:
+			- sh
+			- -c
+			- sleep 1d
+			image: busybox:1.32.0
+			name: my-ro-pod
+			securityContext:
+				allowPrivilegeEscalation: false
+		dnsPolicy: ClusterFirst
+		restartPolicy: Always
+
+	</details>
+
+	<details><summary> Checks:</summary>
+		
+		TBD!
+
+	</details>
+	
+</details>
+
+ - <details><summary>Example_2: Working with Privileged containers:</summary>
+	
+	<details><summary> Run a Pod through CLI:</summary>
+		
+		k run privileged-pod --image=nginx:alpine --privileged
+
+	</details>
+
+	<details><summary> An example of configuration:</summary>
+		
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		labels:
+			run: privileged-pod
+		name: privileged-pod
+		spec:
+		containers:
+		- command:
+			- sh
+			- -c
+			- sleep 1d
+			image: nginx:alpine
+			name: privileged-pod
+			securityContext:
+				privileged: true
+		dnsPolicy: ClusterFirst
+		restartPolicy: Always
+
+	</details>
+
+	<details><summary> Checks:</summary>
+		
+		TBD!
+
+	</details>
+	
+</details>
+
 
 **Useful official documentation**
 
@@ -642,7 +771,38 @@ TBD!
 
 ### 3. Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
 
-TBD!
+Examples:
+ - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
+	
+	<details><summary> Create RuntimeClass class, something like:</summary>
+		
+		apiVersion: node.k8s.io/v1
+		kind: RuntimeClass
+		metadata:
+		name: gvisor
+		handler: runsc
+
+	</details>
+
+	<details><summary> Deploy a new pod with created RuntimeClass, an example:</summary>
+		
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		name: sec
+		spec:
+		runtimeClassName: gvisor
+		containers:
+			- image: nginx:1.21.5-alpine
+			name: sec
+		dnsPolicy: ClusterFirst
+		restartPolicy: Always
+
+	</details>
+
+	
+</details>
 
 **Useful official documentation**
 
@@ -845,11 +1005,45 @@ TBD!
 
 ### 7. ReadOnly Root FileSystem
 
-TBD!
+Examples:
+ - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
+	
+	<details><summary> Generate configuration :</summary>
+		
+		$ k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
+
+	</details>
+
+	<details><summary> Edit it to:</summary>
+		
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		labels:
+			run: my-ro-pod
+		name: application
+		namespace: sun
+		spec:
+		containers:
+		- command:
+			- sh
+			- -c
+			- sleep 1d
+			image: busybox:1.32.0
+			name: my-ro-pod
+			securityContext:
+				readOnlyRootFilesystem: true
+		dnsPolicy: ClusterFirst
+		restartPolicy: Always
+
+	</details>
+	
+</details>
 
 **Useful official documentation**
 
-- None
+- [security-context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 
 **Useful non-official documentation**
 
