@@ -1,0 +1,9 @@
+# Ignoring
+!.gitignore
+!.pre-commit-config.yaml
+!.github
+
+# Other 
+**/*_BK
+**/.DS_Store
+**/Icon*

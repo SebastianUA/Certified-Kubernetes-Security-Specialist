@@ -463,60 +463,107 @@ You must know to how:
 ### 1. Minimize host OS footprint (reduce attack surface)
 
 Examples:
- - <details><summary>Example_1: Use Seccomp:</summary>
+ - <details><summary>Example_1: Use Seccomp (use strace commands):</summary>
 	
 	```
-	TBD
+	$ strace -c ls /root
 	```
 </details>
 
  - <details><summary>Example_2: Use AppArmor:</summary>
 	
 	```
-	TBD
+	create, load and work with profiles
 	```
 </details>
 
  - <details><summary>Example_3: PSA enforces:</summary>
 	
 	```
-	TBD
+	Pod Security admissions (PSA) support has been added for clusters with Kubernetes v1.23 and above. PSA defines security restrictions for a broad set of workloads and replace Pod Security Policies in Kubernetes v1.25 and above. The Pod Security Admission controller is enabled by default in Kubernetes clusters v1.23 and above. To configure its default behavior, you must provide an admission configuration file to the kube-apiserver when provisioning the cluster.
 	```
 </details>
 
  - <details><summary>Example_4: Apply host updates:</summary>
 	
 	```
-	TBD
+	$ sudo apt update && sudo apt install unattended-upgrades -y
+	$ systemctl status unattended-upgrades.service
 	```
 </details>
 
  - <details><summary>Example_5: Install minimal required OS fingerprint:</summary>
 	
 	```
-	TBD
+	It is best practice to install only the packages you will use because each piece of software on your computer could possibly contain a vulnerability. Take the opportunity to select exactly what packages you want to install during the installation. If you find you need another package, you can always add it to the system later.
 	```
 </details>
 
  - <details><summary>Example_6: Identify and address open ports:</summary>
+
+	<details><summary>Using lsof command and check if 8080 is open or not:</summary>
+
+		$ lsof -i :8080
+
+	</details>
+	<details><summary>Using netstat command - check if 66 is oppen and kill the process and delete the binary:</summary>
+
+		$ apt install net-tools
+		$ netstat -natpl | grep 66
+		$ ls -l /proc/22797/exe
+		$ rm -f /usr/bin/app1
+		$ kill -9 22797
+
+	</details>
+
+</details>
+
+ - <details><summary>Example_7: Remove unnecessary packages. For example, find and delete httpd package on the host:</summary>
 	
 	```
-	TBD
+	$ apt show httpd
+	$ apt remove httpd -y
 	```
 </details>
 
- - <details><summary>Example_7: Remove unnecessary packages:</summary>
+ - <details><summary>Example_8: Find service that runs on the host and stop it. For example, find and stop httpd service on the host:</summary>
 	
 	```
-	TBD
+	$ service httpd status
+	$ service httpd stop
+	$ service httpd status
 	```
 </details>
 
+ - <details><summary>Example_9: Working with users (Create, delete, add user to needed groups. Grant some permission):</summary>
+	
+	```
+	TBD!
+	```
+</details>
+
+ - <details><summary>Example_10: Working with kernel modules on the host (get, load, unload, etc):</summary>
+	
+	```
+	TBD!
+	```
+</details>
 
 **Useful official documentation**
 
 - [securing-a-cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules)
 
+**Useful non-official documentation**
+
+- [how-to-keep-ubuntu-20-04-servers-updated](https://www.digitalocean.com/community/tutorials/how-to-keep-ubuntu-20-04-servers-updated)
+- [enforce-standards-namespace-labels](https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/)
+- [psa-label-enforcer-policy](https://github.com/kubewarden/psa-label-enforcer-policy)
+- [migrating-from-pod-security-policies-a-comprehensive-guide-part-1-transitioning-to-psa](https://hackernoon.com/migrating-from-pod-security-policies-a-comprehensive-guide-part-1-transitioning-to-psa)
+- [using-kyverno-with-pod-security-admission](https://kyverno.io/blog/2023/06/12/using-kyverno-with-pod-security-admission/)
+- [add-psa-labels](https://kyverno.io/policies/psa/add-psa-labels/add-psa-labels/)
+- [pod-security-admission](https://rke.docs.rancher.com/config-options/services/pod-security-admission)
+- [pod-security-standards](https://www.eksworkshop.com/docs/security/pod-security-standards/)
+- [Implementing Pod Security Standards in Amazon EKS](https://aws.amazon.com/blogs/containers/implementing-pod-security-standards-in-amazon-eks/)
 
 ### 2. Minimize IAM roles
 
@@ -549,6 +596,14 @@ TBD!
 - [apparmor](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
 - [Container Security](https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation)
 
+### 5. Principle of least privilege
+
+TBD!
+
+**Useful official documentation**
+
+- None
+
 ## Minimize Microservice Vulnerabilities - 20%
 
 ### 1. Setup appropriate OS-level security domains
@@ -563,6 +618,8 @@ TBD!
 
 - [opa-gatekeeper-policy-and-governance-for-kubernetes](https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/)
 - [openpolicyagent](https://www.openpolicyagent.org/docs/latest/kubernetes-primer/)
+- [openpolicyagent online editor](https://play.openpolicyagent.org/)
+- [gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/docs/howto/)
 - [security context for pods](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [kubernetes-security-psp-network-policy](https://sysdig.com/blog/kubernetes-security-psp-network-policy/)
 
@@ -573,8 +630,11 @@ TBD!
 
 **Useful official documentation**
 
+- [distribute-credentials-secure](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
 - [secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
 - [encrypt-data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
+- [kube-apiserver](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
+- [etcd encryption](https://etcd.io/docs/v3.5/op-guide/configuration/#security)
 
 **Useful non-official documentation**
 
@@ -669,6 +729,7 @@ TBD!
 - [checkov](https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/)
 - [clair](https://github.com/quay/clair)
 - [kube-score](https://kube-score.com/)
+- [conftest](https://www.conftest.dev/)
 	
 ### 4. Scan images for known vulnerabilities 
 
@@ -781,6 +842,18 @@ TBD!
 
 - [kubernetes-audit-logging](https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/)
 - [monitor-kubernetes-audit-logs](https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/)
+
+### 7. ReadOnly Root FileSystem
+
+TBD!
+
+**Useful official documentation**
+
+- None
+
+**Useful non-official documentation**
+
+- None
 
 # Additional useful material
 
