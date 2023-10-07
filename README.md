@@ -992,7 +992,62 @@ TBD!
 
 ### 6. Use Audit Logs to monitor access
 
-TBD!
+Examples:
+ - <details><summary>Example_1: Configure the Apiserver for Audit Logging. The log path should be /etc/kubernetes/audit-logs/audit.log on the host and inside the container. The existing Audit Policy to use is at /etc/kubernetes/auditing/policy.yaml . The path should be the same on the host and inside the container. Also, set argument --audit-log-maxsize=3 and set argument --audit-log-maxbackup=4:</summary>
+	
+	<details><summary> Edit kube-api configuration:</summary>
+		
+		# vim /etc/kubernetes/manifests/kube-apiserver.yaml
+
+	</details>
+
+	<details><summary> Add the next line to enable auditing:</summary>
+		
+		---
+		spec:
+			containers:
+			- command:
+				- kube-apiserver
+				- --audit-policy-file=/etc/kubernetes/auditing/policy.yaml
+				- --audit-log-path=/etc/kubernetes/audit-logs/audit.log
+				- --audit-log-maxsize=3
+				- --audit-log-maxbackup=4
+
+	</details>
+
+	<details><summary> Add the new Volumes:</summary>
+		
+		volumes:
+		- name: audit-policy
+			hostPath:
+			path: /etc/kubernetes/auditing/policy.yaml
+			type: File
+		- name: audit-logs
+			hostPath:
+			path: /etc/kubernetes/audit-logs
+			type: DirectoryOrCreate
+
+	</details>
+
+	<details><summary> Add the new VolumeMounts:</summary>
+		
+		volumeMounts:
+		- mountPath: /etc/kubernetes/auditing/policy.yaml
+			name: audit-policy
+			readOnly: true
+		- mountPath: /etc/kubernetes/audit-logs
+			name: audit-logs
+			readOnly: false
+
+	</details>
+
+	<details><summary> Checks:</summary>
+		
+		crictl ps -a | grep api
+
+	</details>
+	
+</details>
 
 **Useful official documentation**
 
