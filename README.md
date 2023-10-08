@@ -302,28 +302,209 @@ Examples:
 ### 1. Restrict access to Kubernetes API
 
 Examples:
- - <details><summary>Example_1: Check if anonymous access is enabled (if so, - it should be disabled):</summary>
+ - <details><summary>Example_1: Blocking anonymous access to use API:</summary>
 	
-	```
-	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
-	```
+	<details><summary>Check if anonymous access is enabled (if so, - it should be disabled):</summary>
+	
+		cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
+
+	</details>
+
+	<details><summary>Fix if it's enabled:</summary>
+	
+		TBD!
+		
+	</details>
+	
 </details>
 
- - <details><summary>Example_2: Check if insecure port is using (if so, - it should be changed to 0):</summary>
+ - <details><summary>Example_2: Blocking insecure port:</summary>
+
+	<details><summary>Check if insecure port is using (if so, - it should be changed to 0):</summary>
 	
-	```
-	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
-	```
+		cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
+
+	</details>
+
+	<details><summary>Fix if it's open:</summary>
+	
+		TBD!
+		
+	</details>
+	
 </details>
 
- - <details><summary>Example_3: Check if Node restriction is enabled (if so, - it should NodeRestriction):</summary>
+ - <details><summary>Example_3: NodeRestriction enabling:</summary>
+
+	<details><summary>Check if Node restriction is enabled (if so, - it should NodeRestriction):</summary>
 	
+		cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "enable-admission-plugins"
+
+	</details>
+
+	Open the `/etc/kubernetes/manifests/kube-apiserver.yaml` file with some editor.
+
+	<details><summary>Let's enable NodeRestriction on Controlplane node</summary>
+
+		spec:
+			containers:
+			- command:
+				- kube-apiserver
+				- --advertise-address=172.30.1.2
+				- --allow-privileged=true
+				- --authorization-mode=Node,RBAC
+				- --client-ca-file=/etc/kubernetes/pki/ca.crt
+				- --enable-admission-plugins=NodeRestriction
+				- --enable-bootstrap-token-auth=true
+		
+	</details>
+
+	Let's check the configurations:
 	```
-	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "enable-admission-plugins"
+	ssh node01
+
+    export KUBECONFIG=/etc/kubernetes/kubelet.conf
+    k label node controlplane killercoda/two=123 # restricted
+    k label node node01 node-restriction.kubernetes.io/two=123 # restricted
+    k label node node01 test/two=123 # works
 	```
+
 </details>
 
-TBD more soon!
+- <details><summary>Example_4: Kuberneter API troubleshooting:</summary>
+
+	<details><summary>First al all, checking:</summary>
+	
+		$ cat /var/log/syslog | grep kube-apiserver
+
+		or
+
+		$ cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
+
+	</details>
+
+	<details><summary>Secondly, checking:</summary>
+	
+		$ journalctl -xe | grep apiserver
+
+	</details>
+
+	<details><summary>Lastly, checking:</summary>
+	
+		$ crictl ps -a | grep api
+		$ $ crictl logs fbb80dac7429e
+
+	</details>
+
+</details>
+
+- <details><summary>Example_5: Certificate signing requests sign manually:</summary>
+
+	First of all, we should have key. Let's get it through openssl:
+	```
+	$ openssl genrsa -out 60099.key 2048
+	```
+
+	Next, runnning the next command to generate certificate:
+	```
+	$ openssl req -new -key 60099.key -out 60099.csr
+	```
+
+	Note: set Common Name = 60099@internal.users
+
+	<details><summary>Certificate signing requests sign manually (manually sign the CSR with the K8s CA file to generate the CRT):</summary>
+	
+		$ openssl x509 -req -in 60099.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out 60099.crt -days 500
+
+	</details>
+
+	<details><summary>Set credentials & context:</summary>
+	
+		$ k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
+		$ k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+		$ k config get-contexts
+		$ k config use-context 60099@internal.users
+
+	</details>
+
+	<details><summary>Checks:</summary>
+	
+		$ k get ns
+
+		$ k get po
+
+	</details>
+
+</details>
+
+- <details><summary>Example_6: Certificate signing requests sign K8S:</summary>
+
+	First of all, we should have key. Let's get it through openssl:
+	```
+	$ openssl genrsa -out 60099.key 2048
+	```
+
+	Next, runnning the next command to generate certificate:
+	```
+	$ openssl req -new -key 60099.key -out 60099.csr
+	```
+
+	Note: set Common Name = 60099@internal.users
+
+	<details><summary>Convert the CSR file into base64:</summary>
+	
+		$ cat 60099.csr | base64 -w 0
+
+	</details>
+
+	<details><summary>Copy it into the YAML:</summary>
+	
+		apiVersion: certificates.k8s.io/v1
+		kind: CertificateSigningRequest
+		metadata:
+		name: 60099@internal.users # ADD
+		spec:
+		groups:
+			- system:authenticated
+		request: CERTIFICATE_BASE64_HERE
+		signerName: kubernetes.io/kube-apiserver-client
+		usages:
+			- client auth
+
+	</details>
+
+	<details><summary>Create and approve:</summary>
+	
+		$ k -f csr.yaml create
+
+		$ k get csr # pending
+
+		$ k certificate approve 60099@internal.users
+
+		$ k get csr # approved
+
+		$ k get csr 60099@internal.users -ojsonpath="{.status.certificate}" | base64 -d > 60099.crt
+
+	</details>
+
+	<details><summary>Set credentials & context:</summary>
+	
+		$ k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
+		$ k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+		$ k config get-contexts
+		$ k config use-context 60099@internal.users
+
+	</details>
+
+	<details><summary>Checks:</summary>
+	
+		$ k get ns
+
+		$ k get po
+
+	</details>
+
+</details>
 
 **Useful official documentation**
 
@@ -342,19 +523,57 @@ TBD more soon!
 
 Examples:
  - <details><summary>Example_1: Working with RBAC (roles and role bindings):</summary>
+
+	<details><summary>Create role & rolebinding:</summary>
 	
-	```
-	k create role role_name --verb=get,list,watch --resource=pods
-	k create rolebinding role_name_binding --role=role_name --user=captain --group=group1
-	```
+		k create role role_name --verb=get,list,watch --resource=pods
+		k create rolebinding role_name_binding --role=role_name --user=captain --group=group1
+
+	</details>
+
+	<details><summary>Verify:</summary>
+	
+		k auth can-i get pods --as captain -n kube-public
+		k auth can-i list pods --as captain -n default
+
+	</details>
+	
 </details>
 
  - <details><summary>Example_2: Working with RBAC (cluster roles and cluster role bindings):</summary>
+
+	<details><summary>Create clusterrole & clusterrolebinding:</summary>
 	
-	```
-	k create clusterrole cluster_role --verb=get,list,watch --resource=pods
-	k create clusterrolebinding cluster_role_binding --clusterrole=cluster_role --user=cap
-	```
+		k create clusterrole cluster_role --verb=get,list,watch --resource=pods
+		k create clusterrolebinding cluster_role_binding --clusterrole=cluster_role --user=cap
+
+	</details>
+
+	<details><summary>Verify:</summary>
+	
+		k auth can-i list pods --as cap -n kube-public
+		k auth can-i list pods --as cap -n default
+
+	</details>
+
+</details>
+
+ - <details><summary>Example_3: Working with Service Account and RBAC:</summary>
+
+	<details><summary> Create Service Account and RBAC:</summary>
+	
+		k -n name_space_1 create sa ser_acc
+		k create clusterrolebinding ser_acc-view --clusterrole view --serviceaccount name_space_1:ser_acc
+
+	</details>
+
+	<details><summary> Verify:</summary>
+	
+		k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n default
+		k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n name_space_1
+
+	</details>	
+
 </details>
 
 You must know to how:
@@ -856,10 +1075,211 @@ TBD!
 
 Examples:
  - <details><summary>Example_1: Use ImagePolicyWebhook:</summary>
+
+	<details><summary>First of all, let create admission config /etc/kubernetes/policywebhook/admission_config.json</summary>
 	
-	```
-	TBD
-	```
+		{
+			"apiVersion": "apiserver.config.k8s.io/v1",
+			"kind": "AdmissionConfiguration",
+			"plugins": [
+				{
+					"name": "ImagePolicyWebhook",
+					"configuration": {
+						"imagePolicy": {
+						"kubeConfigFile": "/etc/kubernetes/policywebhook/kubeconf",
+						"allowTTL": 100,
+						"denyTTL": 50,
+						"retryBackoff": 500,
+						"defaultAllow": false
+						}
+					}
+				}
+			]
+		}
+	
+	</details>
+
+	<details><summary>Then, create /etc/kubernetes/policywebhook/kubeconf with the settings. For example:</summary>
+		apiVersion: v1
+		kind: Config
+
+		# clusters refers to the remote service.
+		clusters:
+		- cluster:
+			certificate-authority: /etc/kubernetes/policywebhook/external-cert.pem  # CA for verifying the remote service.
+			server: https://localhost:1234                   # URL of remote service to query. Must use 'https'.
+		name: image-checker
+
+		contexts:
+		- context:
+			cluster: image-checker
+			user: api-server
+		name: image-checker
+		current-context: image-checker
+		preferences: {}
+
+		# users refers to the API server's webhook configuration.
+		users:
+		- name: api-server
+		user:
+			client-certificate: /etc/kubernetes/policywebhook/apiserver-client-cert.pem     # cert for the webhook admission controller to use
+			client-key:  /etc/kubernetes/policywebhook/apiserver-client-key.pem             # key matching the cert
+	
+	</details>
+
+	<details><summary>The /etc/kubernetes/manifests/kube-apiserver.yaml configuration of kube-apiserver, for example:</summary>
+
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		annotations:
+			kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: 172.30.1.2:6443
+		creationTimestamp: null
+		labels:
+			component: kube-apiserver
+			tier: control-plane
+		name: kube-apiserver
+		namespace: kube-system
+		spec:
+		containers:
+		- command:
+			- kube-apiserver
+			- --advertise-address=172.30.1.2
+			- --allow-privileged=true
+			- --authorization-mode=Node,RBAC
+			- --enable-admission-plugins=NodeRestriction,ImagePolicyWebhook
+			- --admission-control-config-file=/etc/kubernetes/policywebhook/admission_config.json
+			- --client-ca-file=/etc/kubernetes/pki/ca.crt
+			- --enable-admission-plugins=NodeRestriction
+			- --admission-control-config-file=/etc/kubernetes/policywebhook/admission_config.json
+			- --enable-bootstrap-token-auth=true
+			- --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+			- --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+			- --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+			- --etcd-servers=https://127.0.0.1:2379
+			- --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+			- --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
+			- --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+			- --proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt
+			- --proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key
+			- --requestheader-allowed-names=front-proxy-client
+			- --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt
+			- --requestheader-extra-headers-prefix=X-Remote-Extra-
+			- --requestheader-group-headers=X-Remote-Group
+			- --requestheader-username-headers=X-Remote-User
+			- --secure-port=6443
+			- --service-account-issuer=https://kubernetes.default.svc.cluster.local
+			- --service-account-key-file=/etc/kubernetes/pki/sa.pub
+			- --service-account-signing-key-file=/etc/kubernetes/pki/sa.key
+			- --service-cluster-ip-range=10.96.0.0/12
+			- --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+			- --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+			image: registry.k8s.io/kube-apiserver:v1.27.1
+			imagePullPolicy: IfNotPresent
+			livenessProbe:
+			failureThreshold: 8
+			httpGet:
+				host: 172.30.1.2
+				path: /livez
+				port: 6443
+				scheme: HTTPS
+			initialDelaySeconds: 10
+			periodSeconds: 10
+			timeoutSeconds: 15
+			name: kube-apiserver
+			readinessProbe:
+			failureThreshold: 3
+			httpGet:
+				host: 172.30.1.2
+				path: /readyz
+				port: 6443
+				scheme: HTTPS
+			periodSeconds: 1
+			timeoutSeconds: 15
+			resources:
+			requests:
+				cpu: 50m
+			startupProbe:
+			failureThreshold: 24
+			httpGet:
+				host: 172.30.1.2
+				path: /livez
+				port: 6443
+				scheme: HTTPS
+			initialDelaySeconds: 10
+			periodSeconds: 10
+			timeoutSeconds: 15
+			volumeMounts:
+			- mountPath: /etc/kubernetes/policywebhook
+			name: policywebhook
+			readyOnly: true
+			- mountPath: /etc/ssl/certs
+			name: ca-certs
+			readOnly: true
+			- mountPath: /etc/ca-certificates
+			name: etc-ca-certificates
+			readOnly: true
+			- mountPath: /etc/pki
+			name: etc-pki
+			readOnly: true
+			- mountPath: /etc/kubernetes/pki
+			name: k8s-certs
+			readOnly: true
+			- mountPath: /usr/local/share/ca-certificates
+			name: usr-local-share-ca-certificates
+			readOnly: true
+			- mountPath: /usr/share/ca-certificates
+			name: usr-share-ca-certificates
+			readOnly: true
+		hostNetwork: true
+		priority: 2000001000
+		priorityClassName: system-node-critical
+		securityContext:
+			seccompProfile:
+			type: RuntimeDefault
+		volumes:
+		- hostPath:
+			path: /etc/kubernetes/policywebhook
+			type: DirectoryOrCreate
+			name: policywebhook
+		- hostPath:
+			path: /etc/ssl/certs
+			type: DirectoryOrCreate
+			name: ca-certs
+		- hostPath:
+			path: /etc/ca-certificates
+			type: DirectoryOrCreate
+			name: etc-ca-certificates
+		- hostPath:
+			path: /etc/pki
+			type: DirectoryOrCreate
+			name: etc-pki
+		- hostPath:
+			path: /etc/kubernetes/pki
+			type: DirectoryOrCreate
+			name: k8s-certs
+		- hostPath:
+			path: /usr/local/share/ca-certificates
+			type: DirectoryOrCreate
+			name: usr-local-share-ca-certificates
+		- hostPath:
+			path: /usr/share/ca-certificates
+			type: DirectoryOrCreate
+			name: usr-share-ca-certificates
+		status: {}
+
+	</details>
+
+	<details><summary>Checks:</summary>
+	
+		$ crictl ps -a | grep api
+		$ crictl logs 91c61357ef147
+
+		$ k run pod --image=nginx
+			Error from server (Forbidden): pods "pod" is forbidden: Post "https://localhost:1234/?timeout=30s": dial tcp 127.0.0.1:1234: connect: connection refused
+	
+	</details>
+
 </details>
 
 **Useful official documentation**
@@ -893,7 +1313,34 @@ TBD!
 	
 ### 4. Scan images for known vulnerabilities 
 
-TBD!
+Using trivy to scan images in applications and infra namespaces and define if the images has CVE-2021-28831 and/or CVE-2016-9841 vulnerabilities. Scale down those Deployments to zero if you will find something.
+
+Getting images:
+```
+$ k -n applications get pod -oyaml | grep image: | sort -rn | uniq
+- image: nginx:1.20.2-alpine
+- image: nginx:1.19.1-alpine-perl
+image: docker.io/library/nginx:1.20.2-alpine
+image: docker.io/library/nginx:1.19.1-alpine-perl
+```
+
+Let's scan first deployment:
+```
+$ trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
+$ trivy image nginx:1.19.1-alpine-perl | grep CVE-2016-9841
+```
+
+Let's scan second deployment:
+```
+trivy image nginx:1.20.2-alpine | grep CVE-2021-28831
+trivy image nginx:1.20.2-alpine | grep CVE-2016-9841
+```
+
+Hit on the first one, so we scale down:
+```
+$ k -n applications scale deploy web1 --replicas 0
+```
+
 
 **Useful official documentation**
 
