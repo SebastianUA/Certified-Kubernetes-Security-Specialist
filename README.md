@@ -298,7 +298,9 @@ Examples:
 **Useful non-official documentation**
 - [kubernetes-releases](https://github.com/kubernetes/kubernetes/releases)
 
+
 ## Cluster Hardening - 15%
+
 ### 1. Restrict access to Kubernetes API
 
 Examples:
@@ -637,6 +639,7 @@ You must know to how:
 - To create service account and greant it with some permission.
 - To find needed resources and change/add permissions.
 
+
 ### 4. Update Kubernetes frequently
 
 Examples:
@@ -678,7 +681,11 @@ Examples:
 You must know to how:
 - Upgrade the K8S clusters
 
+
+
+
 ## System Hardening - 15%
+
 ### 1. Minimize host OS footprint (reduce attack surface)
 
 Examples:
@@ -952,6 +959,9 @@ Examples:
 
 - None
 
+
+
+
 ## Minimize Microservice Vulnerabilities - 20%
 
 ### 1. Setup appropriate OS-level security domains
@@ -1056,7 +1066,63 @@ TBD!
 Use distroless, UBI minimal, Alpine, or relavent to your app nodejs, python but the minimal build.
 Do not include uncessary software not required for container during runtime e.g build tools and utilities, troubleshooting and debug binaries.
 
-TBD!
+Examples:
+- <details><summary>Example_1: Create a Pod named nginx-sha-pod which uses the image digest nginx@sha256:ca045ecbcd423cec50367a194d61fd846a6f0964f4999e8d692e5fcf7ebc903f:</summary>
+
+	```
+	k run nginx-sha-pod --image=nginx@sha256:ca045ecbcd423cec50367a194d61fd846a6f0964f4999e8d692e5fcf7ebc903f
+	```
+
+</details>
+
+- <details><summary>Example_2: Convert the existing Deployment nginx-sha-deployment to use the image digest of the current tag instead of the tag:</summary>
+
+	
+	Getting labels of deployment:
+	```
+	k get deploy nginx-sha-deployment --show-labels
+	```
+	
+	Get pod with labels:
+	```
+	k get pod -l app=nginx-sha-deployment -oyaml | grep imageID
+	```
+
+	Edit deploy and put needed sha
+	```
+	k edit deploy nginx-sha-deployment
+	```
+
+	Checks:
+	```
+	k get pod -l app=nginx-sha-deployment -oyaml | grep image:
+	```
+
+</details>
+
+- <details><summary>Example_3: Container Image Footprint:</summary>
+
+	In the current folder you have Dockerfile, let's build it with `golden-image` name:
+	```
+	docker build -t golden-image .
+	```
+
+	Run a container with `cointainer-1` name:
+	```
+	docker run --name cointainer-1 -d golden-image
+	```
+
+</details>
+
+- <details><summary>Example_4: Harden a given Docker Container:</summary>
+
+	In the current folder you have Dockerfile, let's build it with `golden-image` name:
+	```
+	TBD
+	```
+
+</details>
+
 
 **Useful official documentation**
 
@@ -1294,7 +1360,22 @@ Examples:
 
 ### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
 
-TBD!
+Examples:
+- <details><summary>Example_1: Static Manual Analysis Docker:</summary>
+
+	```
+	TBD!
+	```
+	
+</details>
+
+- <details><summary>Example_2: Static Manual analysis k8s:</summary>
+
+	```
+	TBD!
+	```
+	
+</details>
 
 **Useful official documentation**
 
@@ -1352,6 +1433,7 @@ $ k -n applications scale deploy web1 --replicas 0
 - [anchore](https://github.com/anchore/anchore-cli#command-line-examples)
 - [trivy](https://github.com/aquasecurity/trivy)
 
+
 ## Monitoring, Logging, and Runtime Security - 20%
 
 ### 1. Perform behavioral analytics of syscall process and file activities at the host and container level to detect malicious activities
@@ -1394,11 +1476,47 @@ TBD!
 
 ### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 
-TBD!
+All falco events you should store in `/var/log/falco.txt`. 
+
+Open `/etc/falco/falco.yaml` file and put something like:
+```
+file_output:
+  enabled: true
+  keep_alive: false
+  filename: /var/log/falco.txt
+```
+
+Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
+```
+- rule: Terminal shell in container
+  desc: A shell was used as the entrypoint/exec point into a container with an attached terminal.
+  condition: >
+    spawned_process and container
+    and shell_procs and proc.tty != 0
+    and container_entrypoint
+    and not user_expected_terminal_shell_in_container_conditions
+  output: >
+    Falco SHELL!!! (user_id=%user.uid repo=%container.image.repository %user.uiduser=%user.name user_loginuid=%user.loginuid %container.info
+    shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty container_id=%container.id image=%container.image.repository)
+  priority: NOTICE
+  tags: [container, shell, mitre_execution]
+``` 
+
+Restart Falco service:
+```
+service falco restart && service falco status
+```
+
+Checks:
+```
+$ k exec -it pod -- sh
+
+$ cat /var/log/syslog | grep falco | grep shell
+```
 
 **Useful official documentation**
 
-- None
+- [Falco](https://falco.org/)
 
 **Useful non-official documentation**
 
@@ -1551,7 +1669,9 @@ Examples:
 
 - None
 
+
 # Additional useful material
+
 
 ## Articles
 
@@ -1584,6 +1704,7 @@ Examples:
 # Authors
 
 Created and maintained by [Vitalii Natarov](https://github.com/SebastianUA). An email: [vitaliy.natarov@yahoo.com](vitaliy.natarov@yahoo.com).
+
 
 # License
 Apache 2 Licensed. See [LICENSE](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/blob/main/LICENSE) for full details.
