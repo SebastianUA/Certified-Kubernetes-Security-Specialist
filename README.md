@@ -984,7 +984,139 @@ TBD!
 
 ### 2. Manage Kubernetes secrets
 
-TBD! 
+Examples:
+- <details><summary>Example_1: Secret Access in Pods:</summary>
+
+	Create a secret with `literal-secret` name through CLI:
+	```
+	kubectl create secret generic literal-secret --from-literal secret=secret12345
+	```
+
+	Create a new secret with `file-secret` name through `file-secret.yaml` file:
+	```
+	apiVersion: v1
+	kind: Secret
+	metadata:
+		name: file-secret
+	data:
+		hosts: MTI3LjAuMC4xCWxvY2FsaG9zdAoxMjcuMC4xLjEJaG9zdDAxCgojIFRoZSBmb2xsb3dpbmcgbGluZXMgYXJlIGRlc2lyYWJsZSBmb3IgSVB2NiBjYXBhYmxlIGhvc3RzCjo6MSAgICAgbG9jYWxob3N0IGlwNi1sb2NhbGhvc3QgaXA2LWxvb3BiYWNrCmZmMDI6OjEgaXA2LWFsbG5vZGVzCmZmMDI6OjIgaXA2LWFsbHJvdXRlcnMKMTI3LjAuMC4xIGhvc3QwMQoxMjcuMC4wLjEgaG9zdDAxCjEyNy4wLjAuMSBob3N0MDEKMTI3LjAuMC4xIGNvbnRyb2xwbGFuZQoxNzIuMTcuMC4zNSBub2RlMDEKMTcyLjE3LjAuMjMgY29udHJvbHBsYW5lCg==
+	```
+
+	Apply it:
+	```
+	k apply -f file-secret.yaml
+	```
+
+	Then, create a new pod with `pod-secrets` name. Make Secret `literal-secret` available as environment variable `literal-secret`. Mount Secret `file-secret` as volume. The file should be available under `/etc/file-secret/hosts`:
+	```
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	name: pod-secrets
+	spec:
+	volumes:
+	- name: file-secret
+		secret:
+		secretName: file-secret
+	containers:
+	- image: nginx
+		name: pod-secrets
+		volumeMounts:
+		- name: file-secret
+			mountPath: /etc/file-secret
+		env:
+		- name: literal-secret
+			valueFrom:
+			secretKeyRef:
+				name: literal-secret
+				key: secret
+	``` 
+
+	Verify:
+	```
+	kubectl exec pod-secrets -- env | grep "secret=secret12345"
+
+	kubectl exec pod-secrets -- cat /etc/file-secret/hosts
+	```
+
+</details>
+
+- <details><summary>Example_2: Secret Read and Decode:</summary>
+
+	Get the secret that created in `opaque` ns and store it into `opaque_secret.txt` file:
+	```
+	kubectl -n opaque get secret test-sec-1 -ojsonpath="{.data.data}" | base64 -d > opaque_secret.txt
+	```
+
+</details>
+
+- <details><summary>Example_3: Secret etcd encryption:</summary>
+
+	Creating folder for this task:
+	```
+	mkdir -p /etc/kubernetes/enc
+	```
+
+	Encrypt secret phrase, for example:
+	```
+	echo -n Secret-ETCD-Encryption | base64
+		U2VjcmV0LUVUQ0QtRW5jcnlwdGlvbg==
+	```
+
+	Create EncryptionConfiguration `/etc/kubernetes/enc/encryption.yaml` file:
+	```
+	apiVersion: apiserver.config.k8s.io/v1
+	kind: EncryptionConfiguration
+	resources:
+	- resources:
+		- secrets
+		providers:
+		- aesgcm:
+			keys:
+			- name: key1
+			  secret: U2VjcmV0LUVUQ0QtRW5jcnlwdGlvbg==
+		- identity: {}
+	```
+
+	Open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and put `encryption-provider-config` parameter. Also add volume and volumeMount, for example:
+	```
+	spec:
+		containers:
+		- command:
+			- kube-apiserver
+		...
+			- --encryption-provider-config=/etc/kubernetes/enc/encryption.yaml
+		...
+			volumeMounts:
+			- mountPath: /etc/kubernetes/enc
+			name: enc
+			readOnly: true
+		...
+		hostNetwork: true
+		priorityClassName: system-cluster-critical
+		volumes:
+		- hostPath:
+			path: /etc/kubernetes/enc
+			type: DirectoryOrCreate
+			name: enc
+		...
+	```
+	Wait till apiserver was restarted:
+	```
+	watch crictl ps
+	```
+
+	When `apiserver` will be re-created, we can encrypt all existing secrets. For example, let's do it fort all secrets in `one` NS:
+	```
+	kubectl -n one get secrets -o json | kubectl replace -f -
+	```
+
+	To check you can do for example:
+	```
+	ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/one/s1
+	```
+
+</details>
 
 **Useful official documentation**
 
