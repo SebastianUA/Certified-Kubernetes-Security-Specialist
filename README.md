@@ -23,6 +23,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 - [Candidate Handbook](https://docs.linuxfoundation.org/tc-docs/certification/lf-handbook2)
 - [Verify Certification](https://training.linuxfoundation.org/certification/verify/)
 
+
 # Structure of certification
 
 ## Cluster Setup - 10%
@@ -73,16 +74,13 @@ Other examples you can find in [hands-on with Kubernetes network policy](https:/
 
 **Useful official documentation**
 
-- [network-policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
 **Useful non-official documentation**
 
-- [networking policy editor](https://editor.networkpolicy.io)
-
-- [kubernetes network policy recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes)
-
+- [Networking policy editor](https://editor.networkpolicy.io)
+- [Kubernetes network policy recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes)
 - [An Introduction to Kubernetes Network Policies for Security People](https://reuvenharrison.medium.com/an-introduction-to-kubernetes-network-policies-for-security-people-ba92dd4c809d)
-
 - [Testing Kubernetes network policies behavior](https://github.com/Tufin/test-network-policies/tree/master)
 
 ### 2. Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
@@ -159,8 +157,8 @@ Examples:
 
 **Useful non-official documentation**
 
-- [cisecurity website](https://www.cisecurity.org/benchmark/kubernetes)
-- [kube-bench](https://github.com/aquasecurity/kube-bench)
+- [CISecurity website](https://www.cisecurity.org/benchmark/kubernetes)
+- [Kube-bench](https://github.com/aquasecurity/kube-bench)
 
 ### 3. Properly set up Ingress objects with security control
 
@@ -231,8 +229,8 @@ $ kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.
 
 **Useful non-official documentation**
 
-- [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress)
-- [ingress with tls](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
+- [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress)
+- [Ingress with TLS](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
 
 ### 4. Protect node metadata and endpoints
 It's part of networking policy where you can restrict access to metadata/endpoints.
@@ -263,13 +261,12 @@ Examples:
 
 **Useful official documentation**
 
-- [network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
 **Useful non-official documentation**
 
-- [restricting-cloud-metadata-api-access](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access)
-
-- [kubelet-authn-authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
+- [Restricting cloud metadata api access](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access)
+- [Kubelet authn/authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
 
 
 ### 5. Minimize the use of and access to, GUI elements
@@ -277,10 +274,12 @@ Examples:
 Nothing specific to add to this topic.
 
 **Useful official documentation**
-- [web-ui-dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
+
+- [Web UI dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/)
 
 **Useful non-official documentation**
-- [on-securing-the-kubernetes-dashboard](https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca)
+
+- [On securing the kubernetes dashboard](https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca)
 
 ### 6. Verify platform binaries before deploying 
 
@@ -296,7 +295,8 @@ Examples:
 </details>
 
 **Useful non-official documentation**
-- [kubernetes-releases](https://github.com/kubernetes/kubernetes/releases)
+
+- [Kubernetes releases](https://github.com/kubernetes/kubernetes/releases)
 
 
 ## Cluster Hardening - 15%
@@ -510,16 +510,15 @@ Examples:
 
 **Useful official documentation**
 
-- [controlling-access](https://kubernetes.io/docs/concepts/security/controlling-access/)
-- [controlling-access#api-server-ports-and-ips](https://kubernetes.io/docs/concepts/security/controlling-access/#api-server-ports-and-ips)
+- [Controlling access](https://kubernetes.io/docs/concepts/security/controlling-access/)
+- [Controlling access (api server ports and ips)](https://kubernetes.io/docs/concepts/security/controlling-access/#api-server-ports-and-ips)
 - [Block anonymous requests](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests)
-- [certificates](https://kubernetes.io/docs/tasks/administer-cluster/certificates/)
-- [certificate signing requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user)
+- [Certificates](https://kubernetes.io/docs/tasks/administer-cluster/certificates/)
+- [Certificate signing requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user)
 
 **Useful non-official documentation**
 
 - None
-
 
 ### 2. Use Role Based Access Controls to minimize exposure
 
@@ -590,8 +589,8 @@ You must know to how:
 
 **Useful non-official documentation**
 
-- [advocacy site for Kubernetes RBAC](https://rbac.dev/)
-- [simplify-kubernetes-resource-access-rbac-impersonation](https://docs.bitnami.com/tutorials/simplify-kubernetes-resource-access-rbac-impersonation/)
+- [Advocacy site for Kubernetes RBAC](https://rbac.dev/)
+- [Simplify Kubernetes resource access rbac impersonation](https://docs.bitnami.com/tutorials/simplify-kubernetes-resource-access-rbac-impersonation/)
 - [Manage Role Based Access Control (RBAC)](https://github.com/David-VTUK/CKA-StudyGuide/blob/master/RevisionTopics/01-Cluster%20Architcture,%20Installation%20and%20Configuration.md#manage-role-based-access-control-rbac)
 
 ### 3. Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
@@ -633,12 +632,11 @@ Examples:
 
 **Useful non-official documentation**
 
-- [advocacy site for Kubernetes RBAC](https://rbac.dev/)
+- [Advocacy site for Kubernetes RBAC](https://rbac.dev/)
 
 You must know to how:
 - To create service account and greant it with some permission.
 - To find needed resources and change/add permissions.
-
 
 ### 4. Update Kubernetes frequently
 
@@ -674,14 +672,11 @@ Examples:
 
 **Useful official documentation**
 
-- [kubeadm upgrade](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/)
-- [kubeadm upgrade](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/)
-
+- [Kubeadm upgrade](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/)
+- [Kubeadm upgrade](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/)
 
 You must know to how:
 - Upgrade the K8S clusters
-
-
 
 
 ## System Hardening - 15%
@@ -788,18 +783,18 @@ Examples:
 
 **Useful official documentation**
 
-- [securing-a-cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules)
+- [Securing a cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules)
 
 **Useful non-official documentation**
 
-- [how-to-keep-ubuntu-20-04-servers-updated](https://www.digitalocean.com/community/tutorials/how-to-keep-ubuntu-20-04-servers-updated)
-- [enforce-standards-namespace-labels](https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/)
-- [psa-label-enforcer-policy](https://github.com/kubewarden/psa-label-enforcer-policy)
-- [migrating-from-pod-security-policies-a-comprehensive-guide-part-1-transitioning-to-psa](https://hackernoon.com/migrating-from-pod-security-policies-a-comprehensive-guide-part-1-transitioning-to-psa)
-- [using-kyverno-with-pod-security-admission](https://kyverno.io/blog/2023/06/12/using-kyverno-with-pod-security-admission/)
-- [add-psa-labels](https://kyverno.io/policies/psa/add-psa-labels/add-psa-labels/)
-- [pod-security-admission](https://rke.docs.rancher.com/config-options/services/pod-security-admission)
-- [pod-security-standards](https://www.eksworkshop.com/docs/security/pod-security-standards/)
+- [How to keep ubuntu-20-04 servers updated](https://www.digitalocean.com/community/tutorials/how-to-keep-ubuntu-20-04-servers-updated)
+- [Enforce standards namespace labels](https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/)
+- [Psa label enforcer policy](https://github.com/kubewarden/psa-label-enforcer-policy)
+- [Migrating from pod security policies a comprehensive guide part 1 transitioning to psa](https://hackernoon.com/migrating-from-pod-security-policies-a-comprehensive-guide-part-1-transitioning-to-psa)
+- [Using kyverno with pod security admission](https://kyverno.io/blog/2023/06/12/using-kyverno-with-pod-security-admission/)
+- [Add psa labels](https://kyverno.io/policies/psa/add-psa-labels/add-psa-labels/)
+- [Pod security admission](https://rke.docs.rancher.com/config-options/services/pod-security-admission)
+- [Pod security standards](https://www.eksworkshop.com/docs/security/pod-security-standards/)
 - [Implementing Pod Security Standards in Amazon EKS](https://aws.amazon.com/blogs/containers/implementing-pod-security-standards-in-amazon-eks/)
 
 ### 2. Minimize IAM roles
@@ -808,7 +803,7 @@ TBD!
 
 **Useful official documentation**
 
-- [access-authn-authz](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
+- [Kubernetes authentication](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
 
 ### 3. Minimize external access to the network
 
@@ -816,7 +811,7 @@ TBD!
 
 **Useful official documentation**
 
-- [network-policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 
 ### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
 
@@ -867,13 +862,13 @@ Examples:
 
 **Useful official documentation**
 
-- [pod-security-admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/)
-- [apparmor](https://kubernetes.io/docs/tutorials/security/apparmor/)
-- [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
+- [Pod security admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/)
+- [Apparmor](https://kubernetes.io/docs/tutorials/security/apparmor/)
+- [Seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
 
 **Useful non-official documentation**
 
-- [apparmor](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
+- [Apparmor](https://gitlab.com/apparmor/apparmor/-/wikis/Documentation)
 - [Container Security](https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation)
 
 ### 5. Principle of least privilege
@@ -959,7 +954,9 @@ Examples:
 
 - None
 
+**Useful non-official documentation**
 
+- None
 
 
 ## Minimize Microservice Vulnerabilities - 20%
@@ -974,13 +971,12 @@ TBD!
 
 **Useful non-official documentation**
 
-- [opa-gatekeeper-policy-and-governance-for-kubernetes](https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/)
-- [openpolicyagent](https://www.openpolicyagent.org/docs/latest/kubernetes-primer/)
-- [openpolicyagent online editor](https://play.openpolicyagent.org/)
-- [gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/docs/howto/)
-- [security context for pods](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [kubernetes-security-psp-network-policy](https://sysdig.com/blog/kubernetes-security-psp-network-policy/)
-
+- [Opa gatekeeper policy and governance for kubernetes](https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/)
+- [Openpolicyagent](https://www.openpolicyagent.org/docs/latest/kubernetes-primer/)
+- [Openpolicyagent online editor](https://play.openpolicyagent.org/)
+- [Gatekeeper](https://open-policy-agent.github.io/gatekeeper/website/docs/howto/)
+- [Security context for pods](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Kubernetes security psp network policy](https://sysdig.com/blog/kubernetes-security-psp-network-policy/)
 
 ### 2. Manage Kubernetes secrets
 
@@ -1120,11 +1116,11 @@ Examples:
 
 **Useful official documentation**
 
-- [distribute-credentials-secure](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
-- [secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
-- [encrypt-data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
-- [kube-apiserver](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
-- [etcd encryption](https://etcd.io/docs/v3.5/op-guide/configuration/#security)
+- [Distribute credentials secure](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
+- [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
+- [Encrypt data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
+- [Kube apiserver](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
+- [ETCd encryption](https://etcd.io/docs/v3.5/op-guide/configuration/#security)
 
 **Useful non-official documentation**
 
@@ -1162,19 +1158,17 @@ Examples:
 
 	</details>
 
-	
 </details>
 
 **Useful official documentation**
 
-- [runtime-class](https://kubernetes.io/docs/concepts/containers/runtime-class/)
-- [encrypt-data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
+- [Runtime class](https://kubernetes.io/docs/concepts/containers/runtime-class/)
+- [Encrypt data](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/)
 
 **Useful non-official documentation**
 
-- [gvisor](https://gvisor.dev/docs/user_guide/install/)
-- [runtime-class-examples](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md#examples)
-
+- [Gvisor](https://gvisor.dev/docs/user_guide/install/)
+- [Runtime class examples](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md#examples)
 
 ### 4. Implement pod-to-pod encryption by use of mTLS
 
@@ -1255,19 +1249,18 @@ Examples:
 
 </details>
 
-
 **Useful official documentation**
 
 - None
 
 **Useful non-official documentation**
 
-- [7-best-practices-for-building-containers](https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers)
-- [smaller-docker-images](https://learnk8s.io/blog/smaller-docker-images)
--[kubernetes-best-practices-how-and-why-to-build-small-container-images](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images)
--[best-practices-for-building-containers](https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible)
--[multi-stages](https://docs.docker.com/build/building/multi-stage/)
--[tips-to-reduce-docker-image-sizes](https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34)
+- [7 best practices for building containers](https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers)
+- [Smaller Docker images](https://learnk8s.io/blog/smaller-docker-images)
+-[Kubernetes best practices how and why to build small container images](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images)
+-[Best practices for building containers](https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible)
+-[Multi stages for Docker](https://docs.docker.com/build/building/multi-stage/)
+-[Tips to reduce Docker image sizes](https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34)
 
 ### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
 
@@ -1482,12 +1475,12 @@ Examples:
 
 **Useful official documentation**
 
-- [admission-controllers#imagepolicywebhook](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook)
-- [extensible-admission-controllers](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+- [Admission controllers (imagepolicywebhook)](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook)
+- [Extensible admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
 
 **Useful non-official documentation**
 
-- [why-do-i-need-admission-controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/#why-do-i-need-admission-controllers)
+- [Why do I need admission controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/#why-do-i-need-admission-controllers)
 
 
 ### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
@@ -1515,14 +1508,14 @@ Examples:
 
 **Useful non-official documentation**
 
-- [statically analyse](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml)
-- [kubehunter](https://github.com/aquasecurity/kube-hunter)
-- [kubesec](https://kubesec.io/)
-- [trivy](https://github.com/aquasecurity/trivy)
-- [checkov](https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/)
-- [clair](https://github.com/quay/clair)
-- [kube-score](https://kube-score.com/)
-- [conftest](https://www.conftest.dev/)
+- [Statically analyse](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml)
+- [Kubehunter](https://github.com/aquasecurity/kube-hunter)
+- [Kubesec](https://kubesec.io/)
+- [Trivy](https://github.com/aquasecurity/trivy)
+- [Checkov](https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/)
+- [Clair](https://github.com/quay/clair)
+- [Kube-score](https://kube-score.com/)
+- [Conftest](https://www.conftest.dev/)
 	
 ### 4. Scan images for known vulnerabilities 
 
@@ -1554,16 +1547,15 @@ Hit on the first one, so we scale down:
 $ k -n applications scale deploy web1 --replicas 0
 ```
 
-
 **Useful official documentation**
 
 - None
 
 **Useful non-official documentation**
 
-- [scan images and run ids](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#10-scan-images-and-run-ids)
-- [anchore](https://github.com/anchore/anchore-cli#command-line-examples)
-- [trivy](https://github.com/aquasecurity/trivy)
+- [Scan images and run ids](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#10-scan-images-and-run-ids)
+- [Anchore](https://github.com/anchore/anchore-cli#command-line-examples)
+- [Trivy](https://github.com/aquasecurity/trivy)
 
 
 ## Monitoring, Logging, and Runtime Security - 20%
@@ -1582,15 +1574,15 @@ Examples:
 
 **Useful official documentation**
 
-- [seccomp]( https://kubernetes.io/docs/tutorials/security/seccomp/)
-- [falco](https://falco.org/docs/)
+- [Seccomp]( https://kubernetes.io/docs/tutorials/security/seccomp/)
+- [Falco](https://falco.org/docs/)
 
 **Useful non-official documentation**
 
-- [how-to-detect-kubernetes-vulnerability-with-falco](https://sysdig.com/blog/how-to-detect-kubernetes-vulnerability-cve-2019-11246-using-falco/)
-- [falco-101](https://learn.sysdig.com/falco-101)
-- [helm-chart-falco](https://github.com/falcosecurity/charts/tree/master/falco)
-- [detect-cve-2020-8557](https://falco.org/blog/detect-cve-2020-8557/)
+- [How to detect Kubernetes vulnerability with falco](https://sysdig.com/blog/how-to-detect-kubernetes-vulnerability-cve-2019-11246-using-falco/)
+- [Falco 101](https://learn.sysdig.com/falco-101)
+- [Helm-chart to deploy Falco](https://github.com/falcosecurity/charts/tree/master/falco)
+- [Detect CVE-2020 and CVE-8557](https://falco.org/blog/detect-cve-2020-8557/)
 
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 
@@ -1602,9 +1594,9 @@ TBD!
 
 **Useful non-official documentation**
 
-- [common-kubernetes-config-security-threats](https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/)
-- [guidance-on-kubernetes-threat-modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
-- [attack-matrix-kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
+- [Common Kubernetes config security threats](https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/)
+- [Guidance on Kubernetes threat modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
+- [Attack matrix Kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
 
 ### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 
@@ -1652,10 +1644,10 @@ $ cat /var/log/syslog | grep falco | grep shell
 
 **Useful non-official documentation**
 
-- [attack-matrix-kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
-- [mitre-attck-framework-for-container-runtime-security-with-sysdig-falco](https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/)
-- [mitigating-kubernetes-attacks](https://www.cncf.io/online-programs/mitigating-kubernetes-attacks/)
-- [anatomy-kubernetes-attack-how-untrusted-docker-images-fail-us](https://www.optiv.com/insights/source-zero/blog/anatomy-kubernetes-attack-how-untrusted-docker-images-fail-us)
+- [Attack matrix Kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
+- [Mitre attck framework for container runtime security with sysdig falco](https://sysdig.com/blog/mitre-attck-framework-for-container-runtime-security-with-sysdig-falco/)
+- [Mitigating Kubernetes attacks](https://www.cncf.io/online-programs/mitigating-kubernetes-attacks/)
+- [Anatomy Kubernetes attack how untrusted docker images fail us](https://www.optiv.com/insights/source-zero/blog/anatomy-kubernetes-attack-how-untrusted-docker-images-fail-us)
 - [Webinar: Mitigating Kubernetes attacks](https://www.youtube.com/watch?v=HWv8ZKLCawM&ab_channel=CNCF%5BCloudNativeComputingFoundation%5D)
 
 ### 4. Perform deep analytical investigation and identification of bad actors within the environment
@@ -1664,13 +1656,13 @@ TBD!
 
 **Useful official documentation**
 
-- [sysdig](https://docs.sysdig.com/en/)
+- [Sysdig](https://docs.sysdig.com/en/)
 
 **Useful non-official documentation**
 
-- [monitoring-kubernetes-with-sysdig](https://kubernetes.io/blog/2015/11/monitoring-kubernetes-with-sysdig/)
+- [Monitoring Kubernetes with Sysdig](https://kubernetes.io/blog/2015/11/monitoring-kubernetes-with-sysdig/)
 - [CNCF Webinar: Getting started with container runtime security using Falco](https://www.youtube.com/watch?v=VEFaGjfjfyc&ab_channel=Sysdig)
-- [kubernetes-security](https://www.redhat.com/en/topics/containers/kubernetes-security)
+- [Kubernetes security](https://www.redhat.com/en/topics/containers/kubernetes-security)
 
 ### 5. Ensure immutability of containers at runtime
 
@@ -1683,9 +1675,9 @@ TBD!
 
 **Useful non-official documentation**
 
-- [principles-of-container-app-design](https://kubernetes.io/blog/2018/03/principles-of-container-app-design/)
-- [why-i-think-we-should-all-use-immutable-docker-images](https://medium.com/sroze/why-i-think-we-should-all-use-immutable-docker-images-9f4fdcb5212f)
-- [immutable-infrastructure-your-systems-can-rise-dead](https://techbeacon.com/enterprise-it/immutable-infrastructure-your-systems-can-rise-dead)
+- [Principles of container app design](https://kubernetes.io/blog/2018/03/principles-of-container-app-design/)
+- [Why I think we should all use immutable docker images](https://medium.com/sroze/why-i-think-we-should-all-use-immutable-docker-images-9f4fdcb5212f)
+- [Immutable infrastructure your systems can rise dead](https://techbeacon.com/enterprise-it/immutable-infrastructure-your-systems-can-rise-dead)
 
 ### 6. Use Audit Logs to monitor access
 
@@ -1748,12 +1740,12 @@ Examples:
 
 **Useful official documentation**
 
-- [audit](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/)
+- [Kubernetes cluster audit](https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/)
 
 **Useful non-official documentation**
 
-- [kubernetes-audit-logging](https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/)
-- [monitor-kubernetes-audit-logs](https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/)
+- [Kubernetes audit logging](https://docs.sysdig.com/en/docs/sysdig-secure/secure-events/kubernetes-audit-logging/)
+- [Monitor Kubernetes audit logs](https://www.datadoghq.com/blog/monitor-kubernetes-audit-logs/)
 
 ### 7. ReadOnly Root FileSystem
 
@@ -1795,7 +1787,7 @@ Examples:
 
 **Useful official documentation**
 
-- [security-context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Kubernetwe security context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 
 **Useful non-official documentation**
 
@@ -1804,14 +1796,13 @@ Examples:
 
 # Additional useful material
 
-
 ## Articles
 
 1. [cheatsheet for kubernetes](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 ## Books
 
-1. [Aqua Security Liz Rice:Free Container Security Book](https://info.aquasec.com/container-security-book)
+1. [Aqua Security Liz Rice: Free Container Security Book](https://info.aquasec.com/container-security-book)
 1. [Learn Kubernetes security: Securely orchestrate, scale, and manage your microservices in Kubernetes deployments](https://www.amazon.com/Learn-Kubernetes-Security-orchestrate-microservices/dp/1839216506)
 1. [Let's Learn CKS Scenarios](https://gumroad.com/l/cksbook)
 
