@@ -303,6 +303,17 @@ Examples:
 
 ### 1. Restrict access to Kubernetes API
 
+When it comes to Kubernetes Production Implementation restricting API access is very important. Restricting access to the API server is about three things:
+- Authentication
+- Authorization
+- Admission Control The primary topics under this section would be bootstrap tokens, RBAC, ABAC, service account, and admission webhooks.
+- Cluster API access methods
+- Kubernetes API Access Security
+- Authentication
+- Authorization
+- Admission Controllers
+- Admission Webhooks
+
 Examples:
  - <details><summary>Example_1: Blocking anonymous access to use API:</summary>
 	
@@ -373,7 +384,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_4: Kuberneter API troubleshooting:</summary>
+- <details><summary>Example_4: Kubernetes API troubleshooting:</summary>
 
 	<details><summary>First al all, checking:</summary>
 	
@@ -508,6 +519,68 @@ Examples:
 
 </details>
 
+- <details><summary>Example_7: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add cipher=ECDHE-RSA-DES-CBC3-SHA as well:</summary>
+
+	- ETCD side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
+		```
+		....
+		spec:
+			containers:
+			- command:
+			- etcd
+			- --advertise-client-urls=https://172.30.1.2:2379
+			- --cert-file=/etc/kubernetes/pki/etcd/server.crt
+			- --client-cert-auth=true
+			- --data-dir=/var/lib/etcd
+			- --experimental-initial-corrupt-check=true
+			- --experimental-watch-progress-notify-interval=5s
+			- --initial-advertise-peer-urls=https://172.30.1.2:2380
+			- --initial-cluster=controlplane=https://172.30.1.2:2380
+			- --key-file=/etc/kubernetes/pki/etcd/server.key
+			- --listen-client-urls=https://127.0.0.1:2379,https://172.30.1.2:2379
+			- --listen-metrics-urls=http://127.0.0.1:2381
+			- --listen-peer-urls=https://172.30.1.2:2380
+			- --name=controlplane
+			- --peer-cert-file=/etc/kubernetes/pki/etcd/peer.crt
+			- --peer-client-cert-auth=true
+			- --peer-key-file=/etc/kubernetes/pki/etcd/peer.key
+			- --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+			- --snapshot-count=10000
+			- --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
+			- --cipher-suites=ECDHE-RSA-DES-CBC3-SHA
+			image: registry.k8s.io/etcd:3.5.7-0
+			imagePullPolicy: IfNotPresent
+		....
+		```
+
+		Checking ETCD:
+		```
+		crictl ps -a | grep etcd
+		```
+
+		NOTE: To get logs, you can use:
+		```
+		cat /var/log/syslog | grep etcd
+		```
+
+	- kube-apiserver side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
+		```
+		--cipher-suites=ECDHE-RSA-DES-CBC3-SHA
+		```
+
+		Checking kube-apiserver:
+		```
+		crictl ps -a | grep apiserver
+		```
+
+		NOTE: To get logs, you can use:
+		```
+		cat /var/log/syslog | grep apiserver
+		```
+
+</details>
+
+
 **Useful official documentation**
 
 - [Controlling access](https://kubernetes.io/docs/concepts/security/controlling-access/)
@@ -515,12 +588,23 @@ Examples:
 - [Block anonymous requests](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests)
 - [Certificates](https://kubernetes.io/docs/tasks/administer-cluster/certificates/)
 - [Certificate signing requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user)
+- [Access to Kubernetes cluster API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
+- [Authorization Modes](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
+- [Admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+- [Extensible admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
 
 **Useful non-official documentation**
 
 - None
 
 ### 2. Use Role Based Access Controls to minimize exposure
+
+Allowing unnecessary cluster-wide access to everyone is a common mistake done during Kubernetes implementations. With Kubernetes RBAC, you can define fine-grained control on who can access the Kubernetes API to enforce the principle of least privilege. The concepts will include:
+
+- Role = the position that could perform actions
+- ClusterRoles = the position that could perform actions across the whole cluster
+- RoleBinding = the position that could perform actions
+- ClusterRoleBindings = the binding of user/service account and cluster roles
 
 Examples:
  - <details><summary>Example_1: Working with RBAC (roles and role bindings):</summary>
@@ -640,6 +724,8 @@ You must know to how:
 
 ### 4. Update Kubernetes frequently
 
+There may be an upgrade question as the documentation about upgrading with kubeadm has been significantly better in recent releases. Also, you should have mechanisms to validate the cluster components, security configurations, and application status post-upgrade.
+
 Examples:
  - <details><summary>Example_1: K8S upgrades(Controlplane):</summary>
 	
@@ -672,8 +758,9 @@ Examples:
 
 **Useful official documentation**
 
-- [Kubeadm upgrade](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/)
-- [Kubeadm upgrade](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/)
+- [Upgrade a cluster](https://kubernetes.io/docs/tasks/administer-cluster/cluster-upgrade/)
+- [Kubeadm upgrade guidance](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/)
+- [Upgrading Kubernetes clusters using kubeadm](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/)
 
 You must know to how:
 - Upgrade the K8S clusters
@@ -816,7 +903,7 @@ TBD!
 ### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
 
 Examples:
- - <details><summary>Example_1: Working with Privilege Escalation:</summary>
+ - <details><summary>Example_1: Working with Apparmor:</summary>
 	
 	<details><summary> An example of configuration:</summary>
 		
@@ -845,20 +932,27 @@ Examples:
 
 	</details>
 
-	<details><summary> Apply the prepared configuration file:</summary>
-		
-		k apply -f pod-with-apparmor.yaml
+	Apply the prepared configuration file:
+	```
+	k apply -f pod-with-apparmor.yaml
+	```
 
-	</details>
-
-	<details><summary> Checks:</summary>
-		$ crictl ps -a | grep httpd
+	Checks:
+	```
+	$ crictl ps -a | grep httpd
 
 		$ crictl inspect e428e2a3e9324 | grep apparmor
           "apparmor_profile": "localhost/docker-default"
         "apparmorProfile": "docker-default",
+	```
+</details>
 
-	</details>
+- <details><summary>Example_2: Working with Seccomp:</summary>
+
+	TBD!
+
+</details>
+
 
 **Useful official documentation**
 
@@ -1114,6 +1208,7 @@ Examples:
 
 </details>
 
+
 **Useful official documentation**
 
 - [Distribute credentials secure](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
@@ -1127,6 +1222,10 @@ Examples:
 - None
 
 ### 3. Use container runtime sandboxes in multi-tenant environments (e.g. gvisor, kata containers)
+
+Before the open container initiative (OCI) proposed to have Container Runtime Interface(CRI), the communication between containers and Kubernetes (K8s) was relying on dockershim/rkt provided and maintained by Docker. However, when containers and K8s are getting more and more sophisticated, the maintenance cost of dockershim/rkt becomes higher and higher. Therefore, having an interface that opens to the open source community and for solely dealing with container runtime becomes the answer to this challenging situation.
+
+Kata Containers and gVisor helps in workload isolation. It can be implemented using the Kubernetes RuntimeClass where you can specify the required runtime for the workload.
 
 Examples:
  - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
@@ -1172,7 +1271,15 @@ Examples:
 
 ### 4. Implement pod-to-pod encryption by use of mTLS
 
-TBD!
+mTLS stands for mutual authentication, meaning client authenticates server and server does the same to client, its core concept is to secure pod-to-pod communications. In exams it may ask you to create the certificates. However, it is worth bookmarking certificate signing requests and understanding how to implement kubeconfig access and mTLS authentication credentials.
+
+Examples:
+- <details><summary>Example_1: Using mTLS:</summary>
+
+	TBD!
+
+</details>
+
 
 **Useful official documentation**
 
@@ -1263,6 +1370,8 @@ Examples:
 -[Tips to reduce Docker image sizes](https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34)
 
 ### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
+
+Securing the images that are allowed to run in your cluster is essential. It’s important to verify the pulled base images are from valid sources. This can be done by ImagePolicyWebhook admission controller.
 
 Examples:
  - <details><summary>Example_1: Use ImagePolicyWebhook:</summary>
@@ -1485,20 +1594,18 @@ Examples:
 
 ### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
 
+This is totally straightforward. You will need to vet the configuration of Kubernetes YAML files and Docker files and fix any security issues.
+
 Examples:
 - <details><summary>Example_1: Static Manual Analysis Docker:</summary>
 
-	```
 	TBD!
-	```
 	
 </details>
 
 - <details><summary>Example_2: Static Manual analysis k8s:</summary>
 
-	```
 	TBD!
-	```
 	
 </details>
 
@@ -1508,10 +1615,9 @@ Examples:
 
 **Useful non-official documentation**
 
-- [Statically analyse](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml)
+- [7 statically analyse yaml](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml)
 - [Kubehunter](https://github.com/aquasecurity/kube-hunter)
 - [Kubesec](https://kubesec.io/)
-- [Trivy](https://github.com/aquasecurity/trivy)
 - [Checkov](https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/)
 - [Clair](https://github.com/quay/clair)
 - [Kube-score](https://kube-score.com/)
@@ -1567,9 +1673,8 @@ Perform behavioural analytics of syscall process and file activities at the host
 Examples:
  - <details><summary>Example_1: Use seccomp:</summary>
 	
-	```
-	TBD
-	```
+	TBD: Restrict a Container's Syscalls with seccomp
+
 </details>
 
 **Useful official documentation**
@@ -1585,20 +1690,6 @@ Examples:
 - [Detect CVE-2020 and CVE-8557](https://falco.org/blog/detect-cve-2020-8557/)
 
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
-
-TBD!
-
-**Useful official documentation**
-
-- None
-
-**Useful non-official documentation**
-
-- [Common Kubernetes config security threats](https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/)
-- [Guidance on Kubernetes threat modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
-- [Attack matrix Kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
-
-### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 
 All falco events you should store in `/var/log/falco.txt`. 
 
@@ -1637,6 +1728,20 @@ $ k exec -it pod -- sh
 
 $ cat /var/log/syslog | grep falco | grep shell
 ```
+
+**Useful official documentation**
+
+- [Falco docs](https://falco.org/docs)
+
+**Useful non-official documentation**
+
+- [Common Kubernetes config security threats](https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/)
+- [Guidance on Kubernetes threat modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
+- [Attack matrix Kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
+
+### 3. Detect all phases of attack regardless of where it occurs and how it spreads
+
+TBD!
 
 **Useful official documentation**
 
