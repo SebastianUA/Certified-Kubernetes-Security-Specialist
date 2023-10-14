@@ -70,7 +70,7 @@ Examples:
 
 </details>
 
-Other examples you can find in [hands-on with Kubernetes network policy](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/Kubernetes-network-policy).
+Other examples you can find in [hands-on with Kubernetes network policy](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/01_Cluster_Setup/Kubernetes-network-policy)
 
 **Useful official documentation**
 
@@ -159,6 +159,7 @@ Examples:
 
 - [CISecurity website](https://www.cisecurity.org/benchmark/kubernetes)
 - [Kube-bench](https://github.com/aquasecurity/kube-bench)
+- [Kube-Bench: Kubernetes CIS Benchmarking Tool](https://devopscube.com/kube-bench-guide/)
 
 ### 3. Properly set up Ingress objects with security control
 
@@ -227,10 +228,15 @@ $ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert
 $ kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
 ```
 
-**Useful non-official documentation**
+**Useful official documentation**
 
 - [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress)
 - [Ingress with TLS](https://kubernetes.io/docs/concepts/services-networking/ingress/#tls)
+
+**Useful non-official documentation**
+
+- [How to Setup Nginx Ingress Controller On Kubernetes](https://devopscube.com/setup-ingress-kubernetes-nginx-controller/)
+- [Kubernetes Ingress Tutorial For Beginners](https://devopscube.com/kubernetes-ingress-tutorial/)
 
 ### 4. Protect node metadata and endpoints
 It's part of networking policy where you can restrict access to metadata/endpoints.
@@ -262,6 +268,7 @@ Examples:
 **Useful official documentation**
 
 - [Network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Declare Network Policy](https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/)
 
 **Useful non-official documentation**
 
@@ -280,6 +287,7 @@ Nothing specific to add to this topic.
 **Useful non-official documentation**
 
 - [On securing the kubernetes dashboard](https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca)
+- [Kubernetes dashboards](https://www.airplane.dev/blog/intro-to-kubernetes-dashboards)
 
 ### 6. Verify platform binaries before deploying 
 
@@ -566,6 +574,7 @@ Examples:
 	- kube-apiserver side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
 		```
 		--cipher-suites=ECDHE-RSA-DES-CBC3-SHA
+		- --tls-min-version=VersionTLS12
 		```
 
 		Checking kube-apiserver:
@@ -588,6 +597,8 @@ Examples:
 - [Block anonymous requests](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#anonymous-requests)
 - [Certificates](https://kubernetes.io/docs/tasks/administer-cluster/certificates/)
 - [Certificate signing requests](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#normal-user)
+- [Using Node Authorization](https://kubernetes.io/docs/reference/access-authn-authz/node/)
+- [Accessing the Kubernetes API from a Pod](https://kubernetes.io/docs/tasks/run-application/access-api-from-pod/)
 - [Access to Kubernetes cluster API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
 - [Authorization Modes](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
 - [Admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
@@ -687,8 +698,8 @@ Examples:
 	apiVersion: v1
 	kind: ServiceAccount
 	metadata:
-	name: build-robot
-	automountServiceAccountToken: false
+		name: build-robot
+		automountServiceAccountToken: false
 	```
 </details>
 
@@ -703,6 +714,27 @@ Examples:
 	spec:
 	serviceAccountName: default
 	automountServiceAccountToken: false
+	```
+</details>
+
+ - <details><summary>Example_3: Disable automountServiceAccountToken on namespace side:</summary>
+	
+	```
+	apiVersion: v1
+	kind: Namespace
+	metadata:
+	creationTimestamp: "2023-10-04T20:43:49Z"
+	labels:
+		kubernetes.io/metadata.name: default
+	name: default
+	automountServiceAccountToken: false
+	resourceVersion: "36"
+	uid: 7d0191eb-7187-4de9-90af-59121a4a9834
+	spec:
+		finalizers:
+			- kubernetes
+	status:
+		phase: Active
 	```
 </details>
 
@@ -727,7 +759,7 @@ You must know to how:
 There may be an upgrade question as the documentation about upgrading with kubeadm has been significantly better in recent releases. Also, you should have mechanisms to validate the cluster components, security configurations, and application status post-upgrade.
 
 Examples:
- - <details><summary>Example_1: K8S upgrades(Controlplane):</summary>
+ - <details><summary>Example_1: K8S upgrades (Controlplane):</summary>
 	
 	```
 	k drain master --ignore-deamonsets
@@ -742,7 +774,7 @@ Examples:
 	```
 </details>
 
- - <details><summary>Example_2: K8S upgrades(Nodes):</summary>
+ - <details><summary>Example_2: K8S upgrades (Nodes):</summary>
 	
 	```
 	k drain node --ignore-deamonsets
@@ -959,6 +991,8 @@ Examples:
 - [Pod security admission](https://kubernetes.io/docs/concepts/security/pod-security-admission/)
 - [Apparmor](https://kubernetes.io/docs/tutorials/security/apparmor/)
 - [Seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
+- [Set the Seccomp Profile for a Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container)
+- [Securing a Pod](https://kubernetes.io/docs/tutorials/security/apparmor/#securing-a-pod)
 
 **Useful non-official documentation**
 
@@ -1364,10 +1398,13 @@ Examples:
 
 - [7 best practices for building containers](https://cloud.google.com/blog/products/containers-kubernetes/7-best-practices-for-building-containers)
 - [Smaller Docker images](https://learnk8s.io/blog/smaller-docker-images)
--[Kubernetes best practices how and why to build small container images](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images)
--[Best practices for building containers](https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible)
--[Multi stages for Docker](https://docs.docker.com/build/building/multi-stage/)
--[Tips to reduce Docker image sizes](https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34)
+- [Kubernetes best practices how and why to build small container images](https://cloud.google.com/blog/products/containers-kubernetes/kubernetes-best-practices-how-and-why-to-build-small-container-images)
+- [Best practices for building containers](https://cloud.google.com/architecture/best-practices-for-building-containers#build-the-smallest-image-possible)
+- [Multi stages for Docker](https://docs.docker.com/build/building/multi-stage/)
+- [Tips to reduce Docker image sizes](https://hackernoon.com/tips-to-reduce-docker-image-sizes-876095da3b34)
+- [Docker Image Security Best Practices](https://res.cloudinary.com/snyk/image/upload/v1551798390/Docker_Image_Security_Best_Practices_.pdf)
+- [3 simple tricks for smaller Docker images](https://learnk8s.io/blog/smaller-docker-images)
+- [Top 20 Dockerfile best practices](https://sysdig.com/blog/dockerfile-best-practices/)
 
 ### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
 
@@ -1771,12 +1808,17 @@ TBD!
 
 ### 5. Ensure immutability of containers at runtime
 
-TBD!
+Immutability of Volumes (Secrets, ConfigMaps, VolumeMounts) can be achieved with readOnly: true field on the mount.
+```
+volumeMounts:
+- name: instance-creds
+  mountPath: /secrets/creds
+  readOnly: true
+```
 
 **Useful official documentation**
 
-- [Falco](https://falco.org/docs/)
-- [Sysdig](https://docs.sysdig.com/)
+- [Kubernetes volumes](https://kubernetes.io/docs/concepts/storage/volumes/)
 
 **Useful non-official documentation**
 
@@ -1903,13 +1945,13 @@ Examples:
 
 ## Articles
 
-1. [cheatsheet for kubernetes](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+1. [Cheatsheet for Kubernetes](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 ## Books
 
-1. [Aqua Security Liz Rice: Free Container Security Book](https://info.aquasec.com/container-security-book)
-1. [Learn Kubernetes security: Securely orchestrate, scale, and manage your microservices in Kubernetes deployments](https://www.amazon.com/Learn-Kubernetes-Security-orchestrate-microservices/dp/1839216506)
-1. [Let's Learn CKS Scenarios](https://gumroad.com/l/cksbook)
+1. [Container Security](https://devopscube.com/recommends/container-security/)
+2. [Kubernetes Security](https://devopscube.com/recommends/kubernetes-security/)
+3. [Learn Kubernetes security: Securely orchestrate, scale, and manage your microservices in Kubernetes deployments](https://www.amazon.com/Learn-Kubernetes-Security-orchestrate-microservices/dp/1839216506)
 
 ## Videos
 
@@ -1927,6 +1969,7 @@ Examples:
 5. [Falco 101](https://learn.sysdig.com/falco-101)
 6. [Killer Shell CKS - Interactive Scenarios for Kubernetes Security](https://killercoda.com/killer-shell-cks)
 7. [Linux Foundation Kubernetes Certifications Now Include Exam Simulator](https://training.linuxfoundation.org/announcements/linux-foundation-kubernetes-certifications-now-include-exam-simulator)
+8. [k8simulator](https://k8simulator.com/product/certified-kubernetes-security-specialist-cks/)
 
 
 # Authors
