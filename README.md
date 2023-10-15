@@ -28,6 +28,13 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 
 ## Cluster Setup - 10%
 
+- Use network security policies to restrict cluster-level access. This will help to prevent unauthorized access to your cluster resources.
+- Use the CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi). The CIS benchmark is a set of security recommendations that can help you to harden your Kubernetes cluster.
+- Properly set up Ingress objects with security control. Ingress objects allow you to expose your Kubernetes services to the outside world. It is important to configure Ingress objects with appropriate security controls to prevent unauthorized access.
+- Protect node metadata and endpoints. Node metadata and endpoints contain sensitive information about your Kubernetes nodes. It is important to protect this information from unauthorized access.
+- Minimize use of, and access to, GUI elements. The Kubernetes GUI can be a convenient way to manage your cluster, but it is also a potential security risk. It is important to minimize use of the GUI and to restrict access to it to authorized users.
+- Verify platform binaries before deploying. Before deploying Kubernetes platform binaries, it is important to verify their authenticity and integrity. This can be done by using a checksum or by signing the binaries.
+
 ### 1. Use Network security policies to restrict cluster level access
 
 Examples:
@@ -38,13 +45,13 @@ Examples:
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
 	metadata:
-	name: deny-all
-	namespace: monitoring
+		name: deny-all
+		namespace: monitoring
 	spec:
 	podSelector: {}
 	policyTypes:
-	   - Egress
-	egress: {}
+		- Ingress
+		- Egress
 	```
 
 </details>
@@ -70,6 +77,26 @@ Examples:
 
 </details>
 
+ - <details><summary>Example_3: Define an allow-all policy which overrides the deny all policy on <b>default</b> namespace:</summary>
+	
+	```
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: NetworkPolicy
+	metadata:
+		name: allow-all
+		namespace: default
+	spec:
+		podSelector: {}
+		policyTypes:
+		- Ingress
+		- Egress
+		ingress: {}
+		egress: {}
+	```
+
+</details>
+
 Other examples you can find in [hands-on with Kubernetes network policy](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/01_Cluster_Setup/Kubernetes-network-policy)
 
 **Useful official documentation**
@@ -82,6 +109,7 @@ Other examples you can find in [hands-on with Kubernetes network policy](https:/
 - [Kubernetes network policy recipes](https://github.com/ahmetb/kubernetes-network-policy-recipes)
 - [An Introduction to Kubernetes Network Policies for Security People](https://reuvenharrison.medium.com/an-introduction-to-kubernetes-network-policies-for-security-people-ba92dd4c809d)
 - [Testing Kubernetes network policies behavior](https://github.com/Tufin/test-network-policies/tree/master)
+- [Network policy from banzaicloud](https://banzaicloud.com/blog/network-policy/)
 
 ### 2. Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
 
@@ -160,6 +188,7 @@ Examples:
 - [CISecurity website](https://www.cisecurity.org/benchmark/kubernetes)
 - [Kube-bench](https://github.com/aquasecurity/kube-bench)
 - [Kube-Bench: Kubernetes CIS Benchmarking Tool](https://devopscube.com/kube-bench-guide/)
+- [101 days of kubernetes](https://www.101daysofdevops.com/courses/101-days-of-kubernetes/lessons/day-1-kubesec/)
 
 ### 3. Properly set up Ingress objects with security control
 
@@ -278,7 +307,9 @@ Examples:
 
 ### 5. Minimize the use of and access to, GUI elements
 
-Nothing specific to add to this topic.
+Restricting the Kubernetes GUI can be accomplished through proper Role-Based Access Control (RBAC) configuration. In Kubernetes, RBAC is created via the RoleBinding resource. Always ensure people are given least-privilege access by default, then provide requests as the user needs them.
+
+A second way to secure the GUI is via Token authentication. Token authentication is prioritized by the Kubernetes Dashboard. The token is in the format Authorization: Bearer <token> and it is located in the request header itself. Bearer Tokens are created through the use of Service Account Tokens. These are just a few of the K8s dashboard concepts that will wind up on the CKS. Make sure you have a thorough understanding of service accounts and how they relate to the Kubernetes Dashboard prior to taking the exam.
 
 **Useful official documentation**
 
@@ -325,37 +356,131 @@ When it comes to Kubernetes Production Implementation restricting API access is 
 Examples:
  - <details><summary>Example_1: Blocking anonymous access to use API:</summary>
 	
-	<details><summary>Check if anonymous access is enabled (if so, - it should be disabled):</summary>
-	
-		cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
+	First that need to check is:
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
+	```
 
+	If it's empty output, then:
+	```
+	ps -ef | grep kubelet | grep -Ei "kubeconfig"
+	```
+
+	<details><summary>Fix if it's enabled, oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	
+		---
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		authentication:
+		anonymous:
+			enabled: false
+		............
 	</details>
 
-	<details><summary>Fix if it's enabled:</summary>
+	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--anonymous-auth=false` into `KUBELET_SYSTEM_PODS_ARGS`.
 	
-		TBD!
-		
+	Make restart service of kubelet:
+	```
+	systemctl daemon-reload systemctl restart kubelet.service
+	```
+	
+</details>
+
+ - <details><summary>Example_2: Chaning authentication mode to Webhook:</summary>
+	
+	Getting `kubeconfig` path:
+	```
+	ps -ef | grep kubelet | grep -Ei "kubeconfig"
+	```
+
+	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	
+		---
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		.....
+		authorization:
+			mode: Webhook
+		.....
+	</details>
+
+	Make restart service of kubelet: 
+	```
+	systemctl daemon-reload systemctl restart kubelet.service
+	```
+	
+</details>
+
+ - <details><summary>Example_3: Blocking insecure port:</summary>
+
+	First, checking:
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
+	```
+
+	<details><summary>Oppening `/etc/kubernetes/manifests/kube-apiserver.yaml` file:</summary>
+	
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		annotations:
+			kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: 172.30.1.2:6443
+		creationTimestamp: null
+		labels:
+			component: kube-apiserver
+			tier: control-plane
+		name: kube-apiserver
+		namespace: kube-system
+		spec:
+		containers:
+		- command:
+			- kube-apiserver
+			............
+			- --insecure-port=0
+			- --secure-port=443
+			.........
 	</details>
 	
 </details>
 
- - <details><summary>Example_2: Blocking insecure port:</summary>
+ - <details><summary>Example_4: Enable protect kernel defaults for kube-apiserver:</summary>
 
-	<details><summary>Check if insecure port is using (if so, - it should be changed to 0):</summary>
+	First, checking:
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "protect-kernel-defaults"
+	```
+
+	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
 	
-		cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
-
+		---
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		authentication:
+		anonymous:
+			enabled: false
+		webhook:
+			cacheTTL: 0s
+			enabled: true
+		x509:
+			clientCAFile: /etc/kubernetes/pki/ca.crt
+		authorization:
+		mode: Webhook
+		webhook:
+			cacheAuthorizedTTL: 0s
+			cacheUnauthorizedTTL: 0s
+		cgroupDriver: systemd
+		protectKernelDefaults: true
+		.........
 	</details>
 
-	<details><summary>Fix if it's open:</summary>
+	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--protect-kernel-defaults=true` into `KUBELET_SYSTEM_PODS_ARGS`.
 	
-		TBD!
-		
-	</details>
+	Make restart service of kubelet:
+	```
+	systemctl daemon-reload systemctl restart kubelet.service
+	```
 	
 </details>
 
- - <details><summary>Example_3: NodeRestriction enabling:</summary>
+ - <details><summary>Example_5: NodeRestriction enabling:</summary>
 
 	<details><summary>Check if Node restriction is enabled (if so, - it should NodeRestriction):</summary>
 	
@@ -392,7 +517,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_4: Kubernetes API troubleshooting:</summary>
+- <details><summary>Example_6: Kubernetes API troubleshooting:</summary>
 
 	<details><summary>First al all, checking:</summary>
 	
@@ -419,7 +544,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_5: Certificate signing requests sign manually:</summary>
+- <details><summary>Example_7: Certificate signing requests sign manually:</summary>
 
 	First of all, we should have key. Let's get it through openssl:
 	```
@@ -458,7 +583,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_6: Certificate signing requests sign K8S:</summary>
+- <details><summary>Example_8: Certificate signing requests sign K8S:</summary>
 
 	First of all, we should have key. Let's get it through openssl:
 	```
@@ -527,7 +652,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_7: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add cipher=ECDHE-RSA-DES-CBC3-SHA as well:</summary>
+- <details><summary>Example_9: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add cipher=ECDHE-RSA-DES-CBC3-SHA as well:</summary>
 
 	- ETCD side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
 		```
@@ -603,10 +728,12 @@ Examples:
 - [Authorization Modes](https://kubernetes.io/docs/reference/access-authn-authz/authorization/)
 - [Admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 - [Extensible admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+- [Kubelet authn/authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
+- [Kubelet config](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/)
 
 **Useful non-official documentation**
 
-- None
+- [Attacking Kubernetes clusters using the kubelet API](https://faun.pub/attacking-kubernetes-clusters-using-the-kubelet-api-abafc36126ca)
 
 ### 2. Use Role Based Access Controls to minimize exposure
 
@@ -761,31 +888,67 @@ There may be an upgrade question as the documentation about upgrading with kubea
 Examples:
  - <details><summary>Example_1: K8S upgrades (Controlplane):</summary>
 	
+	First of all, draing the node:
 	```
 	k drain master --ignore-deamonsets
+	```
+
+	Update OS:
+	```
 	apt update -y
+	```
+	Install packages:
+	```
 	apt-cache show kubeadm | grep 1.22
 	apt install kubeadm=1.22.5-00 kubelet=1.22.5-00 kubectl=1.22.5-00
+	```
 
+	Applying updates:
+	```
 	kubeadm upgrade plan
 	kubeadm upgrade apply v1.22.5
+	```
 
+	Adding master workloads back:
+	```
 	k uncordon master
 	```
+	
 </details>
 
  - <details><summary>Example_2: K8S upgrades (Nodes):</summary>
 	
+	First of all, draing the node:
 	```
 	k drain node --ignore-deamonsets
+	```
+
+	Update OS:
+	```
 	apt update -y
+	```
+
+	Install packages:
+	```
 	apt-cache show kubeadm | grep 1.22
 	apt install kubeadm=1.22.5-00 kubelet=1.22.5-00 kubectl=1.22.5-00
-
+	```
+	
+	Upgrade node with kubeadm:
+	```
 	kubeadm upgrade node
+	```
 
+	Restart service:
+	```
 	service kubelet restart
 	```
+
+	Then, adding master back:
+	```
+	k uncordon node
+	```
+
 </details>
 
 **Useful official documentation**
@@ -1952,6 +2115,7 @@ Examples:
 1. [Container Security](https://devopscube.com/recommends/container-security/)
 2. [Kubernetes Security](https://devopscube.com/recommends/kubernetes-security/)
 3. [Learn Kubernetes security: Securely orchestrate, scale, and manage your microservices in Kubernetes deployments](https://www.amazon.com/Learn-Kubernetes-Security-orchestrate-microservices/dp/1839216506)
+4. [Downloaded books inside this project](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/books)
 
 ## Videos
 

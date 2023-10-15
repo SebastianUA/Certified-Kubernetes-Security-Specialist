@@ -1,0 +1,55 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo-ingress
+  namespace: default
+  annotations:
+    # enable owasp rules protection
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+
+    # enable modsecurity
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    # nginx.ingress.kubernetes.io/modsecurity-snippet: |
+    #   SecRuleEngine On
+    #   SecDebugLog /tmp/modsec_debug.log
+
+    # hide nginx version and server info from header
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   server_tokens off;
+    #   more_clear_headers "Server" "X-App-Name" "X-App-Version";
+
+    # basic DoS protection
+    nginx.ingress.kubernetes.io/limit-rps: "10"
+    # nginx.ingress.kubernetes.io/limit-rpm: "600"
+
+    # default allow access from anywhere
+    # NOTE: set proper ip range for better protection
+    nginx.ingress.kubernetes.io/whitelist-source-range: "0.0.0.0/0"
+
+    # setup basic auth
+    # find more example under the following link:
+    # - https://github.com/kubernetes/ingress-nginx/tree/master/docs/examples/auth
+    nginx.ingress.kubernetes.io/auth-url: http://demo-basic-auth.default.svc.cluster.local/basic-auth/user/mysecretpassword
+
+    # NOTE: here we set ssl-redirect/force-ssl-redirect for demonstration only
+    #       if required, you might want to set "true" before production launch
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+    # enable support for url-rewrite with regex support
+    nginx.ingress.kubernetes.io/rewrite-target: "/"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: demo-backend
+                port:
+                  number: 8088
