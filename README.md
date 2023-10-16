@@ -913,7 +913,7 @@ Examples:
 	```
 	k uncordon master
 	```
-	
+
 </details>
 
  - <details><summary>Example_2: K8S upgrades (Nodes):</summary>
@@ -966,28 +966,73 @@ You must know to how:
 ### 1. Minimize host OS footprint (reduce attack surface)
 
 Examples:
- - <details><summary>Example_1: Use Seccomp (use strace commands):</summary>
+ - <details><summary>Example_1: Use Seccomp:</summary>
 	
+	Open `/var/lib/kubelet/seccomp/custom.json` file and put the next:
 	```
-	$ strace -c ls /root
+	{
+		"defaultAction": "SCMP_ACT_ERRNO",
+		"architectures": [
+			"SCMP_ARCH_X86_64",
+			"SCMP_ARCH_X86",
+			"SCMP_ARCH_X32"
+		],
+		"syscalls": [
+			{
+				"name": "accept",
+				"action": "SCMP_ACT_ALLOW",
+				"args": []
+			},
+			{
+				"name": "uname",
+				"action": "SCMP_ACT_ALLOW",
+				"args": []
+			},
+			{
+				"name": "chroot",
+				"action": "SCMP_ACT_ALLOW",
+				"args": []
+			}
+		]
+	}
 	```
+
+	Going to start using seccomp with pod, for example:
+	```
+	---
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	name: app1
+	namespace: app1
+	spec:
+	containers:
+	- image: nginx
+	  name: app1
+	  securityContext:
+		seccompProfile:
+			type: Localhost
+			localhostProfile: custom.json
+	```
+
 </details>
 
  - <details><summary>Example_2: Use AppArmor:</summary>
 	
-	<details><summary> Get AppArmor profiles:</summary>
-		
-		$ apparmor_status
-   
-		$ aa-status
+	Get AppArmor profiles:
+	```
+	apparmor_status
+	```
 
-	</details>
+	Or, run this:
+	```
+	aa-status
+	```
 
-	<details><summary> Load AppArmor profile:</summary>
-		
-		$ apparmor_parser -q apparmor_config
-
-	</details>
+	Load AppArmor profile:
+	```
+	apparmor_parser -q apparmor_config
+	```
 
 </details>
 
@@ -996,6 +1041,7 @@ Examples:
 	```
 	Pod Security admissions (PSA) support has been added for clusters with Kubernetes v1.23 and above. PSA defines security restrictions for a broad set of workloads and replace Pod Security Policies in Kubernetes v1.25 and above. The Pod Security Admission controller is enabled by default in Kubernetes clusters v1.23 and above. To configure its default behavior, you must provide an admission configuration file to the kube-apiserver when provisioning the cluster.
 	```
+
 </details>
 
  - <details><summary>Example_4: Apply host updates:</summary>
@@ -1004,6 +1050,7 @@ Examples:
 	$ sudo apt update && sudo apt install unattended-upgrades -y
 	$ systemctl status unattended-upgrades.service
 	```
+
 </details>
 
  - <details><summary>Example_5: Install minimal required OS fingerprint:</summary>
@@ -1011,15 +1058,16 @@ Examples:
 	```
 	It is best practice to install only the packages you will use because each piece of software on your computer could possibly contain a vulnerability. Take the opportunity to select exactly what packages you want to install during the installation. If you find you need another package, you can always add it to the system later.
 	```
+
 </details>
 
  - <details><summary>Example_6: Identify and address open ports:</summary>
 
-	<details><summary>Using lsof command and check if 8080 is open or not:</summary>
+	Using lsof command and check if 8080 is open or not:
+	```
+	lsof -i :8080
+	```
 
-		$ lsof -i :8080
-
-	</details>
 	<details><summary>Using netstat command - check if 66 is oppen and kill the process and delete the binary:</summary>
 
 		$ apt install net-tools
@@ -1038,6 +1086,7 @@ Examples:
 	$ apt show httpd
 	$ apt remove httpd -y
 	```
+
 </details>
 
  - <details><summary>Example_8: Find service that runs on the host and stop it. For example, find and stop httpd service on the host:</summary>
@@ -1047,21 +1096,115 @@ Examples:
 	$ service httpd stop
 	$ service httpd status
 	```
+
 </details>
 
  - <details><summary>Example_9: Working with users (Create, delete, add user to needed groups. Grant some permission):</summary>
 	
+	To get all users on host:
 	```
-	TBD!
+	cat /etc/passwd
 	```
+
+	If you want to display only the username you can use either awk or cut commands to print only the first field containing the username:
+	```
+	awk -F: '{ print $1}' /etc/passwd
+
+	cut -d: -f1 /etc/passwd
+	```
+	
+	The /etc/group file contains information on all local user groups configured on a Linux machine. With the /etc/group file, you can view group names, passwords, group IDs, and members associated with each group:
+	```
+	cat /etc/group
+	```
+
+	If you want to get goups of specific use:
+	```
+	groups root
+	```
+
+	Creating group:
+	```
+	groupadd developers
+	```
+
+	Creating user:
+	```
+	useradd -u 1005 -g mygroup test_user
+	```
+
+	Add a User to Multiple Groups:
+	```
+	usermod -a -G admins,mygroup,developers test_user
+	```
+
+	Add a User with a Specific Home Directory, Default Shell, and Custom Comment:
+	```
+	useradd -m -d /var/www/user1 -s /bin/bash -c "Test user 1" -U user1
+	```
+
 </details>
 
  - <details><summary>Example_10: Working with kernel modules on the host (get, load, unload, etc):</summary>
 	
+	To get all modules, use:
 	```
-	TBD!
+	lsmod
 	```
+
+	Or: 
+	```
+	lsmod | grep ^pppol2tp && echo "The module is loaded" || echo "The module is not loaded"
+	```
+
+	Also, you can use:
+	```
+	cat /proc/modules
+	```
+
+	Loading a Module:
+	```
+	modprobe wacom
+	```
+
+	You can blacklisting a module, open the file `/etc/modprobe.d/blacklist.conf` and put:
+	```
+	blacklist evbug
+	```
+
 </details>
+
+ - <details><summary>Example_11: Working with UFW on Linux:</summary>
+	
+	To allow 22 port:
+	```
+	ufw allow 22
+	```
+
+	To close an opened port:
+	```
+	ufw deny 22
+	```
+
+	It is also possible to allow access from specific hosts or networks to a port. The following example allows SSH access from host 192.168.0.2 to any IP address on this host:
+	```
+	ufw allow proto tcp from 192.168.0.2 to any port 22
+	```
+
+	To see the firewall status, enter:
+	```
+	ufw status
+	ufw status verbose
+	ufw status numbered
+	```
+
+	Enamble UFW service on Linux host:
+	```
+	ufw enable
+	```
+
+</details>
+
 
 **Useful official documentation**
 
@@ -1078,24 +1221,35 @@ Examples:
 - [Pod security admission](https://rke.docs.rancher.com/config-options/services/pod-security-admission)
 - [Pod security standards](https://www.eksworkshop.com/docs/security/pod-security-standards/)
 - [Implementing Pod Security Standards in Amazon EKS](https://aws.amazon.com/blogs/containers/implementing-pod-security-standards-in-amazon-eks/)
+- [Seccomp profiles](https://medium.com/@LachlanEvenson/managing-kubernetes-seccomp-profiles-with-security-profiles-operator-c768cff58b0)
 
 ### 2. Minimize IAM roles
 
-TBD!
+IAM roles control access to cloud resources. It is important to minimize the permissions granted to IAM roles.
 
 **Useful official documentation**
 
-- [Kubernetes authentication](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
+- None
+
+**Useful non-official documentation**
+
+- [AWS IAM best practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html)
 
 ### 3. Minimize external access to the network
 
-TBD!
+The less exposure your system has to the outside world, the less vulnerable it is. Restrict network access to your system to only what is necessary.
+
+Also, implement Network Policies - [hands-on with Kubernetes network policy](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/01_Cluster_Setup/Kubernetes-network-policy)
 
 **Useful official documentation**
 
-- [Network policies](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Networking of Kubernetes](https://kubernetes.io/docs/concepts/cluster-administration/networking/)
 
-### 4. Appropriately use kernel hardening tools such as AppArmor, and SecComp
+**Useful non-official documentation**
+
+- None
+
+### 4. Appropriately use kernel hardening tools such as AppArmor, and Secсomp
 
 Examples:
  - <details><summary>Example_1: Working with Apparmor:</summary>
@@ -1144,7 +1298,7 @@ Examples:
 
 - <details><summary>Example_2: Working with Seccomp:</summary>
 
-	TBD!
+	The example is already described in `Minimize host OS footprint (reduce attack surface)` section.
 
 </details>
 
@@ -1163,6 +1317,10 @@ Examples:
 - [Container Security](https://cdn2.hubspot.net/hubfs/1665891/Assets/Container%20Security%20by%20Liz%20Rice%20-%20OReilly%20Apr%202020.pdf?utm_medium=email&_hsmi=85733108&_hsenc=p2ANqtz--tQO3LhW0VqGNthE1dZqnfki1pYhEq-I_LU87M03pmQlvhXhA1lO4jO3vLjN4NtcbEiFyIL2lEBlzzMHe96VPXERZryw&utm_content=85733108&utm_source=hs_automation)
 
 ### 5. Principle of least privilege
+
+Run containers as non-root users: Specify a non-root user in your Dockerfile or create a new user with limited privileges to reduce the risk of container breakout attacks.
+
+Avoid privileged containers: Don’t run privileged containers with unrestricted access to host resources. Instead, use Linux kernel capabilities to grant specific privileges when necessary.
 
 Examples:
  - <details><summary>Example_1: Working with Privilege Escalation:</summary>
@@ -1240,10 +1398,87 @@ Examples:
 	
 </details>
 
+- <details><summary>Example_3: Working with non-root user in containers (runAsNonRoot):</summary>
+	
+	```
+	k run non-root-pod --image=nginx:alpine --dry-run=client -o yaml > non-root-pod.yaml
+	```
+
+	<details><summary> Edit that `non-root-pod.yaml` file to:</summary>
+		
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		creationTimestamp: null
+		labels:
+			run: non-root-pod
+		name: non-root-pod
+		spec:
+		containers:
+		- image: nginx:alpine
+			name: non-root-pod
+			securityContext:        
+				runAsNonRoot: false
+			resources: {}
+		dnsPolicy: ClusterFirst
+		restartPolicy: Always
+		status: {}
+
+	</details>
+
+	Apply:
+	```
+	k apply -f non-root-pod.yaml
+	```
+	
+</details>
+
+- <details><summary>Example_4: Run container as user:</summary>
+	
+	```
+	k run run-as-user-pod --image=nginx:alpine --dry-run=client -o yaml > run-as-user-pod.yaml
+	```
+
+	<details><summary> Edit that `run-as-user-pod.yaml` file to:</summary>
+		
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		creationTimestamp: null
+		labels:
+			run: run-as-user-pod
+		name: run-as-user-pod
+		spec:
+			securityContext:
+				runAsUser: 1001
+				runAsGroup: 1001
+			containers:
+			- image: nginx:alpine
+				name: run-as-user-pod
+				resources: {}
+				securityContext:
+					allowPrivilegeEscalation: false
+			dnsPolicy: ClusterFirst
+			restartPolicy: Always
+			status: {}
+
+	</details>
+
+	Apply the YAML:
+	```
+	k apply -f run-as-user-pod.yaml
+	```
+	
+</details>
+
 
 **Useful official documentation**
 
-- None
+- [runAsUser/runAsGroup](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Privilege Escalation](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Privileged containers](https://kubernetes.io/docs/concepts/workloads/pods/)
 
 **Useful non-official documentation**
 
@@ -1254,7 +1489,21 @@ Examples:
 
 ### 1. Setup appropriate OS-level security domains
 
-TBD!
+OS-level security domains can be used to isolate microservices from each other and from the host OS. This can help to prevent microservices from interfering with each other and from being exploited by attackers.
+
+Examples:
+- <details><summary>Example_1: Working with Open Policy Agent (OPA)/Gatekeeper:</summary>
+
+	TBD
+
+</details>
+
+- <details><summary>Example_2: Working with Security context:</summary>
+
+	It's already described on other topics
+
+</details>
+
 
 **Useful official documentation**
 
@@ -1270,6 +1519,8 @@ TBD!
 - [Kubernetes security psp network policy](https://sysdig.com/blog/kubernetes-security-psp-network-policy/)
 
 ### 2. Manage Kubernetes secrets
+
+Kubernetes secrets can be used to store sensitive information such as passwords and API keys. It is important to manage secrets securely by encrypting them and by restricting access to them.
 
 Examples:
 - <details><summary>Example_1: Secret Access in Pods:</summary>
@@ -1484,6 +1735,7 @@ Examples:
 
 **Useful non-official documentation**
 
+- [kubernetes mTLS](https://tanzu.vmware.com/developer/guides/kubernetes-mtls/)
 - [mTLS](https://www.istioworkshop.io/11-security/01-mtls/)
 - [Istio](https://developer.ibm.com/technologies/containers/tutorials/istio-security-mtls/)
 - [Linkerd](https://linkerd.io/2/features/automatic-mtls/)
@@ -1874,6 +2126,10 @@ Examples:
  - <details><summary>Example_1: Use seccomp:</summary>
 	
 	TBD: Restrict a Container's Syscalls with seccomp
+
+	```
+	strace -c -f -S name chmod 2>&1 1>/dev/null | tail -n +3 | head -n -2 | awk '{print $(NF)}'
+	```
 
 </details>
 
