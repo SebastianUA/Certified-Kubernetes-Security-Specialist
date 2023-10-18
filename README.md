@@ -1656,7 +1656,6 @@ Examples:
 
 </details>
 
-
 **Useful official documentation**
 
 - [Distribute credentials secure](https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/)
@@ -1728,16 +1727,18 @@ Examples:
 
 </details>
 
-
 **Useful official documentation**
 
 - [mTLS](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/)
 
 **Useful non-official documentation**
 
-- [kubernetes mTLS](https://tanzu.vmware.com/developer/guides/kubernetes-mtls/)
+- [Why we need mTLS](https://trstringer.com/why-we-need-mtls/)
+- [Kubernetes mTLS](https://tanzu.vmware.com/developer/guides/kubernetes-mtls/)
 - [mTLS](https://www.istioworkshop.io/11-security/01-mtls/)
 - [Istio](https://developer.ibm.com/technologies/containers/tutorials/istio-security-mtls/)
+- [Istio auto mutual TLS](https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#auto-mutual-tls)
+- [What is mTLS and How to implement it with Istio](https://imesh.ai/blog/what-is-mtls-and-how-to-implement-it-with-istio/)
 - [Linkerd](https://linkerd.io/2/features/automatic-mtls/)
 
 
@@ -1747,6 +1748,7 @@ Examples:
 
 Use distroless, UBI minimal, Alpine, or relavent to your app nodejs, python but the minimal build.
 Do not include uncessary software not required for container during runtime e.g build tools and utilities, troubleshooting and debug binaries.
+The smaller the base image footprint, the less vulnerable your containers are. Use minimal base images and avoid adding unnecessary packages or services to your base images.
 
 Examples:
 - <details><summary>Example_1: Create a Pod named nginx-sha-pod which uses the image digest nginx@sha256:ca045ecbcd423cec50367a194d61fd846a6f0964f4999e8d692e5fcf7ebc903f:</summary>
@@ -1759,7 +1761,6 @@ Examples:
 
 - <details><summary>Example_2: Convert the existing Deployment nginx-sha-deployment to use the image digest of the current tag instead of the tag:</summary>
 
-	
 	Getting labels of deployment:
 	```
 	k get deploy nginx-sha-deployment --show-labels
@@ -1798,7 +1799,12 @@ Examples:
 
 - <details><summary>Example_4: Harden a given Docker Container:</summary>
 
-	In the current folder you have Dockerfile, let's build it with `golden-image` name:
+	There is a Dockerfile at `/root/Dockerfile`. It’s a simple container which tries to make a curl call to an imaginary api with a secret token, the call will 404 , but that's okay:
+	- Use specific version 20.04 for the base image
+	- Remove layer caching issues with apt-get
+	- Remove the hardcoded secret value 2e064aad-3a90–4cde-ad86–16fad1f8943e . The secret value should be passed into the container during runtime as env variable TOKEN
+	- Make it impossible to docker exec , podman exec or kubectl exec into the container using bash
+
 	```
 	TBD
 	```
@@ -1820,6 +1826,7 @@ Examples:
 - [Docker Image Security Best Practices](https://res.cloudinary.com/snyk/image/upload/v1551798390/Docker_Image_Security_Best_Practices_.pdf)
 - [3 simple tricks for smaller Docker images](https://learnk8s.io/blog/smaller-docker-images)
 - [Top 20 Dockerfile best practices](https://sysdig.com/blog/dockerfile-best-practices/)
+- [Checkov](https://www.checkov.io/)
 
 ### 2. Secure your supply chain: whitelist allowed registries, sign and validate images
 
@@ -1839,7 +1846,7 @@ Examples:
 					"configuration": {
 						"imagePolicy": {
 						"kubeConfigFile": "/etc/kubernetes/policywebhook/kubeconf",
-						"allowTTL": 100,
+						"allowTTL": 150,
 						"denyTTL": 50,
 						"retryBackoff": 500,
 						"defaultAllow": false
@@ -2042,7 +2049,6 @@ Examples:
 **Useful non-official documentation**
 
 - [Why do I need admission controllers](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/#why-do-i-need-admission-controllers)
-
 
 ### 3. Use static analysis of user workloads (e.g.Kubernetes resources, Docker files)
 
