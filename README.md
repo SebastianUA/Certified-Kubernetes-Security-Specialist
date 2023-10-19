@@ -2153,43 +2153,99 @@ Examples:
 
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 
-All falco events you should store in `/var/log/falco.txt`. 
+Examples:
+- <details><summary>Example_1</summary>
+	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
-Open `/etc/falco/falco.yaml` file and put something like:
-```
-file_output:
-  enabled: true
-  keep_alive: false
-  filename: /var/log/falco.txt
-```
+	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
+	```
+	file_output:
+	enabled: true
+	keep_alive: false
+	filename: /var/log/falco.txt
+	```
 
-Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
-```
-- rule: Terminal shell in container
-  desc: A shell was used as the entrypoint/exec point into a container with an attached terminal.
-  condition: >
-    spawned_process and container
-    and shell_procs and proc.tty != 0
-    and container_entrypoint
-    and not user_expected_terminal_shell_in_container_conditions
-  output: >
-    Falco SHELL!!! (user_id=%user.uid repo=%container.image.repository %user.uiduser=%user.name user_loginuid=%user.loginuid %container.info
-    shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty container_id=%container.id image=%container.image.repository)
-  priority: NOTICE
-  tags: [container, shell, mitre_execution]
-``` 
+	Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
+	```
+	- rule: Terminal shell in container
+	desc: A shell was used as the entrypoint/exec point into a container with an attached terminal.
+	condition: >
+		spawned_process and container.name = "nginx"
+		and shell_procs and proc.tty != 0
+		and container_entrypoint
+		and not user_expected_terminal_shell_in_container_conditions
+	output: >
+		Shell in container: %evt.time,%user.name,%proc.cmdline
+	priority: CRITICAL
+	tags: [container, shell, mitre_execution]
+	``` 
 
-Restart Falco service:
-```
-service falco restart && service falco status
-```
+	Restart Falco service:
+	```
+	service falco restart && service falco status
+	```
 
-Checks:
-```
-$ k exec -it pod -- sh
+	Checks:
+	```
+	$ k run nginx --image=nginx:alpine
 
-$ cat /var/log/syslog | grep falco | grep shell
-```
+	$ k exec -it nginx -- sh
+
+	$ cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
+	```
+
+</details>
+
+- <details><summary>Example_2</summary>
+	
+	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
+
+	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
+	```
+	file_output:
+	enabled: true
+	keep_alive: false
+	filename: /var/log/falco.txt
+	```
+
+	Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
+	```
+	- macro: app_nginx
+  	  condition: container and container.image contains "nginx"
+
+	- list: nginx_allowed_processes
+      items: ["nginx", "app-entrypoint.", "basename", "dirname", "grep", "nami", "node", "tini"]
+
+	- rule: Terminal shell in container
+	  desc: A shell was used as the entrypoint/exec point into a container with an attached terminal.
+	  condition: >
+		spawned_process and app_nginx
+		and not proc.name in (nginx_allowed_processes)
+		and shell_procs and proc.tty != 0
+		and container_entrypoint
+		and not user_expected_terminal_shell_in_container_conditions
+	  output: >
+		Shell in container: %evt.time,%user.name,%proc.cmdline
+	  priority: CRITICAL
+	  tags: [container, shell, mitre_execution, app_nginx]
+	``` 
+
+	Restart Falco service:
+	```
+	service falco restart && service falco status
+	```
+
+	Checks:
+	```
+	$ k run nginx --image=nginx:alpine
+
+	$ k exec -it nginx -- sh
+
+	$ cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
+	```
+
+</details>
+
 
 **Useful official documentation**
 
@@ -2203,7 +2259,7 @@ $ cat /var/log/syslog | grep falco | grep shell
 
 ### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 
-TBD!
+This part of the task can be done with OPA for example and allow pulling images from private container image registries only.
 
 **Useful official documentation**
 
@@ -2219,11 +2275,12 @@ TBD!
 
 ### 4. Perform deep analytical investigation and identification of bad actors within the environment
 
-TBD!
+Probably Falco can help to take care of it. You can easily put some Falco's rules to detect who and which UID enter inside container.
 
 **Useful official documentation**
 
 - [Sysdig](https://docs.sysdig.com/en/)
+- [Falco](https://falco.org/)
 
 **Useful non-official documentation**
 
