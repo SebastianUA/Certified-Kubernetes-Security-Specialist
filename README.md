@@ -193,6 +193,47 @@ Examples:
 ### 3. Properly set up Ingress objects with security control
 
 Examples:
+ - <details><summary>Install ingress</summary>
+	
+	Deploy the stack:
+	```
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+	```
+
+	After a while, they should all be running. The following command will wait for the ingress controller pod to be up, running, and ready:
+	```
+	kubectl wait --namespace ingress-nginx \
+	--for=condition=ready pod \
+	--selector=app.kubernetes.io/component=controller \
+	--timeout=120s
+	```
+
+	Let's create a simple web server and the associated service:
+	```
+	kubectl create deployment demo --image=httpd --port=80
+	kubectl expose deployment demo
+	```
+
+	Then create an ingress resource. The following example uses a host that maps to localhost:
+	```
+	kubectl create ingress demo-localhost --class=nginx \
+  	--rule="demo.localdev.me/*=demo:80"
+	```
+
+	Now, forward a local port to the ingress controller:
+	```
+	kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
+	```
+
+	At this point, you can access your deployment using curl:
+	```
+	curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
+	```
+
+	You should see a HTML response containing text like "It works!".
+
+</details>
+
  - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service:</summary>
 	
 	```
@@ -309,7 +350,111 @@ Examples:
 
 Restricting the Kubernetes GUI can be accomplished through proper Role-Based Access Control (RBAC) configuration. In Kubernetes, RBAC is created via the RoleBinding resource. Always ensure people are given least-privilege access by default, then provide requests as the user needs them.
 
-A second way to secure the GUI is via Token authentication. Token authentication is prioritized by the Kubernetes Dashboard. The token is in the format Authorization: Bearer <token> and it is located in the request header itself. Bearer Tokens are created through the use of Service Account Tokens. These are just a few of the K8s dashboard concepts that will wind up on the CKS. Make sure you have a thorough understanding of service accounts and how they relate to the Kubernetes Dashboard prior to taking the exam.
+A second way to secure the GUI is via Token authentication. Token authentication is prioritized by the Kubernetes Dashboard. The token is in the format Authorization: Bearer `token` and it is located in the request header itself. Bearer Tokens are created through the use of Service Account Tokens. These are just a few of the K8s dashboard concepts that will wind up on the CKS. Make sure you have a thorough understanding of service accounts and how they relate to the Kubernetes Dashboard prior to taking the exam.
+
+To install web-ui dashboard, use:
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/recommended.yaml
+
+namespace/kubernetes-dashboard created
+serviceaccount/kubernetes-dashboard created
+service/kubernetes-dashboard created
+secret/kubernetes-dashboard-certs created
+secret/kubernetes-dashboard-csrf created
+secret/kubernetes-dashboard-key-holder created
+configmap/kubernetes-dashboard-settings created
+role.rbac.authorization.k8s.io/kubernetes-dashboard created
+clusterrole.rbac.authorization.k8s.io/kubernetes-dashboard created
+rolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
+clusterrolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
+deployment.apps/kubernetes-dashboard created
+service/dashboard-metrics-scraper created
+Warning: spec.template.metadata.annotations[seccomp.security.alpha.kubernetes.io/pod]: non-functional in v1.27+; use the "seccompProfile" field instead
+deployment.apps/dashboard-metrics-scraper created
+```
+
+Let's get dashboard's resources:
+```
+k -n kubernetes-dashboard get pod,deploy,svc
+
+NAME                                             READY   STATUS    RESTARTS   AGE
+pod/dashboard-metrics-scraper-5bc754cb48-8gbcc   1/1     Running   0          65s
+pod/kubernetes-dashboard-6db6d44699-49kk4        1/1     Running   0          65s
+
+NAME                                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/dashboard-metrics-scraper   1/1     1            1           65s
+deployment.apps/kubernetes-dashboard        1/1     1            1           65s
+
+NAME                                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+service/dashboard-metrics-scraper   ClusterIP   10.111.34.81   <none>        8000/TCP   65s
+service/kubernetes-dashboard        ClusterIP   10.98.70.117   <none>        443/TCP    65s
+```
+
+As most of you notice, default Kubernetes Dashboard service is exposed as Cluster IP and it would not be possible for administrators to access this IP address without getting inside a shell inside a Pod. For most cases, administrators use “kubectl proxy” to proxy an endpoint within the working machine to the actual Kubernetes Dashboard service.
+In some testing environments in less security concern, we could make Kubernetes Dashboard deployments and services to be exposed with Node Port, so administrators could use nodes’ IP address, public or private, and assigned port to access the service. We edit the actual running deployment YAML:
+```
+kubectl edit deployment kubernetes-dashboard -n kubernetes-dashboard
+```
+
+Then, add `--insecure-port=9999` and tune it, likes:
+```
+.....
+spec:
+	containers:
+    - args:
+      - --namespace=kubernetes-dashboard
+      - --insecure-port=9999
+	image: kubernetesui/dashboard:v2.1.0
+	imagePullPolicy: Always
+	livenessProbe:
+		failureThreshold: 3
+		httpGet:
+			path: /
+			port: 9999
+			scheme: HTTP
+		initialDelaySeconds: 30
+		periodSeconds: 10
+		successThreshold: 1
+		timeoutSeconds: 30
+.....
+```
+
+NOTE: 
+- Delete the `auto-generate-certificates` from config.
+- Change `port` of `livenessProbe`  to `9999`.
+- Change `scheme` of `livenessProbe` to `HTTP`.
+
+After that, we make changes on Kubernetes Dashboard services:
+```
+kubectl edit service kubernetes-dashboard -n kubernetes-dashboard
+```
+
+And:
+- Change port to `9999`.
+- Change targetPort to `9999`.
+- Change type to `NodePort`.
+
+The config should be likes:
+```
+.....
+ports:
+  - nodePort: 30142
+    port: 9999
+    protocol: TCP
+    targetPort: 9999
+  selector:
+    k8s-app: kubernetes-dashboard
+  sessionAffinity: None
+  type: NodePort
+.....
+```
+Then, runnning the next command to forward port to:
+```
+kubectl port-forward deployments/kubernetes-dashboard 9999:30142 -n kubernetes-dashboard
+```
+
+Open your browser on `http://127.0.0.1:30142/`.
+Since Kubernetes Dashboard is leveraging service account “default” in namespace “kubernetes-dashboard” for accessing each resource, binding the right permission to this service account would allow the dashboard to show more information in the corresponding namespaces.
 
 **Useful official documentation**
 
