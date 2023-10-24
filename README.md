@@ -1,6 +1,5 @@
 # Certified Kubernetes Security Specialist (CKS) in 2023-2024
 
-
 A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes practitioner (must be CKA certified) who has demonstrated competence on a broad range of best practices for securing container-based applications and Kubernetes platforms during build, deployment, and runtime.
 
 <p align="center">
@@ -144,7 +143,7 @@ Examples:
  - <details><summary>Example_2: Fix issues of 1.3.2 part with <b>kube-bench</b>:</summary>
 	
 	```
-	$ kube-bench run --targets master --check 1.3.2 
+	kube-bench run --targets master --check 1.3.2 
 
 	[INFO] 1 Master Node Security Configuration
 	[INFO] 1.3 Controller Manager
@@ -182,6 +181,10 @@ Examples:
 	```
 
 </details>
+
+**Useful official documentation**
+
+- None 
 
 **Useful non-official documentation**
 
@@ -294,8 +297,8 @@ Examples:
 
 **NOTE:** You should create the needed <b>local-domain-tls</b> secret for Ingress with certifications:
 ```
-$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=local.domail.name/O=local.domail.name"
-$ kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=local.domail.name/O=local.domail.name"
+kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
 ```
 
 **Useful official documentation**
@@ -309,6 +312,7 @@ $ kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.
 - [Kubernetes Ingress Tutorial For Beginners](https://devopscube.com/kubernetes-ingress-tutorial/)
 
 ### 4. Protect node metadata and endpoints
+
 It's part of networking policy where you can restrict access to metadata/endpoints.
 
 Examples:
@@ -465,18 +469,22 @@ Since Kubernetes Dashboard is leveraging service account “default” in namesp
 - [On securing the kubernetes dashboard](https://blog.heptio.com/on-securing-the-kubernetes-dashboard-16b09b1b7aca)
 - [Kubernetes dashboards](https://www.airplane.dev/blog/intro-to-kubernetes-dashboards)
 
-### 6. Verify platform binaries before deploying 
+### 6. Verify platform binaries before deploying
 
 Examples:
  - <details><summary>Compare binary file of kubelet on the current host and with kubelet 1.27 that you must download from official release:</summary>
 	
 	```
-	$ sha512sum $(which kubelet) | cut -c-10
-	$ wget -O kubelet https://dl.k8s.io/$(/usr/bin/kubelet --version | cut -d " " -f2)/bin/linux/$(uname -m)/kubelet 
-	$ sha512sum ./kubelet | cut -c -10
+	sha512sum $(which kubelet) | cut -c-10
+	wget -O kubelet https://dl.k8s.io/$(/usr/bin/kubelet --version | cut -d " " -f2)/bin/linux/$(uname -m)/kubelet 
+	sha512sum ./kubelet | cut -c -10
 	```
 
 </details>
+
+**Useful official documentation**
+
+- None
 
 **Useful non-official documentation**
 
@@ -545,6 +553,7 @@ Examples:
 		authorization:
 			mode: Webhook
 		.....
+
 	</details>
 
 	Make restart service of kubelet: 
@@ -583,6 +592,7 @@ Examples:
 			- --insecure-port=0
 			- --secure-port=443
 			.........
+
 	</details>
 	
 </details>
@@ -614,6 +624,7 @@ Examples:
 		cgroupDriver: systemd
 		protectKernelDefaults: true
 		.........
+
 	</details>
 
 	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--protect-kernel-defaults=true` into `KUBELET_SYSTEM_PODS_ARGS`.
@@ -666,24 +677,24 @@ Examples:
 
 	<details><summary>First al all, checking:</summary>
 	
-		$ cat /var/log/syslog | grep kube-apiserver
+		cat /var/log/syslog | grep kube-apiserver
 
 		or
 
-		$ cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
+		cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
 
 	</details>
 
 	<details><summary>Secondly, checking:</summary>
 	
-		$ journalctl -xe | grep apiserver
+		journalctl -xe | grep apiserver
 
 	</details>
 
 	<details><summary>Lastly, checking:</summary>
 	
-		$ crictl ps -a | grep api
-		$ $ crictl logs fbb80dac7429e
+		crictl ps -a | grep api
+		crictl logs fbb80dac7429e
 
 	</details>
 
@@ -693,36 +704,36 @@ Examples:
 
 	First of all, we should have key. Let's get it through openssl:
 	```
-	$ openssl genrsa -out 60099.key 2048
+	openssl genrsa -out 60099.key 2048
 	```
 
 	Next, runnning the next command to generate certificate:
 	```
-	$ openssl req -new -key 60099.key -out 60099.csr
+	openssl req -new -key 60099.key -out 60099.csr
 	```
 
 	Note: set Common Name = 60099@internal.users
 
 	<details><summary>Certificate signing requests sign manually (manually sign the CSR with the K8s CA file to generate the CRT):</summary>
 	
-		$ openssl x509 -req -in 60099.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out 60099.crt -days 500
+		openssl x509 -req -in 60099.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out 60099.crt -days 500
 
 	</details>
 
 	<details><summary>Set credentials & context:</summary>
 	
-		$ k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
-		$ k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
-		$ k config get-contexts
-		$ k config use-context 60099@internal.users
+		k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
+		k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+		k config get-contexts
+		k config use-context 60099@internal.users
 
 	</details>
 
 	<details><summary>Checks:</summary>
 	
-		$ k get ns
+		k get ns
 
-		$ k get po
+		k get po
 
 	</details>
 
@@ -732,19 +743,19 @@ Examples:
 
 	First of all, we should have key. Let's get it through openssl:
 	```
-	$ openssl genrsa -out 60099.key 2048
+	openssl genrsa -out 60099.key 2048
 	```
 
 	Next, runnning the next command to generate certificate:
 	```
-	$ openssl req -new -key 60099.key -out 60099.csr
+	openssl req -new -key 60099.key -out 60099.csr
 	```
 
 	Note: set Common Name = 60099@internal.users
 
 	<details><summary>Convert the CSR file into base64:</summary>
 	
-		$ cat 60099.csr | base64 -w 0
+		cat 60099.csr | base64 -w 0
 
 	</details>
 
@@ -766,32 +777,32 @@ Examples:
 
 	<details><summary>Create and approve:</summary>
 	
-		$ k -f csr.yaml create
+		k -f csr.yaml create
 
-		$ k get csr # pending
+		k get csr # pending
 
-		$ k certificate approve 60099@internal.users
+		k certificate approve 60099@internal.users
 
-		$ k get csr # approved
+		k get csr # approved
 
-		$ k get csr 60099@internal.users -ojsonpath="{.status.certificate}" | base64 -d > 60099.crt
+		k get csr 60099@internal.users -ojsonpath="{.status.certificate}" | base64 -d > 60099.crt
 
 	</details>
 
 	<details><summary>Set credentials & context:</summary>
 	
-		$ k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
-		$ k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
-		$ k config get-contexts
-		$ k config use-context 60099@internal.users
+		k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
+		k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+		k config get-contexts
+		k config use-context 60099@internal.users
 
 	</details>
 
 	<details><summary>Checks:</summary>
 	
-		$ k get ns
+		k get ns
 
-		$ k get po
+		k get po
 
 	</details>
 
@@ -858,7 +869,6 @@ Examples:
 		```
 
 </details>
-
 
 **Useful official documentation**
 
@@ -973,6 +983,7 @@ Examples:
 		name: build-robot
 		automountServiceAccountToken: false
 	```
+
 </details>
 
  - <details><summary>Example_2: Opt out of automounting API credentials for a service account (Opt out at pod scope):</summary>
@@ -987,11 +998,13 @@ Examples:
 	serviceAccountName: default
 	automountServiceAccountToken: false
 	```
+
 </details>
 
  - <details><summary>Example_3: Disable automountServiceAccountToken on namespace side:</summary>
 	
 	```
+	---
 	apiVersion: v1
 	kind: Namespace
 	metadata:
@@ -1008,6 +1021,7 @@ Examples:
 	status:
 		phase: Active
 	```
+
 </details>
 
 **Useful official documentation**
@@ -1102,6 +1116,10 @@ Examples:
 - [Kubeadm upgrade guidance](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-upgrade/)
 - [Upgrading Kubernetes clusters using kubeadm](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/)
 
+**Useful non-official documentation**
+
+- None 
+
 You must know to how:
 - Upgrade the K8S clusters
 
@@ -1113,6 +1131,17 @@ You must know to how:
 Examples:
  - <details><summary>Example_1: Use Seccomp:</summary>
 	
+	By default, the folder for seccomp is located in the `/var/lib/kubelet/seccomp` location.
+
+	Checking if seccomp is on host:
+	```
+	grep -i seccomp /boot/config-$(uname -r)
+
+	CONFIG_SECCOMP=y
+	CONFIG_HAVE_ARCH_SECCOMP_FILTER=y
+	CONFIG_SECCOMP_FILTER=y
+	```
+
 	Open `/var/lib/kubelet/seccomp/custom.json` file and put the next:
 	```
 	{
@@ -1192,8 +1221,8 @@ Examples:
  - <details><summary>Example_4: Apply host updates:</summary>
 	
 	```
-	$ sudo apt update && sudo apt install unattended-upgrades -y
-	$ systemctl status unattended-upgrades.service
+	sudo apt update && sudo apt install unattended-upgrades -y
+	systemctl status unattended-upgrades.service
 	```
 
 </details>
@@ -1215,11 +1244,11 @@ Examples:
 
 	<details><summary>Using netstat command - check if 66 is oppen and kill the process and delete the binary:</summary>
 
-		$ apt install net-tools
-		$ netstat -natpl | grep 66
-		$ ls -l /proc/22797/exe
-		$ rm -f /usr/bin/app1
-		$ kill -9 22797
+		apt install net-tools
+		netstat -natpl | grep 66
+		ls -l /proc/22797/exe
+		rm -f /usr/bin/app1
+		kill -9 22797
 
 	</details>
 
@@ -1228,8 +1257,8 @@ Examples:
  - <details><summary>Example_7: Remove unnecessary packages. For example, find and delete httpd package on the host:</summary>
 	
 	```
-	$ apt show httpd
-	$ apt remove httpd -y
+	apt show httpd
+	apt remove httpd -y
 	```
 
 </details>
@@ -1237,9 +1266,9 @@ Examples:
  - <details><summary>Example_8: Find service that runs on the host and stop it. For example, find and stop httpd service on the host:</summary>
 	
 	```
-	$ service httpd status
-	$ service httpd stop
-	$ service httpd status
+	service httpd status
+	service httpd stop
+	service httpd status
 	```
 
 </details>
@@ -1350,7 +1379,6 @@ Examples:
 
 </details>
 
-
 **Useful official documentation**
 
 - [Securing a cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules)
@@ -1405,8 +1433,8 @@ Examples:
 		apiVersion: apps/v1
 		kind: Deployment
 		metadata:
-		name: pod-with-apparmor
-		namespace: apparmor
+			name: pod-with-apparmor
+			namespace: apparmor
 		spec:
 		replicas: 3
 		selector:
@@ -1418,11 +1446,11 @@ Examples:
 			labels:
 				app: pod-with-apparmor
 			annotations:
-				container.apparmor.security.beta.kubernetes.io/httpd: localhost/docker-default
+				container.apparmor.security.beta.kubernetes.io/pod-with-apparmor: localhost/docker-default
 			spec:
 			containers:
 			- image: httpd:latest
-				name: httpd
+				name: pod-with-apparmor
 
 	</details>
 
@@ -1431,13 +1459,16 @@ Examples:
 	k apply -f pod-with-apparmor.yaml
 	```
 
-	Checks:
+	Getting ID of container:
 	```
-	$ crictl ps -a | grep httpd
+	crictl ps -a | grep pod-with-apparmor
+	```
 
-		$ crictl inspect e428e2a3e9324 | grep apparmor
-          "apparmor_profile": "localhost/docker-default"
-        "apparmorProfile": "docker-default",
+	Then, run the command:
+	```
+	crictl inspect e428e2a3e9324 | grep apparmor
+		"apparmor_profile": "localhost/docker-default"
+    	"apparmorProfile": "docker-default",
 	```
 </details>
 
@@ -1446,7 +1477,6 @@ Examples:
 	The example is already described in `Minimize host OS footprint (reduce attack surface)` section.
 
 </details>
-
 
 **Useful official documentation**
 
@@ -1476,28 +1506,22 @@ Examples:
 		apiVersion: v1
 		kind: Pod
 		metadata:
-		labels:
-			run: my-ro-pod
-		name: application
-		namespace: sun
+			labels:
+				run: my-ro-pod
+			name: application
+			namespace: sun
 		spec:
-		containers:
-		- command:
-			- sh
-			- -c
-			- sleep 1d
-			image: busybox:1.32.0
-			name: my-ro-pod
-			securityContext:
+			containers:
+			- command:
+				- sh
+				- -c
+				- sleep 1d
+			  image: busybox:1.32.0
+			  name: my-ro-pod
+			  securityContext:
 				allowPrivilegeEscalation: false
-		dnsPolicy: ClusterFirst
-		restartPolicy: Always
-
-	</details>
-
-	<details><summary> Checks:</summary>
-		
-		TBD!
+			dnsPolicy: ClusterFirst
+			restartPolicy: Always
 
 	</details>
 	
@@ -1505,11 +1529,10 @@ Examples:
 
  - <details><summary>Example_2: Working with Privileged containers:</summary>
 	
-	<details><summary> Run a Pod through CLI:</summary>
-		
-		k run privileged-pod --image=nginx:alpine --privileged
-
-	</details>
+	Run a Pod through CLI
+	```	
+	k run privileged-pod --image=nginx:alpine --privileged
+	```
 
 	<details><summary> An example of configuration:</summary>
 		
@@ -1517,27 +1540,21 @@ Examples:
 		apiVersion: v1
 		kind: Pod
 		metadata:
-		labels:
-			run: privileged-pod
-		name: privileged-pod
+			labels:
+				run: privileged-pod
+			name: privileged-pod
 		spec:
-		containers:
-		- command:
-			- sh
-			- -c
-			- sleep 1d
+			containers:
+			- command:
+				- sh
+				- -c
+				- sleep 1d
 			image: nginx:alpine
 			name: privileged-pod
 			securityContext:
 				privileged: true
-		dnsPolicy: ClusterFirst
-		restartPolicy: Always
-
-	</details>
-
-	<details><summary> Checks:</summary>
-		
-		TBD!
+			dnsPolicy: ClusterFirst
+			restartPolicy: Always
 
 	</details>
 	
@@ -1555,20 +1572,18 @@ Examples:
 		apiVersion: v1
 		kind: Pod
 		metadata:
-		creationTimestamp: null
-		labels:
-			run: non-root-pod
-		name: non-root-pod
+			labels:
+				run: non-root-pod
+			name: non-root-pod
 		spec:
-		containers:
-		- image: nginx:alpine
+			containers:
+			- image: nginx:alpine
 			name: non-root-pod
 			securityContext:        
 				runAsNonRoot: false
 			resources: {}
-		dnsPolicy: ClusterFirst
-		restartPolicy: Always
-		status: {}
+			dnsPolicy: ClusterFirst
+			restartPolicy: Always
 
 	</details>
 
@@ -1591,23 +1606,21 @@ Examples:
 		apiVersion: v1
 		kind: Pod
 		metadata:
-		creationTimestamp: null
-		labels:
-			run: run-as-user-pod
-		name: run-as-user-pod
+			labels:
+				run: run-as-user-pod
+			name: run-as-user-pod
 		spec:
 			securityContext:
 				runAsUser: 1001
 				runAsGroup: 1001
 			containers:
 			- image: nginx:alpine
-				name: run-as-user-pod
-				resources: {}
-				securityContext:
-					allowPrivilegeEscalation: false
+			  name: run-as-user-pod
+			  resources: {}
+			  securityContext:
+				allowPrivilegeEscalation: false
 			dnsPolicy: ClusterFirst
 			restartPolicy: Always
-			status: {}
 
 	</details>
 
@@ -1617,7 +1630,6 @@ Examples:
 	```
 	
 </details>
-
 
 **Useful official documentation**
 
@@ -1639,16 +1651,33 @@ OS-level security domains can be used to isolate microservices from each other a
 Examples:
 - <details><summary>Example_1: Working with Open Policy Agent (OPA)/Gatekeeper:</summary>
 
-	TBD
+	To install:
+	```
+	kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/deploy/gatekeeper.yaml
+	```
+
+	Deploy some example (k8srequiredlabels):
+	```
+	kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/demo/basic/templates/k8srequiredlabels_template.yaml
+	```
+
+	You can install this Constraint with the following command:
+	```
+	kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/demo/basic/constraints/all_ns_must_have_gatekeeper.yaml
+	```
+
+	To check constraints:
+	```
+	kubectl get constraints
+	```
 
 </details>
 
 - <details><summary>Example_2: Working with Security context:</summary>
 
-	It's already described on other topics
+	It's already described on other topics with a lot of examples.
 
 </details>
-
 
 **Useful official documentation**
 
@@ -1677,6 +1706,7 @@ Examples:
 
 	Create a new secret with `file-secret` name through `file-secret.yaml` file:
 	```
+	---
 	apiVersion: v1
 	kind: Secret
 	metadata:
@@ -1692,6 +1722,7 @@ Examples:
 
 	Then, create a new pod with `pod-secrets` name. Make Secret `literal-secret` available as environment variable `literal-secret`. Mount Secret `file-secret` as volume. The file should be available under `/etc/file-secret/hosts`:
 	```
+	---
 	apiVersion: v1
 	kind: Pod
 	metadata:
@@ -1748,6 +1779,7 @@ Examples:
 
 	Create EncryptionConfiguration `/etc/kubernetes/enc/encryption.yaml` file:
 	```
+	---
 	apiVersion: apiserver.config.k8s.io/v1
 	kind: EncryptionConfiguration
 	resources:
@@ -1824,10 +1856,11 @@ Examples:
 	
 	<details><summary> Create RuntimeClass class, something like:</summary>
 		
+		---
 		apiVersion: node.k8s.io/v1
 		kind: RuntimeClass
 		metadata:
-		name: gvisor
+			name: gvisor
 		handler: runsc
 
 	</details>
@@ -1838,16 +1871,22 @@ Examples:
 		apiVersion: v1
 		kind: Pod
 		metadata:
-		name: sec
-		spec:
-		runtimeClassName: gvisor
-		containers:
-			- image: nginx:1.21.5-alpine
 			name: sec
-		dnsPolicy: ClusterFirst
-		restartPolicy: Always
+		spec:
+			runtimeClassName: gvisor
+			containers:
+				- image: nginx:1.21.5-alpine
+				name: sec
+			dnsPolicy: ClusterFirst
+			restartPolicy: Always
 
 	</details>
+
+	Checks:
+	```
+	k apply gvisor_file.yaml
+	k exec sec -- dmesg
+	```
 
 </details>
 
@@ -1864,6 +1903,17 @@ Examples:
 ### 4. Implement pod-to-pod encryption by use of mTLS
 
 mTLS stands for mutual authentication, meaning client authenticates server and server does the same to client, its core concept is to secure pod-to-pod communications. In exams it may ask you to create the certificates. However, it is worth bookmarking certificate signing requests and understanding how to implement kubeconfig access and mTLS authentication credentials.
+
+What nTLS is?
+Mutual TLS takes TLS to the next level by authenticating both sides of the client-server connection before exchanging communications. This may seem like a common-sense approach, but there are many situations where the client’s identity is irrelevant to the connection.
+
+When only the server’s identity matters, standard unidirectional TLS is the most efficient approach. TLS uses public-key encryption, requiring a private and public key pair for encrypted communications. To verify the server’s identity, the client sends a message encrypted using the public key (obtained from the server’s TLS certificate) to the server. Only a server holding the appropriate private key can decrypt the message, so successful decryption authenticates the server. 
+
+To have bi-directional authentication would require that all clients also have TLS certificates, which come from a certificate authority. Because of the sheer number of potential clients (browsers accessing websites, for example), generating and managing so many certificates would be extremely difficult.
+
+However, for some applications and services, it can be crucial to verify that only trusted clients connect to the server. Perhaps only certain users should have access to particular servers. Or maybe you have API calls that should only come from specific services. In these situations, the added burdens of mTLS are well worth it. And if your organization reinforces security with zero trust policies where every attempt to access the server must be verified, mTLS is necessary.
+
+mTLS adds a separate authentication of the client following verification of the server. Only after verifying both parties to the connection can the two exchange data. With mTLS, the server knows that a trusted source is attempting to access it.
 
 Examples:
 - <details><summary>Example_1: Using mTLS:</summary>
@@ -1916,7 +1966,7 @@ Examples:
 	k get pod -l app=nginx-sha-deployment -oyaml | grep imageID
 	```
 
-	Edit deploy and put needed sha
+	Edit deploy and put needed sha:
 	```
 	k edit deploy nginx-sha-deployment
 	```
@@ -1944,14 +1994,37 @@ Examples:
 
 - <details><summary>Example_4: Harden a given Docker Container:</summary>
 
-	There is a Dockerfile at `/root/Dockerfile`. It’s a simple container which tries to make a curl call to an imaginary api with a secret token, the call will 404 , but that's okay:
+	There is a Dockerfile at `/root/Dockerfile`. It’s a simple container which tries to make a curl call to an imaginary api with a secret token, the call will 404, but that's okay:
 	- Use specific version 20.04 for the base image
 	- Remove layer caching issues with apt-get
-	- Remove the hardcoded secret value 2e064aad-3a90–4cde-ad86–16fad1f8943e . The secret value should be passed into the container during runtime as env variable TOKEN
+	- Remove the hardcoded secret value 2e064aad-3a90–4cde-ad86–16fad1f8943e. The secret value should be passed into the container during runtime as env variable TOKEN
 	- Make it impossible to docker exec , podman exec or kubectl exec into the container using bash
 
+	Dockerfile (before):
 	```
-	TBD
+	FROM ubuntu
+	RUN apt-get update
+	RUN apt-get -y install curl
+	ENV URL https://google.com/this-will-fail?secret-token=
+	CMD ["sh", "-c", "curl --head $URL=2e064aad-3a90-4cde-ad86-16fad1f8943e"]
+	```
+
+	Dockerfile (after):
+	```
+	FROM ubuntu:20.04
+	RUN apt-get update && apt-get -y install curl
+	ENV URL https://google.com/this-will-fail?secret-token=
+	RUN rm /usr/bin/bash
+	CMD ["sh", "-c", "curl --head $URL$TOKEN"]
+	```
+
+	Testing:
+	```
+	podman build -t app .
+	podman run -d -e TOKEN=6666666-5555555-444444-33333-22222-11111 app sleep 1d
+	podman ps | grep app
+	podman exec -it 4a848daec2e2 bash # fails
+	podman exec -it 4a848daec2e2 sh # works
 	```
 
 </details>
@@ -1980,7 +2053,7 @@ Securing the images that are allowed to run in your cluster is essential. It’s
 Examples:
  - <details><summary>Example_1: Use ImagePolicyWebhook:</summary>
 
-	<details><summary>First of all, let create admission config /etc/kubernetes/policywebhook/admission_config.json</summary>
+	<details><summary>First of all, let's create admission /etc/kubernetes/policywebhook/admission_config.json config</summary>
 	
 		{
 			"apiVersion": "apiserver.config.k8s.io/v1",
@@ -2033,6 +2106,7 @@ Examples:
 
 	<details><summary>The /etc/kubernetes/manifests/kube-apiserver.yaml configuration of kube-apiserver, for example:</summary>
 
+		---
 		apiVersion: v1
 		kind: Pod
 		metadata:
@@ -2174,15 +2248,15 @@ Examples:
 
 	</details>
 
-	<details><summary>Checks:</summary>
-	
-		$ crictl ps -a | grep api
-		$ crictl logs 91c61357ef147
+	Checks
+	```
+	crictl ps -a | grep api
+	crictl logs 91c61357ef147
 
-		$ k run pod --image=nginx
-			Error from server (Forbidden): pods "pod" is forbidden: Post "https://localhost:1234/?timeout=30s": dial tcp 127.0.0.1:1234: connect: connection refused
+	k run pod --image=nginx
 	
-	</details>
+	Error from server (Forbidden): pods "pod" is forbidden: Post "https://localhost:1234/?timeout=30s": dial tcp 127.0.0.1:1234: connect: connection refused
+	```
 
 </details>
 
@@ -2202,7 +2276,7 @@ This is totally straightforward. You will need to vet the configuration of Kuber
 Examples:
 - <details><summary>Example_1: Static Manual Analysis Docker:</summary>
 
-	TBD!
+	Everyone must understand Dockerfile and fix it with best practices (without any tools).
 	
 </details>
 
@@ -2232,7 +2306,7 @@ Using trivy to scan images in applications and infra namespaces and define if th
 
 Getting images:
 ```
-$ k -n applications get pod -oyaml | grep image: | sort -rn | uniq
+k -n applications get pod -oyaml | grep image: | sort -rn | uniq
 - image: nginx:1.20.2-alpine
 - image: nginx:1.19.1-alpine-perl
 image: docker.io/library/nginx:1.20.2-alpine
@@ -2241,8 +2315,8 @@ image: docker.io/library/nginx:1.19.1-alpine-perl
 
 Let's scan first deployment:
 ```
-$ trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
-$ trivy image nginx:1.19.1-alpine-perl | grep CVE-2016-9841
+trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
+trivy image nginx:1.19.1-alpine-perl | grep CVE-2016-9841
 ```
 
 Let's scan second deployment:
@@ -2253,7 +2327,7 @@ trivy image nginx:1.20.2-alpine | grep CVE-2016-9841
 
 Hit on the first one, so we scale down:
 ```
-$ k -n applications scale deploy web1 --replicas 0
+k -n applications scale deploy web1 --replicas 0
 ```
 
 **Useful official documentation**
@@ -2332,11 +2406,11 @@ Examples:
 
 	Checks:
 	```
-	$ k run nginx --image=nginx:alpine
+	k run nginx --image=nginx:alpine
 
-	$ k exec -it nginx -- sh
+	k exec -it nginx -- sh
 
-	$ cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
+	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
 	```
 
 </details>
@@ -2382,15 +2456,14 @@ Examples:
 
 	Checks:
 	```
-	$ k run nginx --image=nginx:alpine
+	k run nginx --image=nginx:alpine
 
-	$ k exec -it nginx -- sh
+	k exec -it nginx -- sh
 
-	$ cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
+	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
 	```
 
 </details>
-
 
 **Useful official documentation**
 
@@ -2528,7 +2601,7 @@ Examples:
 	
 	<details><summary> Generate configuration :</summary>
 		
-		$ k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
+		k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
 
 	</details>
 
