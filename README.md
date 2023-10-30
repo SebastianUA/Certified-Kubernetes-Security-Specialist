@@ -2282,7 +2282,7 @@ Examples:
 
 - <details><summary>Example_2: Static Manual analysis k8s:</summary>
 
-	TBD!
+	Everyone must understand YAML files of deployments/pods/etc and fix them out with best practices (without any tools).
 	
 </details>
 
@@ -2302,7 +2302,7 @@ Examples:
 	
 ### 4. Scan images for known vulnerabilities 
 
-Using trivy to scan images in applications and infra namespaces and define if the images has CVE-2021-28831 and/or CVE-2016-9841 vulnerabilities. Scale down those Deployments to zero if you will find something.
+Using trivy to scan images in applications and infra namespaces and define if the images has CVE-2021-28831 and/or CVE-2016-9841 vulnerabilities. Scale down those Deployments to 0 if you will find something.
 
 Getting images:
 ```
@@ -2508,7 +2508,7 @@ Probably Falco can help to take care of it. You can easily put some Falco's rule
 
 ### 5. Ensure immutability of containers at runtime
 
-Immutability of Volumes (Secrets, ConfigMaps, VolumeMounts) can be achieved with readOnly: true field on the mount.
+Immutability of Volumes (Secrets, ConfigMaps, VolumeMounts) can be achieved with `readOnly`: true field on the mount.
 ```
 volumeMounts:
 - name: instance-creds
@@ -2528,14 +2528,66 @@ volumeMounts:
 
 ### 6. Use Audit Logs to monitor access
 
-Examples:
- - <details><summary>Example_1: Configure the Apiserver for Audit Logging. The log path should be /etc/kubernetes/audit-logs/audit.log on the host and inside the container. The existing Audit Policy to use is at /etc/kubernetes/auditing/policy.yaml . The path should be the same on the host and inside the container. Also, set argument --audit-log-maxsize=3 and set argument --audit-log-maxbackup=4:</summary>
-	
-	<details><summary> Edit kube-api configuration:</summary>
-		
-		# vim /etc/kubernetes/manifests/kube-apiserver.yaml
+The kube-apiserver allows us to capture the logs at various stages of a request sent to it. This includes the events at the metadata stage, request, and response bodies as well. Kubernetes allows us to define the stages which we intend to capture. The following are the allowed stages in the Kubernetes audit logging framework:
+- RequestReceived: As the name suggests, this stage captures the generated events as soon as the audit handler receives the request.
+- ResponseStarted: In this stage, collects the events once the response headers are sent, but just before the response body is sent.
+- ResponseComplete: This stage collects the events after the response body is sent completely.
+- Panic: Events collected whenever the apiserever panics.
 
-	</details>
+The level field in the rules list defines what properties of an event are recorded. An important aspect of audit logging in Kubernetes is, whenever an event is processed it is matched against the rules defined in the config file in order. The first rule sets the audit level of logging the event. Kubernetes provides the following audit levels while defining the audit configuration:
+- Metadata: Logs request metadata (requesting user/userGroup, timestamp, resource/subresource, verb, status, etc.) but not request or response bodies.
+- Request: This level records the event metadata and request body but does not log the response body.
+- RequestResponse: It is more verbose among all the levels as this level logs the Metadata, request, and response bodies.
+- None: This disables logging of any event that matches the rule.
+
+Examples:
+
+- <details><summary>Example_1: Create policy file.</summary>
+
+	Let's create policy, where you must log logs of PODs inside `prod` NS when you created them.
+
+	Create `/etc/kubernetes/auditing/policy.yaml` policy file:
+	```
+	---
+	apiVersion: audit.k8s.io/v1 # This is required.
+	kind: Policy
+	# Don't generate audit events for all requests in RequestReceived stage.
+	omitStages:
+	- "RequestReceived"
+	rules:
+	- level: Metadata
+		namespaces: ["prod"]
+		verbs: ["create"]
+		resources:
+		- group: "" # core
+		  resources: ["pods"]
+
+	# Log all other resources in core and extensions at the Request level.
+	- level: Request
+		resources:
+		- group: "" # core API group
+		- group: "extensions" # Version of group should NOT be included.
+
+	# Log pod changes at RequestResponse level
+	- level: RequestResponse
+		resources:
+		- group: ""
+		resources: ["pods"]
+
+	# Don't log any other requests"
+	- level: None
+		namespaces: ["*"]
+		verbs: ["*"]
+		resources:
+		- group: "" # core
+		  resources: ["*"]
+		  resourceNames: ["*"]
+	``` 
+
+	Edit kube-api configuration:
+	```	
+	vim /etc/kubernetes/manifests/kube-apiserver.yaml
+	```
 
 	<details><summary> Add the next line to enable auditing:</summary>
 		
@@ -2577,11 +2629,64 @@ Examples:
 
 	</details>
 
-	<details><summary> Checks:</summary>
+	Checks:
+	```
+	crictl ps -a | grep api
+	```
+
+</details>
+
+- <details><summary>Example_2: Configure the Apiserver for Audit Logging. The log path should be /etc/kubernetes/audit-logs/audit.log on the host and inside the container. The existing Audit Policy to use is at /etc/kubernetes/auditing/policy.yaml. The path should be the same on the host and inside the container. Also, set argument --audit-log-maxsize=3 and set argument --audit-log-maxbackup=4:</summary>
+	
+	Edit kube-api configuration:
+	```	
+	vim /etc/kubernetes/manifests/kube-apiserver.yaml
+	```
+
+	<details><summary> Add the next line to enable auditing:</summary>
 		
-		crictl ps -a | grep api
+		---
+		spec:
+			containers:
+			- command:
+				- kube-apiserver
+				- --audit-policy-file=/etc/kubernetes/auditing/policy.yaml
+				- --audit-log-path=/etc/kubernetes/audit-logs/audit.log
+				- --audit-log-maxsize=3
+				- --audit-log-maxbackup=4
 
 	</details>
+
+	<details><summary> Add the new Volumes:</summary>
+		
+		volumes:
+		- name: audit-policy
+			hostPath:
+			path: /etc/kubernetes/auditing/policy.yaml
+			type: File
+		- name: audit-logs
+			hostPath:
+			path: /etc/kubernetes/audit-logs
+			type: DirectoryOrCreate
+
+	</details>
+
+	<details><summary> Add the new VolumeMounts:</summary>
+		
+		volumeMounts:
+		- mountPath: /etc/kubernetes/auditing/policy.yaml
+			name: audit-policy
+			readOnly: true
+		- mountPath: /etc/kubernetes/audit-logs
+			name: audit-logs
+			readOnly: false
+
+	</details>
+
+	Checks:
+	```
+	crictl ps -a | grep api
+	```
 	
 </details>
 
