@@ -2482,10 +2482,22 @@ Examples:
 	01:33:21.137163716,1000,tar
 	```
 	
-	Use:
+	Use for all pods:
 	```
-	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.id=$(kubectl get pods -l "app.kubernetes.io/name=${pod_label}" -n "${pod_namespace}" -o json | jq -r '.items[].status.containerStatuses[].containerID' | tr -d 'containerd://') >> /opt/incidents/user.name/summary
-	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.id=myredis >> /opt/incidents/user.id/summary
+	sysdig -M 10 -p "%evt.time,%user.uid,%proc.name"
+	```
+
+	Use for specific container ID (myredis):
+	```
+	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.id=f011edb5a03e >> /opt/incidents/user.name/summary
+	
+	Or:
+	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.id=$(kubectl get po myredis -o json | jq -r '.status.containerStatuses[].containerID'| tr -d 'containerd://') >> /opt/incidents/user.name/summary
+	```
+
+	Use for specific container name - myredis:
+	```
+	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/user.id/summary
 	```
 
 </details>
@@ -2499,6 +2511,7 @@ Examples:
 - [Common Kubernetes config security threats](https://www.cncf.io/blog/2020/08/07/common-kubernetes-config-security-threats/)
 - [Guidance on Kubernetes threat modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
 - [Attack matrix Kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
+- [Sysdig Examples](https://github.com/draios/sysdig/wiki/Sysdig-Examples#security)
 
 ### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 
