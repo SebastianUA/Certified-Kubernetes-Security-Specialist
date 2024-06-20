@@ -666,7 +666,7 @@ Examples:
 	ssh node01
 
     export KUBECONFIG=/etc/kubernetes/kubelet.conf
-    k label node controlplane killercoda/two=123 # restricted
+    k label node controlplane controlplane/two=123 # restricted
     k label node node01 node-restriction.kubernetes.io/two=123 # restricted
     k label node node01 test/two=123 # works
 	```
@@ -852,9 +852,9 @@ Examples:
 		cat /var/log/syslog | grep etcd
 		```
 
-	- kube-apiserver side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
+	- kube-apiserver side, open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and put the next:
 		```
-		--cipher-suites=ECDHE-RSA-DES-CBC3-SHA
+		- --tls-cipher-suites=ECDHE-RSA-DES-CBC3-SHA
 		- --tls-min-version=VersionTLS12
 		```
 
@@ -1200,7 +1200,7 @@ Examples:
 
 	Or, run this:
 	```
-	aa-status
+	aa-status | grep some_apparmor_profile_name
 	```
 
 	Load AppArmor profile:
@@ -1918,7 +1918,7 @@ mTLS adds a separate authentication of the client following verification of the 
 Examples:
 - <details><summary>Example_1: Using mTLS:</summary>
 
-	TBD!
+	No need it for examination. For general development, read the material.
 
 </details>
 
@@ -2373,7 +2373,7 @@ Examples:
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 
 Examples:
-- <details><summary>Example_1</summary>
+- <details><summary>Example_1 (with Falco)</summary>
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
 	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
@@ -2415,7 +2415,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_2</summary>
+- <details><summary>Example_2 (with Falco)</summary>
 	
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
@@ -2461,6 +2461,31 @@ Examples:
 	k exec -it nginx -- sh
 
 	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
+	```
+
+</details>
+
+- <details><summary>Example_3 (with Sysdig)</summary>
+	
+	Use sysdig tool to detect anomalous processes that occur and execute frequently in a single container of Pod `myredis`.
+
+	NOTE: These tools are pre-installed on the cluster's worker node `node01` only, not on the master node.
+
+
+	Use the tools to analyze the spawned and executed processes for at least `60` seconds, checking them with filters and writing the events to the file `/opt/incidents/summary`, which contains the detected events in the following format. This file contains the detected events in the following format: `timestamp,uid/username,processName`. Keep the original timestamp format of the tool intact.
+	NOTE: Ensure that the events file is stored on a working node in the cluster.
+
+	The output example of formatted events should be like:
+	```
+	01:33:19.601363716,root,init
+	01:33:20.606013716,nobody,bash
+	01:33:21.137163716,1000,tar
+	```
+	
+	Use:
+	```
+	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.id=$(kubectl get pods -l "app.kubernetes.io/name=${pod_label}" -n "${pod_namespace}" -o json | jq -r '.items[].status.containerStatuses[].containerID' | tr -d 'containerd://') >> /opt/incidents/user.name/summary
+	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.id=myredis >> /opt/incidents/user.id/summary
 	```
 
 </details>
@@ -2544,7 +2569,7 @@ Examples:
 
 - <details><summary>Example_1: Create policy file.</summary>
 
-	Let's create policy, where you must log logs of PODs inside `prod` NS when you created them.
+	Let's create policy, where you must log logs of PODs inside `prod` NS when you created them. Other requests should not be logged at all.
 
 	Create `/etc/kubernetes/auditing/policy.yaml` policy file:
 	```
@@ -2579,7 +2604,7 @@ Examples:
 		namespaces: ["*"]
 		verbs: ["*"]
 		resources:
-		- group: "" # core
+		- group: ""
 		  resources: ["*"]
 		  resourceNames: ["*"]
 	``` 
@@ -2632,6 +2657,8 @@ Examples:
 	Checks:
 	```
 	crictl ps -a | grep api
+
+	tail -f /etc/kubernetes/audit-logs/audit.log
 	```
 
 </details>
