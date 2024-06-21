@@ -808,7 +808,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_9: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add cipher=ECDHE-RSA-DES-CBC3-SHA as well:</summary>
+- <details><summary>Example_9: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` cipher as well:</summary>
 
 	- ETCD side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
 		```
@@ -836,7 +836,8 @@ Examples:
 			- --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
 			- --snapshot-count=10000
 			- --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt
-			- --cipher-suites=ECDHE-RSA-DES-CBC3-SHA
+			- --cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+			- --tls-min-version=TLS1.2
 			image: registry.k8s.io/etcd:3.5.7-0
 			imagePullPolicy: IfNotPresent
 		....
@@ -854,7 +855,7 @@ Examples:
 
 	- kube-apiserver side, open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and put the next:
 		```
-		- --tls-cipher-suites=ECDHE-RSA-DES-CBC3-SHA
+		- --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
 		- --tls-min-version=VersionTLS12
 		```
 
