@@ -2399,6 +2399,8 @@ Examples:
 	priority: CRITICAL
 	tags: [container, shell, mitre_execution]
 	``` 
+	
+	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 
 	Restart Falco service:
 	```
@@ -2449,6 +2451,8 @@ Examples:
 	  priority: CRITICAL
 	  tags: [container, shell, mitre_execution, app_nginx]
 	``` 
+
+	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 
 	Restart Falco service:
 	```
