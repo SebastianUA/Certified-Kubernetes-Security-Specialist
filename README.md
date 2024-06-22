@@ -853,6 +853,11 @@ Examples:
 		cat /var/log/syslog | grep etcd
 		```
 
+		To check cipher:
+		```
+		nmap --script ssl-enum-ciphers -p 2379 127.0.0.1
+		```
+
 	- kube-apiserver side, open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and put the next:
 		```
 		- --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
@@ -867,6 +872,11 @@ Examples:
 		NOTE: To get logs, you can use:
 		```
 		cat /var/log/syslog | grep apiserver
+		```
+
+		To check cipher:
+		```
+		nnmap --script ssl-enum-ciphers -p 6443 127.0.0.1
 		```
 	
 	- kubelet side, open `/var/lib/kubelet/config.yaml` file and put the next:
@@ -902,6 +912,13 @@ Examples:
 		```
 		systemctl status tart kubelet.service
 		```
+
+		To check cipher:
+		```
+		nmap --script ssl-enum-ciphers -p 10250 127.0.0.1
+		```
+
+		NOTE: I'm note sure that it's needing to do.
 
 </details>
 
