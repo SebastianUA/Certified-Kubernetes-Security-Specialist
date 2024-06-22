@@ -868,6 +868,40 @@ Examples:
 		```
 		cat /var/log/syslog | grep apiserver
 		```
+	
+	- kubelet side, open `/var/lib/kubelet/config.yaml` file and put the next:
+		```
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		authentication:
+		anonymous:
+			enabled: false
+		webhook:
+			cacheTTL: 0s
+			enabled: true
+		x509:
+			clientCAFile: /etc/kubernetes/pki/ca.crt
+		authorization:
+		mode: Webhook
+		webhook:
+			cacheAuthorizedTTL: 0s
+			cacheUnauthorizedTTL: 0s
+		cgroupDriver: systemd
+		clusterDNS:
+		- 10.96.0.10
+		clusterDomain: cluster.local
+		tlsCipherSuites:
+		- TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+		```
+
+		Restart service:
+		```
+		systemctl restart kubelet.service
+		```
+
+		Checking kube-apiserver:
+		```
+		systemctl status tart kubelet.service
+		```
 
 </details>
 
