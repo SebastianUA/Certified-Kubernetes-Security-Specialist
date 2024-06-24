@@ -237,7 +237,7 @@ Examples:
 
 </details>
 
- - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service:</summary>
+ - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service. You should open use `app1` path</summary>
 	
 	```
 	---
@@ -253,7 +253,7 @@ Examples:
 	rules:
 	- http:
 		paths:
-		- path: /health
+		- path: /app1
 			pathType: Prefix
 			backend:
 			service:
@@ -261,6 +261,18 @@ Examples:
 				port:
 				number: 80
 	```
+
+	Also, you can generate it through CLI:
+	```
+	k create ingress ingress-app1 --rule="*/app1=app1-svc:80" --annotation="nginx.ingress.kubernetes.io/rewrite-target=/" --dry-run=client -o yaml > ingress-app1.yaml
+	```
+
+	Apply it:
+	```
+	k apply -f ingress-app1.yaml
+	```
+
+	NOTE: you should replace `pathType: Exact` to `pathType: Prefix` based on your needs!
 
 </details>
  
