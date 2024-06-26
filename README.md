@@ -2438,33 +2438,49 @@ Examples:
 	
 ### 4. Scan images for known vulnerabilities 
 
-Using trivy to scan images in applications and infra namespaces and define if the images has CVE-2021-28831 and/or CVE-2016-9841 vulnerabilities. Scale down those Deployments to 0 if you will find something.
+- <details><summary>Example_1: Using trivy to scan images in applications and infra namespaces and define if the images has CVE-2021-28831 and/or CVE-2016-9841 vulnerabilities. Scale down those Deployments to 0 if you will find something:</summary>
 
-Getting images:
-```
-k -n applications get pod -oyaml | grep image: | sort -rn | uniq
-- image: nginx:1.20.2-alpine
-- image: nginx:1.19.1-alpine-perl
-image: docker.io/library/nginx:1.20.2-alpine
-image: docker.io/library/nginx:1.19.1-alpine-perl
-```
+	Getting images:
+	```
+	k -n applications get pod -oyaml | grep image: | sort -rn | uniq
+	- image: nginx:1.20.2-alpine
+	- image: nginx:1.19.1-alpine-perl
+	image: docker.io/library/nginx:1.20.2-alpine
+	image: docker.io/library/nginx:1.19.1-alpine-perl
+	```
 
-Let's scan first deployment:
-```
-trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
-trivy image nginx:1.19.1-alpine-perl | grep CVE-2016-9841
-```
+	Let's scan first deployment:
+	```
+	trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
+	trivy image nginx:1.19.1-alpine-perl | grep CVE-2016-9841
+	```
 
-Let's scan second deployment:
-```
-trivy image nginx:1.20.2-alpine | grep CVE-2021-28831
-trivy image nginx:1.20.2-alpine | grep CVE-2016-9841
-```
+	Let's scan second deployment:
+	```
+	trivy image nginx:1.20.2-alpine | grep CVE-2021-28831
+	trivy image nginx:1.20.2-alpine | grep CVE-2016-9841
+	```
 
-Hit on the first one, so we scale down:
-```
-k -n applications scale deploy web1 --replicas 0
-```
+	Hit on the first one, so we scale down:
+	```
+	k -n applications scale deploy web1 --replicas 0
+	```
+	
+</details>
+
+- <details><summary>Example_2: Using trivy to scan images in `default` namespace:</summary>
+
+	Getting images from all pods in `default` NS:
+	```
+	k get po -o yaml | grep image: | sort -rn | uniq
+	```
+
+	Let's scan second `nginx:1.19.2`:
+	```
+	trivy --severity HIGH,CRITICAL nginx:1.19.2
+	```
+	
+</details>
 
 **Useful official documentation**
 
