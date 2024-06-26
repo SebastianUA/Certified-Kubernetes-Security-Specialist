@@ -15,7 +15,7 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 - Prerequisite: valid **CKA certification**
 - Cost: **$395 USD**
 - Exam Eligibility: **12 Month**, with a free retake within this year.
-- Software Version: **Kubernetes v1.27**
+- Software Version: **Kubernetes v1.30**
 - [The official website with certification](https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist)
 - [CNCF Exam Curriculum repository](https://github.com/cncf/curriculum/)
 - [Tips & Important Instructions: CKS](https://docs.linuxfoundation.org/tc-docs/certification/important-instructions-cks)
@@ -176,7 +176,7 @@ Examples:
 		- kube-apiserver
 		- --profiling=false
 	...
-		image: registry.k8s.io/kube-apiserver:v1.22.2
+		image: registry.k8s.io/kube-apiserver:v1.29.2
 	...
 	```
 
@@ -264,15 +264,13 @@ Examples:
 
 	Also, you can generate it through CLI:
 	```
-	k create ingress ingress-app1 --rule="*/app1=app1-svc:80" --annotation="nginx.ingress.kubernetes.io/rewrite-target=/" --dry-run=client -o yaml > ingress-app1.yaml
+	k create ingress ingress-app1 --class=nginx --rule="*/*=app1-svc:80" --annotation="nginx.ingress.kubernetes.io/rewrite-target=/" --dry-run=client -o yaml > ingress-app1.yaml
 	```
 
-	Apply it:
+	Apply the config:
 	```
 	k apply -f ingress-app1.yaml
 	```
-
-	NOTE: you should replace `pathType: Exact` to `pathType: Prefix` based on your needs!
 
 </details>
  
@@ -370,46 +368,71 @@ A second way to secure the GUI is via Token authentication. Token authentication
 
 To install web-ui dashboard, use:
 ```
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/recommended.yaml
+helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 
-namespace/kubernetes-dashboard created
-serviceaccount/kubernetes-dashboard created
-service/kubernetes-dashboard created
-secret/kubernetes-dashboard-certs created
-secret/kubernetes-dashboard-csrf created
-secret/kubernetes-dashboard-key-holder created
-configmap/kubernetes-dashboard-settings created
-role.rbac.authorization.k8s.io/kubernetes-dashboard created
-clusterrole.rbac.authorization.k8s.io/kubernetes-dashboard created
-rolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
-clusterrolebinding.rbac.authorization.k8s.io/kubernetes-dashboard created
-deployment.apps/kubernetes-dashboard created
-service/dashboard-metrics-scraper created
-Warning: spec.template.metadata.annotations[seccomp.security.alpha.kubernetes.io/pod]: non-functional in v1.27+; use the "seccompProfile" field instead
-deployment.apps/dashboard-metrics-scraper created
+"kubernetes-dashboard" has been added to your repositories
+```
+
+To install web-ui dashboard, use:
+```
+helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+
+Release "kubernetes-dashboard" does not exist. Installing it now.
+NAME: kubernetes-dashboard
+LAST DEPLOYED: Mon Jun 24 23:10:08 2024
+NAMESPACE: kubernetes-dashboard
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+*************************************************************************************************
+*** PLEASE BE PATIENT: Kubernetes Dashboard may need a few minutes to get up and become ready ***
+*************************************************************************************************
+
+Congratulations! You have just installed Kubernetes Dashboard in your cluster.
+
+To access Dashboard run:
+  kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+
+NOTE: In case port-forward command does not work, make sure that kong service name is correct.
+      Check the services in Kubernetes Dashboard namespace using:
+        kubectl -n kubernetes-dashboard get svc
+
+Dashboard will be available at:
+  https://localhost:8443
 ```
 
 Let's get dashboard's resources:
 ```
 k -n kubernetes-dashboard get pod,deploy,svc
 
-NAME                                             READY   STATUS    RESTARTS   AGE
-pod/dashboard-metrics-scraper-5bc754cb48-8gbcc   1/1     Running   0          65s
-pod/kubernetes-dashboard-6db6d44699-49kk4        1/1     Running   0          65s
+NAME                                                        READY   STATUS              RESTARTS   AGE
+pod/kubernetes-dashboard-api-fcb98d6fd-jpztk                1/1     Running             0          22s
+pod/kubernetes-dashboard-auth-67d784b9c7-5fhnk              0/1     ContainerCreating   0          22s
+pod/kubernetes-dashboard-kong-7696bb8c88-wg2dh              1/1     Running             0          22s
+pod/kubernetes-dashboard-metrics-scraper-5485b64c47-f97ng   1/1     Running             0          22s
+pod/kubernetes-dashboard-web-84f8d6fff4-kdrch               1/1     Running             0          22s
 
-NAME                                        READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/dashboard-metrics-scraper   1/1     1            1           65s
-deployment.apps/kubernetes-dashboard        1/1     1            1           65s
+NAME                                                   READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/kubernetes-dashboard-api               1/1     1            1           22s
+deployment.apps/kubernetes-dashboard-auth              0/1     1            0           22s
+deployment.apps/kubernetes-dashboard-kong              1/1     1            1           22s
+deployment.apps/kubernetes-dashboard-metrics-scraper   1/1     1            1           22s
+deployment.apps/kubernetes-dashboard-web               1/1     1            1           22s
 
-NAME                                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
-service/dashboard-metrics-scraper   ClusterIP   10.111.34.81   <none>        8000/TCP   65s
-service/kubernetes-dashboard        ClusterIP   10.98.70.117   <none>        443/TCP    65s
+NAME                                           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                         AGE
+service/kubernetes-dashboard-api               ClusterIP   10.101.228.206   <none>        8000/TCP                        22s
+service/kubernetes-dashboard-auth              ClusterIP   10.98.91.18      <none>        8000/TCP                        22s
+service/kubernetes-dashboard-kong-manager      NodePort    10.99.35.114     <none>        8002:30410/TCP,8445:30211/TCP   22s
+service/kubernetes-dashboard-kong-proxy        ClusterIP   10.98.25.235     <none>        443/TCP                         22s
+service/kubernetes-dashboard-metrics-scraper   ClusterIP   10.101.105.50    <none>        8000/TCP                        22s
+service/kubernetes-dashboard-web               ClusterIP   10.108.39.226    <none>        8000/TCP                        22s
 ```
 
 As most of you notice, default Kubernetes Dashboard service is exposed as Cluster IP and it would not be possible for administrators to access this IP address without getting inside a shell inside a Pod. For most cases, administrators use “kubectl proxy” to proxy an endpoint within the working machine to the actual Kubernetes Dashboard service.
 In some testing environments in less security concern, we could make Kubernetes Dashboard deployments and services to be exposed with Node Port, so administrators could use nodes’ IP address, public or private, and assigned port to access the service. We edit the actual running deployment YAML:
 ```
-kubectl edit deployment kubernetes-dashboard -n kubernetes-dashboard
+kubectl edit deployment kubernetes-dashboard-web -n kubernetes-dashboard
 ```
 
 Then, add `--insecure-port=9999` and tune it, likes:
@@ -420,7 +443,7 @@ spec:
     - args:
       - --namespace=kubernetes-dashboard
       - --insecure-port=9999
-	image: kubernetesui/dashboard:v2.1.0
+	image: docker.io/kubernetesui/dashboard-web:1.4.0
 	imagePullPolicy: Always
 	livenessProbe:
 		failureThreshold: 3
@@ -442,7 +465,7 @@ NOTE:
 
 After that, we make changes on Kubernetes Dashboard services:
 ```
-kubectl edit service kubernetes-dashboard -n kubernetes-dashboard
+kubectl edit service kubernetes-dashboard-web -n kubernetes-dashboard
 ```
 
 And:
@@ -545,7 +568,8 @@ Examples:
 	
 	Make restart service of kubelet:
 	```
-	systemctl daemon-reload systemctl restart kubelet.service
+	systemctl daemon-reload && \
+	systemctl restart kubelet.service
 	```
 	
 </details>
@@ -568,9 +592,9 @@ Examples:
 
 	</details>
 
-	Make restart service of kubelet: 
+	Make restart service of kubelet:
 	```
-	systemctl daemon-reload systemctl restart kubelet.service
+	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
 </details>
@@ -616,8 +640,13 @@ Examples:
 	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "protect-kernel-defaults"
 	```
 
+	So, we can put `protectKernelDefaults` parameter into `kubelet`, but first of all, check where the configuration is:
+	```
+	ps -ef | grep kubelet | grep -Ei "config"
+	```
+
 	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
-	
+
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		authentication:
@@ -636,14 +665,13 @@ Examples:
 		cgroupDriver: systemd
 		protectKernelDefaults: true
 		.........
-
 	</details>
 
 	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--protect-kernel-defaults=true` into `KUBELET_SYSTEM_PODS_ARGS`.
 	
-	Make restart service of kubelet:
+	Make restart service of kubelet after your change(s):
 	```
-	systemctl daemon-reload systemctl restart kubelet.service
+	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
 </details>
@@ -914,8 +942,13 @@ Examples:
 		tlsCipherSuites:
 		- TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
 		```
+		
+		Reload daemon:
+		```
+		systemctl daemon-reload
+		```
 
-		Restart service:
+		Restart kubelet service:
 		```
 		systemctl restart kubelet.service
 		```
@@ -932,6 +965,45 @@ Examples:
 
 		NOTE: I'm note sure that it's needing to do.
 
+</details>
+
+ - <details><summary>Example_10: Enable `readOnlyPort` for `kubelet`:</summary>
+
+	First of all, check where the configuration is:
+	```
+	ps -ef | grep kubelet | grep -Ei "config"
+	```
+
+	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
+
+		---
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		authentication:
+		anonymous:
+			enabled: false
+		webhook:
+			cacheTTL: 0s
+			enabled: true
+		x509:
+			clientCAFile: /etc/kubernetes/pki/ca.crt
+		authorization:
+		mode: Webhook
+		webhook:
+			cacheAuthorizedTTL: 0s
+			cacheUnauthorizedTTL: 0s
+		cgroupDriver: systemd
+		readOnlyPort: 0
+		.........
+	</details>
+
+	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `–-read-only-ports=0` into `KUBELET_SYSTEM_PODS_ARGS`.
+	
+	Make restart service of kubelet after your change(s):
+	```
+	
+	systemctl daemon-reload && systemctl restart kubelet.service
+	```
+	
 </details>
 
 **Useful official documentation**
