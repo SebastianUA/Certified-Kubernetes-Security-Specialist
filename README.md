@@ -96,6 +96,23 @@ Examples:
 
 </details>
 
+ - <details><summary>Example_4: Create default deny networking policy for ingress only. Use netpol in <b>monitoring</b> namespace:</summary>
+	
+	```
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: NetworkPolicy
+	metadata:
+		name: deny-ingress-only
+		namespace: monitoring
+	spec:
+	podSelector: {}
+	policyTypes:
+		- Ingress
+	```
+
+</details>
+
 Other examples you can find in [hands-on with Kubernetes network policy](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/01_Cluster_Setup/Kubernetes-network-policy)
 
 **Useful official documentation**
@@ -142,6 +159,7 @@ Examples:
 
  - <details><summary>Example_2: Fix issues of 1.3.2 part with <b>kube-bench</b>:</summary>
 	
+	Run `kube-bench` command, for example - only for master host:
 	```
 	kube-bench run --targets master --check 1.3.2 
 
@@ -517,6 +535,23 @@ Examples:
 
 </details>
 
+ - <details><summary>Compare binary file of kubectl on the current host and with kubectl 1.30 that you must download from official release. The 2d example:</summary>
+	
+	Download SHA256 of kubelet:
+	```
+	curl -LO "https://dl.k8s.io/v1.30.0/bin/linux/amd64/kubectl.sha256"
+	```
+
+	Checking SHA with current kubectl that has been installed on host:
+	```
+	echo "$(cat kubectl.sha256)  $(which kubectl)" | shasum -a 256 --check
+	/usr/bin/kubectl: OK
+	```
+
+	NOTE: The same way is for `kubeadm` and `kubelet`.
+
+</details>
+
 **Useful official documentation**
 
 - None
@@ -531,15 +566,13 @@ Examples:
 ### 1. Restrict access to Kubernetes API
 
 When it comes to Kubernetes Production Implementation restricting API access is very important. Restricting access to the API server is about three things:
-- Authentication
-- Authorization
+- Authentication in Kubernetes.
+- Authorization in Kubernetes.
 - Admission Control The primary topics under this section would be bootstrap tokens, RBAC, ABAC, service account, and admission webhooks.
-- Cluster API access methods
-- Kubernetes API Access Security
-- Authentication
-- Authorization
-- Admission Controllers
-- Admission Webhooks
+- Cluster API access methods.
+- Kubernetes API Access Security.
+- Admission Controllers in Kubernetes.
+- Admission Webhooks in Kubernetes.
 
 Examples:
  - <details><summary>Example_1: Blocking anonymous access to use API:</summary>
@@ -1380,30 +1413,98 @@ Examples:
 
 	<details><summary>Using netstat command - check if 66 is oppen and kill the process and delete the binary:</summary>
 
+		install netstat on Ubuntu:
+		```
 		apt install net-tools
+		```
+
+		Getting process (the port is 66):
+		```
 		netstat -natpl | grep 66
+		```
+
+		Check where the file located:
+		```
 		ls -l /proc/22797/exe
+		```
+
+		To remove file, use:
+		```
 		rm -f /usr/bin/app1
+		```
+
+		Now, kill that port:
+		```
 		kill -9 22797
+		```
 
 	</details>
 
 </details>
 
- - <details><summary>Example_7: Remove unnecessary packages. For example, find and delete httpd package on the host:</summary>
+ - <details><summary>Example_7: Remove unnecessary packages. For example, find and delete apache2 package on the host:</summary>
 	
+	Check details of the package:
 	```
 	apt show httpd
-	apt remove httpd -y
+	```
+
+	Simple output:
+	```
+	Package: apache2
+	Version: 2.4.41-4ubuntu3.17
+	Priority: optional
+	Section: web
+	Origin: Ubuntu
+	Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+	Original-Maintainer: Debian Apache Maintainers <debian-apache@lists.debian.org>
+	Bugs: https://bugs.launchpad.net/ubuntu/+filebug
+	Installed-Size: 544 kB
+	Provides: httpd, httpd-cgi
+	Pre-Depends: dpkg (>= 1.17.14)
+	Depends: apache2-bin (= 2.4.41-4ubuntu3.17), apache2-data (= 2.4.41-4ubuntu3.17), apache2-utils (= 2.4.41-4ubuntu3.17), lsb-base, mime-support, perl:any, procps
+	Recommends: ssl-cert
+	Suggests: apache2-doc, apache2-suexec-pristine | apache2-suexec-custom, www-browser, ufw
+	Conflicts: apache2.2-bin, apache2.2-common
+	Breaks: libapache2-mod-proxy-uwsgi (<< 2.4.33)
+	Replaces: apache2.2-bin, apache2.2-common, libapache2-mod-proxy-uwsgi (<< 2.4.33)
+	Homepage: https://httpd.apache.org/
+	Task: lamp-server
+	Download-Size: 95.5 kB
+	APT-Manual-Installed: yes
+	APT-Sources: http://archive.ubuntu.com/ubuntu focal-updates/main amd64 Packages
+	Description: Apache HTTP Server
+	The Apache HTTP Server Project's goal is to build a secure, efficient and
+	extensible HTTP server as standards-compliant open source software. The
+	result has long been the number one web server on the Internet.
+	.
+	Installing this package results in a full installation, including the
+	configuration files, init scripts and support scripts.
+
+	N: There is 1 additional record. Please use the '-a' switch to see it
+	```
+
+	Remove `apache2` pkg:
+	```
+	apt remove apache2 -y
 	```
 
 </details>
 
  - <details><summary>Example_8: Find service that runs on the host and stop it. For example, find and stop httpd service on the host:</summary>
 	
+	First of all, check status of the service:
 	```
 	service httpd status
+	```
+
+	Then, to stop service use:
+	```
 	service httpd stop
+	```
+
+	One more check:
+	```
 	service httpd status
 	```
 
