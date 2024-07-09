@@ -777,28 +777,28 @@ Examples:
 
 	First of all, we should have key. Let's get it through openssl:
 	```
-	openssl genrsa -out 60099.key 2048
+	openssl genrsa -out iuser.key 2048
 	```
 
 	Next, runnning the next command to generate certificate:
 	```
-	openssl req -new -key 60099.key -out 60099.csr
+	openssl req -new -key iuser.key -out iuser.csr
 	```
 
-	Note: set Common Name = 60099@internal.users
+	Note: set Common Name = iuser@internal.users
 
 	<details><summary>Certificate signing requests sign manually (manually sign the CSR with the K8s CA file to generate the CRT):</summary>
 	
-		openssl x509 -req -in 60099.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out 60099.crt -days 500
+		openssl x509 -req -in iuser.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out iuser.crt -days 500
 
 	</details>
 
 	<details><summary>Set credentials & context:</summary>
 	
-		k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
-		k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+		k config set-credentials iuser@internal.users --client-key=iuser.key --client-certificate=iuser.crt
+		k config set-context iuser@internal.users --cluster=kubernetes --user=iuser@internal.users
 		k config get-contexts
-		k config use-context 60099@internal.users
+		k config use-context iuser@internal.users
 
 	</details>
 
@@ -816,19 +816,19 @@ Examples:
 
 	First of all, we should have key. Let's get it through openssl:
 	```
-	openssl genrsa -out 60099.key 2048
+	openssl genrsa -out iuser.key 2048
 	```
 
 	Next, runnning the next command to generate certificate:
 	```
-	openssl req -new -key 60099.key -out 60099.csr
+	openssl req -new -key iuser.key -out iuser.csr
 	```
 
-	Note: set Common Name = 60099@internal.users
+	Note: set Common Name = iuser@internal.users
 
 	<details><summary>Convert the CSR file into base64:</summary>
 	
-		cat 60099.csr | base64 -w 0
+		cat iuser.csr | base64 -w 0
 
 	</details>
 
@@ -837,7 +837,7 @@ Examples:
 		apiVersion: certificates.k8s.io/v1
 		kind: CertificateSigningRequest
 		metadata:
-		name: 60099@internal.users # ADD
+		name: iuser@internal.users # ADD
 		spec:
 		groups:
 			- system:authenticated
@@ -854,20 +854,20 @@ Examples:
 
 		k get csr # pending
 
-		k certificate approve 60099@internal.users
+		k certificate approve iuser@internal.users
 
 		k get csr # approved
 
-		k get csr 60099@internal.users -ojsonpath="{.status.certificate}" | base64 -d > 60099.crt
+		k get csr iuser@internal.users -ojsonpath="{.status.certificate}" | base64 -d > iuser.crt
 
 	</details>
 
 	<details><summary>Set credentials & context:</summary>
 	
-		k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
-		k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+		k config set-credentials iuser@internal.users --client-key=iuser.key --client-certificate=iuser.crt
+		k config set-context iuser@internal.users --cluster=kubernetes --user=iuser@internal.users
 		k config get-contexts
-		k config use-context 60099@internal.users
+		k config use-context iuser@internal.users
 
 	</details>
 
@@ -974,6 +974,7 @@ Examples:
 		clusterDomain: cluster.local
 		tlsCipherSuites:
 		- TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+		tlsMinVersion: VersionTLS12
 		```
 		
 		Reload daemon:
@@ -1766,7 +1767,7 @@ Examples:
 
  - <details><summary>Example_2: Working with Privileged containers:</summary>
 	
-	Run a Pod through CLI
+	Run a pod through CLI:
 	```	
 	k run privileged-pod --image=nginx:alpine --privileged
 	```
@@ -1824,7 +1825,7 @@ Examples:
 
 	</details>
 
-	Apply:
+	Apply generated yaml file:
 	```
 	k apply -f non-root-pod.yaml
 	```
