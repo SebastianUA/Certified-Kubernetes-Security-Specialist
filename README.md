@@ -2930,11 +2930,11 @@ The level field in the rules list defines what properties of an event are record
 
 Examples:
 
-- <details><summary>Example_1: Create policy file.</summary>
+- <details><summary>Example_1: Create Audit policy for Kubernetes cluster.</summary>
 
 	Let's create policy, where you must log logs of PODs inside `prod` NS when you created them. Other requests should not be logged at all.
 
-	Create `/etc/kubernetes/auditing/policy.yaml` policy file:
+	Create `/etc/kubernetes/auditing/policy.yaml` policy file with the next configuration:
 	```
 	---
 	apiVersion: audit.k8s.io/v1 # This is required.
@@ -2964,15 +2964,9 @@ Examples:
 
 	# Don't log any other requests"
 	- level: None
-		namespaces: ["*"]
-		verbs: ["*"]
-		resources:
-		- group: ""
-		  resources: ["*"]
-		  resourceNames: ["*"]
 	``` 
 
-	Edit kube-api configuration:
+	Next, edit kube-api configuration:
 	```	
 	vim /etc/kubernetes/manifests/kube-apiserver.yaml
 	```
@@ -3021,7 +3015,7 @@ Examples:
 	```
 	crictl ps -a | grep api
 
-	tail -f /etc/kubernetes/audit-logs/audit.log
+	tail -fn10 /etc/kubernetes/audit-logs/audit.log
 	```
 
 </details>
@@ -3076,6 +3070,7 @@ Examples:
 	Checks:
 	```
 	crictl ps -a | grep api
+	tail -f /etc/kubernetes/audit-logs/audit.log
 	```
 	
 </details>
