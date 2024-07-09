@@ -130,7 +130,7 @@ Other examples you can find in [hands-on with Kubernetes network policy](https:/
 ### 2. Use CIS benchmark to review the security configuration of Kubernetes components (etcd, kubelet, kubedns, kubeapi)
 
 Examples:
- - <details><summary>Example_1: Fix issues that provided in CIS file (some example of the file):</summary>
+ - <details><summary>Example_1: Fix issues that provided in CIS file (some example of the file). That file got from kube-banch output report:</summary>
 	
 	```
 	[INFO] 1 Master Node Security Configuration
@@ -162,7 +162,10 @@ Examples:
 	Run `kube-bench` command, for example - only for master host:
 	```
 	kube-bench run --targets master --check 1.3.2 
+	```
 
+	The output will be something like the next one:
+	```
 	[INFO] 1 Master Node Security Configuration
 	[INFO] 1.3 Controller Manager
 	[FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
@@ -1149,9 +1152,10 @@ Examples:
 	---
 	apiVersion: v1
 	kind: ServiceAccount
+	automountServiceAccountToken: false
 	metadata:
-		name: build-robot
-		automountServiceAccountToken: false
+	  name: build-robot
+	  namespace: default
 	```
 
 </details>
