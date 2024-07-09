@@ -44,13 +44,13 @@ Examples:
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
 	metadata:
-		name: deny-all
-		namespace: monitoring
+	  name: deny-all
+	  namespace: monitoring
 	spec:
 	podSelector: {}
 	policyTypes:
-		- Ingress
-		- Egress
+	- Ingress
+	- Egress
 	```
 
 </details>
@@ -69,9 +69,9 @@ Examples:
 	   run: my-app
 	ingress:
 	- from:
-		- podSelector:
-			matchLabels:
-			   run: app2
+	   - podSelector:
+		 matchLabels:
+		   run: app2
 	```
 
 </details>
@@ -86,12 +86,12 @@ Examples:
 		name: allow-all
 		namespace: default
 	spec:
-		podSelector: {}
-		policyTypes:
-		- Ingress
-		- Egress
-		ingress: {}
-		egress: {}
+	  podSelector: {}
+	  policyTypes:
+	  - Ingress
+	  - Egress
+	  ingress: {}
+	  egress: {}
 	```
 
 </details>
@@ -103,12 +103,12 @@ Examples:
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
 	metadata:
-		name: deny-ingress-only
-		namespace: monitoring
+	  name: deny-ingress-only
+	  namespace: monitoring
 	spec:
 	podSelector: {}
 	policyTypes:
-		- Ingress
+	- Ingress
 	```
 
 </details>
@@ -278,7 +278,7 @@ Examples:
 			pathType: Prefix
 			backend:
 			service:
-				name: app1-svc
+				name: app1
 				port:
 				number: 80
 	```
@@ -460,7 +460,7 @@ Then, add `--insecure-port=9999` and tune it, likes:
 ```
 .....
 spec:
-	containers:
+    containers:
     - args:
       - --namespace=kubernetes-dashboard
       - --insecure-port=9999
@@ -746,6 +746,13 @@ Examples:
     k label node node01 node-restriction.kubernetes.io/two=123 # restricted
     k label node node01 test/two=123 # works
 	```
+
+	*NOTE*: If you don't know how to find proper parameter (at that case - NodeRestriction), you can use:
+	```
+	ps -ef | grep apiserver
+	/proc/15501/exe -h | grep -Ei plugins
+	``` 
+	Where `15501` - PID ID of the process. 
 
 </details>
 
@@ -1037,7 +1044,6 @@ Examples:
 	
 	Make restart service of kubelet after your change(s):
 	```
-	
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
@@ -1411,39 +1417,52 @@ Examples:
 
  - <details><summary>Example_6: Identify and address open ports:</summary>
 
-	Using lsof command and check if 8080 is open or not:
+	1. Using lsof command and check if 8080 is open or not:
 	```
 	lsof -i :8080
 	```
 
-	<details><summary>Using netstat command - check if 66 is oppen and kill the process and delete the binary:</summary>
+	Check where the file is:
+	```
+	ls -l /proc/22797/exe
+	```
 
-		install netstat on Ubuntu:
-		```
-		apt install net-tools
-		```
+	To remove file:
+	```
+	rm -f /usr/bin/app1
+	```
 
-		Getting process (the port is 66):
-		```
-		netstat -natpl | grep 66
-		```
+	Now, kill the `8080` port:
+	```
+	kill -9 22797
+	```
 
-		Check where the file located:
-		```
-		ls -l /proc/22797/exe
-		```
+	2. Using netstat command - check if `66` is oppen and kill the process and delete the binary:
 
-		To remove file, use:
-		```
-		rm -f /usr/bin/app1
-		```
+	Install `netstat` on Ubuntu:
+	```
+	apt install net-tools
+	```
 
-		Now, kill that port:
-		```
-		kill -9 22797
-		```
+	Getting process (the port is 66):
+	```
+	netstat -natpl | grep 66
+	```
 
-	</details>
+	Check where the file located:
+	```
+	ls -l /proc/22797/exe
+	```
+
+	To remove file, use:
+	```
+	rm -f /usr/bin/app1
+	```
+
+	Now, kill that port:
+	```
+	kill -9 22797
+	```
 
 </details>
 
@@ -1524,7 +1543,7 @@ Examples:
 
 	If you want to display only the username you can use either awk or cut commands to print only the first field containing the username:
 	```
-	awk -F: '{ print $1}' /etc/passwd
+	awk -F: '{print $1}' /etc/passwd
 
 	cut -d: -f1 /etc/passwd
 	```
@@ -1952,9 +1971,9 @@ Examples:
 	apiVersion: v1
 	kind: Secret
 	metadata:
-		name: file-secret
+	  name: file-secret
 	data:
-		hosts: MTI3LjAuMC4xCWxvY2FsaG9zdAoxMjcuMC4xLjEJaG9zdDAxCgojIFRoZSBmb2xsb3dpbmcgbGluZXMgYXJlIGRlc2lyYWJsZSBmb3IgSVB2NiBjYXBhYmxlIGhvc3RzCjo6MSAgICAgbG9jYWxob3N0IGlwNi1sb2NhbGhvc3QgaXA2LWxvb3BiYWNrCmZmMDI6OjEgaXA2LWFsbG5vZGVzCmZmMDI6OjIgaXA2LWFsbHJvdXRlcnMKMTI3LjAuMC4xIGhvc3QwMQoxMjcuMC4wLjEgaG9zdDAxCjEyNy4wLjAuMSBob3N0MDEKMTI3LjAuMC4xIGNvbnRyb2xwbGFuZQoxNzIuMTcuMC4zNSBub2RlMDEKMTcyLjE3LjAuMjMgY29udHJvbHBsYW5lCg==
+	  hosts: MTI3LjAuMC4xCWxvY2FsaG9zdAoxMjcuMC4xLjEJaG9zdDAxCgojIFRoZSBmb2xsb3dpbmcgbGluZXMgYXJlIGRlc2lyYWJsZSBmb3IgSVB2NiBjYXBhYmxlIGhvc3RzCjo6MSAgICAgbG9jYWxob3N0IGlwNi1sb2NhbGhvc3QgaXA2LWxvb3BiYWNrCmZmMDI6OjEgaXA2LWFsbG5vZGVzCmZmMDI6OjIgaXA2LWFsbHJvdXRlcnMKMTI3LjAuMC4xIGhvc3QwMQoxMjcuMC4wLjEgaG9zdDAxCjEyNy4wLjAuMSBob3N0MDEKMTI3LjAuMC4xIGNvbnRyb2xwbGFuZQoxNzIuMTcuMC4zNSBub2RlMDEKMTcyLjE3LjAuMjMgY29udHJvbHBsYW5lCg==
 	```
 
 	Apply it:
@@ -2006,7 +2025,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_3: Secret etcd encryption:</summary>
+- <details><summary>Example_3: Secret etcd encryption. Use aesgcm encryption for etcd:</summary>
 
 	Creating folder for this task:
 	```
@@ -2063,14 +2082,18 @@ Examples:
 	watch crictl ps
 	```
 
-	When `apiserver` will be re-created, we can encrypt all existing secrets. For example, let's do it fort all secrets in `one` NS:
+	When `apiserver` will be re-created, we can encrypt all existing secrets. For example, let's do it fort all secrets in `one1` NS:
 	```
-	kubectl -n one get secrets -o json | kubectl replace -f -
+	kubectl -n one1 get secrets -o json | kubectl replace -f -
 	```
 
 	To check you can do for example:
 	```
-	ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/one/s1
+	ETCDCTL_API=3 etcdctl \
+	--cert /etc/kubernetes/pki/apiserver-etcd-client.crt \
+	--key /etc/kubernetes/pki/apiserver-etcd-client.key \
+	--cacert /etc/kubernetes/pki/etcd/ca.crt \
+	get /registry/secrets/one1/s1
 	```
 
 </details>
@@ -2096,37 +2119,44 @@ Kata Containers and gVisor helps in workload isolation. It can be implemented us
 Examples:
  - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
 	
-	<details><summary> Create RuntimeClass class, something like:</summary>
-		
-		---
-		apiVersion: node.k8s.io/v1
-		kind: RuntimeClass
-		metadata:
-			name: gvisor
-		handler: runsc
+	Create RuntimeClass class, something like. Put the next data to `rtc.yaml` file:
+	```
+	---
+	apiVersion: node.k8s.io/v1
+	kind: RuntimeClass
+	metadata:
+	  name: gvisor
+	handler: runsc
+	```
 
-	</details>
+	Then, apply the file: 
+	```
+	k apply -f rtc.yaml
+	```
 
-	<details><summary> Deploy a new pod with created RuntimeClass, an example:</summary>
-		
-		---
-		apiVersion: v1
-		kind: Pod
-		metadata:
-			name: sec
-		spec:
-			runtimeClassName: gvisor
-			containers:
-				- image: nginx:1.21.5-alpine
-				name: sec
-			dnsPolicy: ClusterFirst
-			restartPolicy: Always
+	Deploy a new pod with created RuntimeClass, an example `sec_pod.yaml`:
+	```
+	---
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	  name: sec
+	spec:
+	  runtimeClassName: gvisor
+	  containers:
+		- image: nginx:1.21.5-alpine
+		  name: sec
+		  dnsPolicy: ClusterFirst
+		  restartPolicy: Always
+	```
 
-	</details>
+	Then, apply the file: 
+	```
+	k apply -f sec_pod.yaml
+	```
 
 	Checks:
 	```
-	k apply gvisor_file.yaml
 	k exec sec -- dmesg
 	```
 
@@ -2268,6 +2298,8 @@ Examples:
 	podman exec -it 4a848daec2e2 bash # fails
 	podman exec -it 4a848daec2e2 sh # works
 	```
+
+	NOTE: you can use `docker` or `podman` to work with Dockerfile and containers.
 
 </details>
 
@@ -2490,7 +2522,7 @@ Examples:
 
 	</details>
 
-	Checks
+	Checks:
 	```
 	crictl ps -a | grep api
 	crictl logs 91c61357ef147
@@ -2631,7 +2663,7 @@ Examples:
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 
 Examples:
-- <details><summary>Example_1 (with Falco)</summary>
+- <details><summary>Example_1 Detect shell exec in all containers with Falco</summary>
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
 	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
@@ -2675,7 +2707,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_2 (with Falco)</summary>
+- <details><summary>Example_2 Detect shell exec in one specific container with Falco</summary>
 	
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
@@ -2727,7 +2759,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_3 (with Sysdig)</summary>
+- <details><summary>Example_3 detect anomalous processes that occur and execute frequently in a single container with Sysdig</summary>
 	
 	Use sysdig tool to detect anomalous processes that occur and execute frequently in a single container of Pod `myredis`.
 
@@ -2760,6 +2792,62 @@ Examples:
 	Use for specific container name - myredis:
 	```
 	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/user.id/summary
+	```
+
+</details>
+
+- <details><summary>Example_4 detect spawned processes in container(s) with Falco</summary>
+	The sriteria is to detect spawned processes in container only for `nginx` PODs with the next format `Spawned process in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
+
+	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
+	```
+	file_output:
+	enabled: true
+	keep_alive: false
+	filename: /var/log/falco.txt
+	```
+
+	Now, open `/etc/falco/falco_rules.local.yaml` file and put the next rule:
+	```
+	- rule: spawned_process_in_container
+	desc: A process was spawned in the container.
+	condition: >
+	   evt.type = execve and container.name = "nginx"
+	output: >
+	   Spawned process in container: %evt.time,%user.name,%proc.cmdline
+	priority: CRITICAL
+	``` 
+
+	Or, cna re-use macros:
+	```
+	- rule: spawned_process_in_container
+	desc: A process was spawned in the container.
+	condition: >
+	   spawned_process and container.name = "nginx"
+	output: >
+	   Spawned process in container: %evt.time,%user.name,%proc.cmdline
+	priority: CRITICAL
+	```
+	
+	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
+
+	Restart Falco service:
+	```
+	service falco restart && service falco status
+	```
+
+	Checks:
+	```
+	k run nginx --image=nginx:alpine
+
+	k exec -it nginx -- sh
+
+	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
+	```
+
+	Or, you can run the below command for running falco every 30 seconds and store data in file:
+	```
+	falco -M 30 -r /etc/falco/falco_rules.local.yaml > /var/log/falco.txt
 	```
 
 </details>
