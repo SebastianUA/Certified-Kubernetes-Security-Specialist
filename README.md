@@ -47,10 +47,10 @@ Examples:
 	  name: deny-all
 	  namespace: monitoring
 	spec:
-	podSelector: {}
-	policyTypes:
-	- Ingress
-	- Egress
+	  podSelector: {}
+	  policyTypes:
+	  - Ingress
+	  - Egress
 	```
 
 </details>
@@ -65,8 +65,8 @@ Examples:
 	name: api-allow
 	spec:
 	podSelector:
-	   matchLabels:
-	   run: my-app
+	  matchLabels:
+	  run: my-app
 	ingress:
 	- from:
 	   - podSelector:
@@ -106,9 +106,26 @@ Examples:
 	  name: deny-ingress-only
 	  namespace: monitoring
 	spec:
-	podSelector: {}
-	policyTypes:
-	- Ingress
+	  podSelector: {}
+	  policyTypes:
+	  - Ingress
+	```
+
+</details>
+
+- <details><summary>Example_5: Create default deny networking policy for egress only. Use netpol in <b>monitoring</b> namespace:</summary>
+	
+	```
+	---
+	apiVersion: networking.k8s.io/v1
+	kind: NetworkPolicy
+	metadata:
+	  name: deny-egress-only
+	  namespace: monitoring
+	spec:
+	  podSelector: {}
+	  policyTypes:
+	  - Egress
 	```
 
 </details>
@@ -610,7 +627,7 @@ Examples:
 	
 </details>
 
- - <details><summary>Example_2: Chaning authentication mode to Webhook:</summary>
+ - <details><summary>Example_2: Changing authentication mode to Webhook:</summary>
 	
 	Getting `kubeconfig` path:
 	```
@@ -1043,6 +1060,30 @@ Examples:
 	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `–-read-only-ports=0` into `KUBELET_SYSTEM_PODS_ARGS`.
 	
 	Make restart service of kubelet after your change(s):
+	```
+	systemctl daemon-reload && systemctl restart kubelet.service
+	```
+	
+</details>
+
+ - <details><summary>Example_11: Enable rotation of certificates:</summary>
+
+	Getting `kubeconfig` path, for example you can use:
+	```
+	ps -ef | grep kubelet | grep -Ei "kubeconfig"
+	```
+
+	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	
+		---
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		.....
+		rotateCertificates: true
+		.....
+
+	</details>
+
+	Make restart service of kubelet:
 	```
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
@@ -1818,6 +1859,8 @@ Examples:
 			restartPolicy: Always
 
 	</details>
+
+	*NOTE*: When you set runAsNonRoot: true you require that the container will run with a user with any UID other than 0. No matter which UID your user has. So, that parameter must set to `false` for security context.
 	
 </details>
 
