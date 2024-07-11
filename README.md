@@ -595,14 +595,9 @@ When it comes to Kubernetes Production Implementation restricting API access is 
 - Admission Webhooks in Kubernetes.
 
 Examples:
- - <details><summary>Example_1: Blocking anonymous access to use API:</summary>
-	
-	First that need to check is:
-	```
-	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
-	```
+ - <details><summary>Example_1: Blocking anonymous access to use API in Kubelet:</summary>
 
-	If it's empty output, then:
+	Checking, where the config is:
 	```
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
@@ -627,7 +622,7 @@ Examples:
 	
 </details>
 
- - <details><summary>Example_2: Changing authentication mode to Webhook:</summary>
+ - <details><summary>Example_2: Changing authentication mode to Webhook for kubelet:</summary>
 	
 	Getting `kubeconfig` path:
 	```
@@ -652,7 +647,7 @@ Examples:
 	
 </details>
 
- - <details><summary>Example_3: Blocking insecure port:</summary>
+ - <details><summary>Example_3: Blocking insecure port for kube-apiserver:</summary>
 
 	First, checking:
 	```
@@ -1066,7 +1061,7 @@ Examples:
 	
 </details>
 
- - <details><summary>Example_11: Enable rotation of certificates:</summary>
+ - <details><summary>Example_11: Enable rotation of certificates for kubelet:</summary>
 
 	Getting `kubeconfig` path, for example you can use:
 	```
@@ -1090,6 +1085,54 @@ Examples:
 	
 </details>
 
+ - <details><summary>Example_12: Blocking anonymous access to use API in kube-apiserver and getting clusterrolebindings and rolebindings:</summary>
+	
+	You can check it like:
+	```
+	ps -ef | grep kube-apiserver
+	```
+
+	First that need to check is:
+	```
+	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
+	```
+
+	*NOTE*: `--anonymous-auth` argument shows as `false`. This setting ensures that requests not rejected by other authentication methods are not treated as anonymous and therefore allowed against policy.
+
+	Open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and adding the `--anonymous-auth=false` parameter, something like:
+	```
+	---
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	annotations:
+		kubeadm.kubernetes.io/kube-apiserver.advertise-address.endpoint: 172.30.1.2:6443
+	creationTimestamp: null
+	labels:
+		component: kube-apiserver
+		tier: control-plane
+	name: kube-apiserver
+	namespace: kube-system
+	spec:
+	containers:
+	- command:
+		- kube-apiserver
+		- --anonymous-auth=false
+		........
+	```
+
+	Identify affected resources. Also, a review of RBAC items for clusterrolebindings which provide access to `system:anonymous` or `system:unauthenticated` will help, this can be done using a command like:
+	```
+	kubectl get clusterrolebindings -o json | jq '.items[] | select(.subjects? // [] | any(.kind == "User" and .name == "system:anonymous" or .kind == "Group" and .name == "system:unauthenticated"))'
+	```
+
+	Similarly for RoleBindings, the following command can be used:
+	```
+	kubectl get rolebindings -A -o json | jq '.items[] | select(.subjects? // [] | any(.kind == "User" and .name == "system:anonymous" or .kind == "Group" and .name == "system:unauthenticated"))'
+	```
+	
+</details>
+
 **Useful official documentation**
 
 - [Controlling access](https://kubernetes.io/docs/concepts/security/controlling-access/)
@@ -1109,6 +1152,7 @@ Examples:
 **Useful non-official documentation**
 
 - [Attacking Kubernetes clusters using the kubelet API](https://faun.pub/attacking-kubernetes-clusters-using-the-kubelet-api-abafc36126ca)
+- [Limiting access to Kubernetes resources with RBAC](https://learnk8s.io/rbac-kubernetes)
 
 ### 2. Use Role Based Access Controls to minimize exposure
 
