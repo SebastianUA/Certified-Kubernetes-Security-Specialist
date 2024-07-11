@@ -54,7 +54,7 @@ Examples:
 	```
 
 </details>
- 
+
  - <details><summary>Example_2: Create networking policy with <b>api-allow</b> name and create a restriction access to <b>api-allow</b> application that has deployed on <b>default</b> namespace and allow access only from <b>app2</b> pods:</summary>
 	
 	```
@@ -153,7 +153,7 @@ Examples:
 	[INFO] 1 Master Node Security Configuration
 	[INFO] 1.2 API Server
 	[FAIL] 1.2.20 Ensure that the --profiling argument is set to false (Automated)
-
+	
 	== Remediations master ==
 	1.2.20 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 	on the master node and set the below parameter.
@@ -165,7 +165,7 @@ Examples:
 	1 checks FAIL
 	0 checks WARN
 	0 checks INFO
-
+	
 	== Summary total ==
 	0 checks PASS
 	1 checks FAIL
@@ -186,7 +186,7 @@ Examples:
 	[INFO] 1 Master Node Security Configuration
 	[INFO] 1.3 Controller Manager
 	[FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
-
+	
 	== Remediations master ==
 	1.3.2 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
 	on the master node and set the below parameter.
@@ -198,14 +198,14 @@ Examples:
 	1 checks FAIL
 	0 checks WARN
 	0 checks INFO
-
+	
 	== Summary total ==
 	0 checks PASS
 	1 checks FAIL
 	0 checks WARN
 	0 checks INFO
 	```
-
+	
 	Then, going to fix:
 	```
 	...
@@ -258,20 +258,21 @@ Examples:
 	Then create an ingress resource. The following example uses a host that maps to localhost:
 	```
 	kubectl create ingress demo-localhost --class=nginx \
+
   	--rule="demo.localdev.me/*=demo:80"
-	```
-
-	Now, forward a local port to the ingress controller:
-	```
-	kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
-	```
-
-	At this point, you can access your deployment using curl:
-	```
-	curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
-	```
-
-	You should see a HTML response containing text like "It works!".
+  	```
+  	
+  	Now, forward a local port to the ingress controller:
+  	```
+  	kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
+  	```
+  	
+  	At this point, you can access your deployment using curl:
+  	```
+  	curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
+  	```
+  	
+  	You should see a HTML response containing text like "It works!".
 
 </details>
 
@@ -311,7 +312,7 @@ Examples:
 	```
 
 </details>
- 
+
  - <details><summary>Example_2: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace (with TLS):</summary>
 	
 	```
@@ -371,19 +372,20 @@ Examples:
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
 	metadata:
+
   		name: deny-all-allow-metadata-access
-		namespace: monitoring
-	spec:
+  		namespace: monitoring
+  	spec:
   		podSelector: {}
   		policyTypes:
   		- Egress
   		egress:
   		- to:
-    	  - ipBlock:
-      		cidr: 0.0.0.0/0
-            except:
-      		- 1.1.1.1/32
-	```
+  		  - ipBlock:
+  	  		cidr: 0.0.0.0/0
+  	        except:
+  	  		- 1.1.1.1/32
+  	```
 
 </details>
 
@@ -620,6 +622,7 @@ Examples:
 	systemctl restart kubelet.service
 	```
 	
+
 </details>
 
  - <details><summary>Example_2: Changing authentication mode to Webhook for kubelet:</summary>
@@ -645,6 +648,7 @@ Examples:
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
+
 </details>
 
  - <details><summary>Example_3: Blocking insecure port for kube-apiserver:</summary>
@@ -679,6 +683,7 @@ Examples:
 
 	</details>
 	
+
 </details>
 
  - <details><summary>Example_4: Enable protect kernel defaults for kube-apiserver:</summary>
@@ -722,6 +727,7 @@ Examples:
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
+
 </details>
 
  - <details><summary>Example_5: NodeRestriction enabling:</summary>
@@ -746,13 +752,13 @@ Examples:
 				- --client-ca-file=/etc/kubernetes/pki/ca.crt
 				- --enable-admission-plugins=NodeRestriction
 				- --enable-bootstrap-token-auth=true
-		
+	
 	</details>
 
 	Let's check the configurations:
 	```
 	ssh node01
-
+	
     export KUBECONFIG=/etc/kubernetes/kubelet.conf
     k label node controlplane controlplane/two=123 # restricted
     k label node node01 node-restriction.kubernetes.io/two=123 # restricted
@@ -763,7 +769,7 @@ Examples:
 	```
 	ps -ef | grep apiserver
 	/proc/15501/exe -h | grep -Ei plugins
-	``` 
+	```
 	Where `15501` - PID ID of the process. 
 
 </details>
@@ -773,9 +779,9 @@ Examples:
 	<details><summary>First al all, checking:</summary>
 	
 		cat /var/log/syslog | grep kube-apiserver
-
+		
 		or
-
+		
 		cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
 
 	</details>
@@ -827,7 +833,7 @@ Examples:
 	<details><summary>Checks:</summary>
 	
 		k get ns
-
+		
 		k get po
 
 	</details>
@@ -873,13 +879,13 @@ Examples:
 	<details><summary>Create and approve:</summary>
 	
 		k -f csr.yaml create
-
+		
 		k get csr # pending
-
+		
 		k certificate approve iuser@internal.users
-
+		
 		k get csr # approved
-
+		
 		k get csr iuser@internal.users -ojsonpath="{.status.certificate}" | base64 -d > iuser.crt
 
 	</details>
@@ -896,7 +902,7 @@ Examples:
 	<details><summary>Checks:</summary>
 	
 		k get ns
-
+		
 		k get po
 
 	</details>
@@ -1059,6 +1065,7 @@ Examples:
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
+
 </details>
 
  - <details><summary>Example_11: Enable rotation of certificates for kubelet:</summary>
@@ -1083,6 +1090,7 @@ Examples:
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 	
+
 </details>
 
  - <details><summary>Example_12: Blocking anonymous access to use API in kube-apiserver and getting clusterrolebindings and rolebindings:</summary>
@@ -1130,7 +1138,10 @@ Examples:
 	```
 	kubectl get rolebindings -A -o json | jq '.items[] | select(.subjects? // [] | any(.kind == "User" and .name == "system:anonymous" or .kind == "Group" and .name == "system:unauthenticated"))'
 	```
+
+	If needed, you can delete them!
 	
+
 </details>
 
 **Useful official documentation**
@@ -1153,6 +1164,7 @@ Examples:
 
 - [Attacking Kubernetes clusters using the kubelet API](https://faun.pub/attacking-kubernetes-clusters-using-the-kubelet-api-abafc36126ca)
 - [Limiting access to Kubernetes resources with RBAC](https://learnk8s.io/rbac-kubernetes)
+- [Let's talk about anonymous access to Kubernetes](https://raesene.github.io/blog/2023/03/18/lets-talk-about-anonymous-access-to-Kubernetes/)
 
 ### 2. Use Role Based Access Controls to minimize exposure
 
@@ -1180,6 +1192,7 @@ Examples:
 
 	</details>
 	
+
 </details>
 
  - <details><summary>Example_2: Working with RBAC (cluster roles and cluster role bindings):</summary>
@@ -1401,7 +1414,7 @@ Examples:
 	Checking if seccomp is on host:
 	```
 	grep -i seccomp /boot/config-$(uname -r)
-
+	
 	CONFIG_SECCOMP=y
 	CONFIG_HAVE_ARCH_SECCOMP_FILTER=y
 	CONFIG_SECCOMP_FILTER=y
@@ -1589,7 +1602,7 @@ Examples:
 	.
 	Installing this package results in a full installation, including the
 	configuration files, init scripts and support scripts.
-
+	
 	N: There is 1 additional record. Please use the '-a' switch to see it
 	```
 
@@ -1629,7 +1642,7 @@ Examples:
 	If you want to display only the username you can use either awk or cut commands to print only the first field containing the username:
 	```
 	awk -F: '{print $1}' /etc/passwd
-
+	
 	cut -d: -f1 /etc/passwd
 	```
 	
@@ -1774,7 +1787,7 @@ Examples:
  - <details><summary>Example_1: Working with Apparmor:</summary>
 	
 	<details><summary> An example of configuration:</summary>
-		
+	
 		---
 		apiVersion: apps/v1
 		kind: Deployment
@@ -1816,7 +1829,7 @@ Examples:
 		"apparmor_profile": "localhost/docker-default"
     	"apparmorProfile": "docker-default",
 	```
-</details>
+	</details>
 
 - <details><summary>Example_2: Working with Seccomp:</summary>
 
@@ -1847,7 +1860,7 @@ Examples:
  - <details><summary>Example_1: Working with Privilege Escalation:</summary>
 	
 	<details><summary> An example of configuration:</summary>
-		
+	
 		---
 		apiVersion: v1
 		kind: Pod
@@ -1871,6 +1884,7 @@ Examples:
 
 	</details>
 	
+
 </details>
 
  - <details><summary>Example_2: Working with Privileged containers:</summary>
@@ -1881,7 +1895,7 @@ Examples:
 	```
 
 	<details><summary> An example of configuration:</summary>
-		
+	
 		---
 		apiVersion: v1
 		kind: Pod
@@ -1906,6 +1920,7 @@ Examples:
 
 	*NOTE*: When you set runAsNonRoot: true you require that the container will run with a user with any UID other than 0. No matter which UID your user has. So, that parameter must set to `false` for security context.
 	
+
 </details>
 
 - <details><summary>Example_3: Working with non-root user in containers (runAsNonRoot):</summary>
@@ -1915,7 +1930,7 @@ Examples:
 	```
 
 	<details><summary> Edit that `non-root-pod.yaml` file to:</summary>
-		
+	
 		---
 		apiVersion: v1
 		kind: Pod
@@ -1940,6 +1955,7 @@ Examples:
 	k apply -f non-root-pod.yaml
 	```
 	
+
 </details>
 
 - <details><summary>Example_4: Run container as user:</summary>
@@ -1949,7 +1965,7 @@ Examples:
 	```
 
 	<details><summary> Edit that `run-as-user-pod.yaml` file to:</summary>
-		
+	
 		---
 		apiVersion: v1
 		kind: Pod
@@ -1977,6 +1993,7 @@ Examples:
 	k apply -f run-as-user-pod.yaml
 	```
 	
+
 </details>
 
 **Useful official documentation**
@@ -2092,12 +2109,12 @@ Examples:
 			secretKeyRef:
 				name: literal-secret
 				key: secret
-	``` 
+	```
 
 	Verify:
 	```
 	kubectl exec pod-secrets -- env | grep "secret=secret12345"
-
+	
 	kubectl exec pod-secrets -- cat /etc/file-secret/hosts
 	```
 
@@ -2447,7 +2464,7 @@ Examples:
 			certificate-authority: /etc/kubernetes/policywebhook/external-cert.pem  # CA for verifying the remote service.
 			server: https://localhost:1234                   # URL of remote service to query. Must use 'https'.
 		name: image-checker
-
+		
 		contexts:
 		- context:
 			cluster: image-checker
@@ -2455,7 +2472,7 @@ Examples:
 		name: image-checker
 		current-context: image-checker
 		preferences: {}
-
+		
 		# users refers to the API server's webhook configuration.
 		users:
 		- name: api-server
@@ -2613,7 +2630,7 @@ Examples:
 	```
 	crictl ps -a | grep api
 	crictl logs 91c61357ef147
-
+	
 	k run pod --image=nginx
 	
 	Error from server (Forbidden): pods "pod" is forbidden: Post "https://localhost:1234/?timeout=30s": dial tcp 127.0.0.1:1234: connect: connection refused
@@ -2639,12 +2656,14 @@ Examples:
 
 	Everyone must understand Dockerfile and fix it with best practices (without any tools).
 	
+
 </details>
 
 - <details><summary>Example_2: Static Manual analysis k8s:</summary>
 
 	Everyone must understand YAML files of deployments/pods/etc and fix them out with best practices (without any tools).
 	
+
 </details>
 
 **Useful official documentation**
@@ -2691,6 +2710,7 @@ Examples:
 	k -n applications scale deploy web1 --replicas 0
 	```
 	
+
 </details>
 
 - <details><summary>Example_2: Using trivy to scan images in `default` namespace:</summary>
@@ -2705,6 +2725,7 @@ Examples:
 	trivy --severity HIGH,CRITICAL nginx:1.19.2
 	```
 	
+
 </details>
 
 **Useful official documentation**
@@ -2763,32 +2784,70 @@ Examples:
 
 	Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
 	```
-	- rule: Terminal shell in container
-	desc: A shell was used as the entrypoint/exec point into a container with an attached terminal.
-	condition: >
-		spawned_process and container.name = "nginx"
-		and shell_procs and proc.tty != 0
-		and container_entrypoint
-		and not user_expected_terminal_shell_in_container_conditions
-	output: >
-		Shell in container: %evt.time,%user.name,%proc.cmdline
-	priority: CRITICAL
-	tags: [container, shell, mitre_execution]
-	``` 
+	---
+  
+  	# macros
+	- macro: container
+	  condition: (container.id != host)
+	
+	- macro: spawned_process
+	  condition: evt.type in (execve, execveat) and evt.dir=<
+	
+	- macro: shell_procs
+	  condition: proc.name in (shell_binaries)
+	
+	- macro: container_entrypoint
+	  condition: (not proc.pname exists or proc.pname in (runc:[0:PARENT], runc:[1:CHILD], runc, docker-runc, exe, docker-runc-cur))
+	
+	- macro: never_true
+	  condition: (evt.num=0)
+	
+	- macro: user_expected_terminal_shell_in_container_conditions
+	  condition: (never_true)
+	
+	# rules
+	- rule: Terminal shell in container 1
+	  desc: detect spawned process by user name
+	  condition: >
+	    spawned_process 
+	    and container
+	    and container.name = "nginx"
+	    and shell_procs and proc.tty != 0
+	    and container_entrypoint
+	    and not user_expected_terminal_shell_in_container_conditions
+	  output: >
+	    Shell in container: %evt.time,%user.name,%proc.cmdline
+	  priority: CRITICAL
+	  tags: [container, shell]
+	
+	- rule: Terminal shell in container 2
+	  desc: detect spawned process by user ID
+	  condition: >
+	    spawned_process
+	    and container
+	    and container.name = "nginx"
+	    and shell_procs and proc.tty != 0
+	    and container_entrypoint
+	    and not user_expected_terminal_shell_in_container_conditions
+	  output: >
+	    Shell in container: %evt.time,%user.uid,%proc.cmdline
+	  priority: CRITICAL
+	  tags: [container, shell]
+	```
 	
 	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
-
+	
 	Restart Falco service:
 	```
 	service falco restart && service falco status
 	```
-
+	
 	Checks:
 	```
 	k run nginx --image=nginx:alpine
-
+	
 	k exec -it nginx -- sh
-
+	
 	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
 	```
 
@@ -2810,10 +2869,10 @@ Examples:
 	```
 	- macro: app_nginx
   	  condition: container and container.image contains "nginx"
-
+	
 	- list: nginx_allowed_processes
       items: ["nginx", "app-entrypoint.", "basename", "dirname", "grep", "nami", "node", "tini"]
-
+	
 	- rule: Terminal shell in container
 	  desc: A shell was used as the entrypoint/exec point into a container with an attached terminal.
 	  condition: >
@@ -2826,7 +2885,7 @@ Examples:
 		Shell in container: %evt.time,%user.name,%proc.cmdline
 	  priority: CRITICAL
 	  tags: [container, shell, mitre_execution, app_nginx]
-	``` 
+	```
 
 	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 
@@ -2838,9 +2897,9 @@ Examples:
 	Checks:
 	```
 	k run nginx --image=nginx:alpine
-
+	
 	k exec -it nginx -- sh
-
+	
 	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
 	```
 
@@ -2855,7 +2914,7 @@ Examples:
 
 	Use the tools to analyze the spawned and executed processes for at least `60` seconds, checking them with filters and writing the events to the file `/opt/incidents/summary`, which contains the detected events in the following format. This file contains the detected events in the following format: `timestamp,uid/username,processName`. Keep the original timestamp format of the tool intact.
 	NOTE: Ensure that the events file is stored on a working node in the cluster.
-
+	
 	The output example of formatted events should be like:
 	```
 	01:33:19.601363716,root,init
@@ -2867,19 +2926,34 @@ Examples:
 	```
 	sysdig -M 10 -p "%evt.time,%user.uid,%proc.name"
 	```
-
-	Use for specific container ID (myredis):
+	
+	Use for specific container ID (`myredis`):
 	```
-	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.id=f011edb5a03e >> /opt/incidents/user.name/summary
+	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.name=myredis >> /opt/incidents/summary
 	
 	Or:
 	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.id=$(kubectl get po myredis -o json | jq -r '.status.containerStatuses[].containerID'| tr -d 'containerd://') >> /opt/incidents/user.name/summary
 	```
+	
+	Use for specific container name - `myredis`:
+	```
+	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/summary
+	```
 
-	Use for specific container name - myredis:
+	*NOTE*: To get list of events, you can use:
 	```
-	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/user.id/summary
+	sysdig --list
+
+	sysdig --list | grep time
 	```
+
+	For testing, create container:
+	```
+	k run myredis --image=redis
+	k exec -ti myredis -- sh
+	```
+
+	Then, run some command(s) insode the container.
 
 </details>
 
@@ -2903,7 +2977,7 @@ Examples:
 	output: >
 	   Spawned process in container: %evt.time,%user.name,%proc.cmdline
 	priority: CRITICAL
-	``` 
+	```
 
 	Or, cna re-use macros:
 	```
@@ -2926,9 +3000,9 @@ Examples:
 	Checks:
 	```
 	k run nginx --image=nginx:alpine
-
+	
 	k exec -it nginx -- sh
-
+	
 	cat /var/log/syslog | grep falco | grep -Ei "Shell in container"
 	```
 
@@ -3036,22 +3110,22 @@ Examples:
 		resources:
 		- group: "" # core
 		  resources: ["pods"]
-
+	
 	# Log all other resources in core and extensions at the Request level.
 	- level: Request
 		resources:
 		- group: "" # core API group
 		- group: "extensions" # Version of group should NOT be included.
-
+	
 	# Log pod changes at RequestResponse level
 	- level: RequestResponse
 		resources:
 		- group: ""
 		resources: ["pods"]
-
+	
 	# Don't log any other requests"
 	- level: None
-	``` 
+	```
 
 	Next, edit kube-api configuration:
 	```	
@@ -3059,7 +3133,7 @@ Examples:
 	```
 
 	<details><summary> Add the next line to enable auditing:</summary>
-		
+	
 		---
 		spec:
 			containers:
@@ -3073,7 +3147,7 @@ Examples:
 	</details>
 
 	<details><summary> Add the new Volumes:</summary>
-		
+	
 		volumes:
 		- name: audit-policy
 			hostPath:
@@ -3087,7 +3161,7 @@ Examples:
 	</details>
 
 	<details><summary> Add the new VolumeMounts:</summary>
-		
+	
 		volumeMounts:
 		- mountPath: /etc/kubernetes/auditing/policy.yaml
 			name: audit-policy
@@ -3101,7 +3175,7 @@ Examples:
 	Checks:
 	```
 	crictl ps -a | grep api
-
+	
 	tail -fn10 /etc/kubernetes/audit-logs/audit.log
 	```
 
@@ -3115,7 +3189,7 @@ Examples:
 	```
 
 	<details><summary> Add the next line to enable auditing:</summary>
-		
+	
 		---
 		spec:
 			containers:
@@ -3129,7 +3203,7 @@ Examples:
 	</details>
 
 	<details><summary> Add the new Volumes:</summary>
-		
+	
 		volumes:
 		- name: audit-policy
 			hostPath:
@@ -3143,7 +3217,7 @@ Examples:
 	</details>
 
 	<details><summary> Add the new VolumeMounts:</summary>
-		
+	
 		volumeMounts:
 		- mountPath: /etc/kubernetes/auditing/policy.yaml
 			name: audit-policy
@@ -3160,6 +3234,7 @@ Examples:
 	tail -f /etc/kubernetes/audit-logs/audit.log
 	```
 	
+
 </details>
 
 **Useful official documentation**
@@ -3177,13 +3252,13 @@ Examples:
  - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
 	
 	<details><summary> Generate configuration :</summary>
-		
+	
 		k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
 
 	</details>
 
 	<details><summary> Edit it to:</summary>
-		
+	
 		---
 		apiVersion: v1
 		kind: Pod
@@ -3207,6 +3282,7 @@ Examples:
 
 	</details>
 	
+
 </details>
 
 **Useful official documentation**
