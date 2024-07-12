@@ -2940,6 +2940,11 @@ Examples:
 	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/summary
 	```
 
+	Or:
+	```
+	sysdig -pc "container.name=myredis and evt.type in (execve, execveat) and evt.dir=<" -p '%evt.time,%user.uid,%proc.name' >> /opt/incidents/summary
+	```
+
 	*NOTE*: To get list of events, you can use:
 	```
 	sysdig --list
@@ -3016,6 +3021,7 @@ Examples:
 **Useful official documentation**
 
 - [Falco docs](https://falco.org/docs)
+- [Sysdig docs](https://docs.sysdig.com/en/)
 
 **Useful non-official documentation**
 
@@ -3023,6 +3029,9 @@ Examples:
 - [Guidance on Kubernetes threat modeling](https://www.trendmicro.com/vinfo/us/security/news/virtualization-and-cloud/guidance-on-kubernetes-threat-modeling)
 - [Attack matrix Kubernetes](https://www.microsoft.com/en-us/security/blog/2020/04/02/attack-matrix-kubernetes/)
 - [Sysdig Examples](https://github.com/draios/sysdig/wiki/Sysdig-Examples#security)
+- [Monitoring Command Execution In Containers With Sysdig](https://keefer.io/posts/sysdig-monitoring/)
+- [Falco security](https://artifacthub.io/packages/helm/falcosecurity/falco)
+- [Kubernetes Security Tools: Falco](https://medium.com/@noah_h/kubernetes-security-tools-falco-e873831f3d3d)
 
 ### 3. Detect all phases of attack regardless of where it occurs and how it spreads
 
@@ -3031,6 +3040,7 @@ This part of the task can be done with OPA for example and allow pulling images 
 **Useful official documentation**
 
 - [Falco](https://falco.org/)
+- [Sysdig docs](https://docs.sysdig.com/en/)
 
 **Useful non-official documentation**
 
