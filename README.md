@@ -546,6 +546,8 @@ Since Kubernetes Dashboard is leveraging service account “default” in namesp
 
 ### 6. Verify platform binaries before deploying
 
+In this section, we will take a look at Verify platform binaries before deploying.
+
 Examples:
  - <details><summary>Compare binary file of kubelet on the current host and with kubelet 1.27 that you must download from official release:</summary>
 	
@@ -622,7 +624,6 @@ Examples:
 	systemctl restart kubelet.service
 	```
 	
-
 </details>
 
  - <details><summary>Example_2: Changing authentication mode to Webhook for kubelet:</summary>
@@ -912,7 +913,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_9: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add `TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256` cipher as well:</summary>
+- <details><summary>Example_9: Add minimal TLS 1.2 for ETCD and kube-apiserver; Add TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 cipher as well:</summary>
 
 	- ETCD side, open `/etc/kubernetes/manifests/etcd.yaml` file and put the next:
 		```
@@ -980,7 +981,7 @@ Examples:
 
 		To check cipher:
 		```
-		nnmap --script ssl-enum-ciphers -p 6443 127.0.0.1
+		nmap --script ssl-enum-ciphers -p 6443 127.0.0.1
 		```
 	
 	- kubelet side, open `/var/lib/kubelet/config.yaml` file and put the next:
@@ -1067,7 +1068,6 @@ Examples:
 	```
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
-	
 
 </details>
 
@@ -2019,7 +2019,7 @@ Examples:
 	k run run-as-user-pod --image=nginx:alpine --dry-run=client -o yaml > run-as-user-pod.yaml
 	```
 
-	<details><summary> Edit that `run-as-user-pod.yaml` file to:</summary>
+	<details><summary> Edit that run-as-user-pod.yaml file to:</summary>
 	
 		---
 		apiVersion: v1
