@@ -768,6 +768,9 @@ Examples:
 	*NOTE*: If you don't know how to find proper parameter (at that case - NodeRestriction), you can use:
 	```
 	ps -ef | grep apiserver
+	```
+	Getting plugins:
+	```
 	/proc/15501/exe -h | grep -Ei plugins
 	```
 	Where `15501` - PID ID of the process. 
@@ -1089,7 +1092,6 @@ Examples:
 	```
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
-	
 
 </details>
 
@@ -1141,6 +1143,45 @@ Examples:
 
 	If needed, you can delete them!
 	
+
+</details>
+
+- <details><summary>Example_13: Read-only port for kubelet:</summary>
+
+	Getting `kubeconfig` path, for example you can use:
+	```
+	ps -ef | grep kubelet | grep -Ei "kubeconfig"
+	```
+
+	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	
+		---
+		apiVersion: kubelet.config.k8s.io/v1beta1
+		authentication:
+		anonymous:
+			enabled: false
+		webhook:
+			cacheTTL: 0s
+			enabled: true
+		x509:
+			clientCAFile: /etc/kubernetes/pki/ca.crt
+		authorization:
+		mode: Webhook
+		webhook:
+			cacheAuthorizedTTL: 0s
+			cacheUnauthorizedTTL: 0s
+		readOnlyPort:0
+		.....
+	</details>
+
+	Kubelet uses two ports:
+	- `10250`: Serves API that allows full access
+	- `10255`: Servers API that allow unauthenticated read-only access
+
+	Make restart service of kubelet:
+	```
+	systemctl daemon-reload && systemctl restart kubelet.service
+	```
 
 </details>
 
@@ -1738,6 +1779,19 @@ Examples:
 
 </details>
 
+- <details><summary>Example_12: SSH Hardening:</summary>
+	
+	Going to add some restriction in `/etc/ssh/sshd_config` file:
+	Disable SSH for root Account `PermitRootLogin no`
+	Disable password login `PasswordAuthentication no`
+
+	Restart SSHD restart:
+	```
+	service sshd restart
+	```
+
+</details>
+
 **Useful official documentation**
 
 - [Securing a cluster](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#preventing-containers-from-loading-unwanted-kernel-modules)
@@ -1758,6 +1812,7 @@ Examples:
 ### 2. Minimize IAM roles
 
 IAM roles control access to cloud resources. It is important to minimize the permissions granted to IAM roles.
+Don’t use the root user, and set users with least privileges principle. Assign permissions to groups, and no to users, and assign the user to a group.
 
 **Useful official documentation**
 
@@ -2748,10 +2803,129 @@ Perform behavioural analytics of syscall process and file activities at the host
 Examples:
  - <details><summary>Example_1: Use seccomp:</summary>
 	
-	TBD: Restrict a Container's Syscalls with seccomp
+	There is a JSON format for writing custom seccomp profiles: A fundamental seccomp profile has three main elements: defaultAction, architectures and syscalls:
+	```
+	{
+		"defaultAction": "",
+		"architectures": [],
+		"syscalls": [
+			{
+				"names": [],
+				"action": ""
+			}
+		]
+	}
+	```
 
+	Using the following pattern we can whitelist only those system calls we want to allow from a process:
+	```
+	{
+		"defaultAction": "SCMP_ACT_ERRNO",
+		"architectures": [
+			"SCMP_ARCH_X86_64",
+			"SCMP_ARCH_X86",
+			"SCMP_ARCH_X32"
+		],
+		"syscalls": [
+			{
+				"names": [
+					"pselect6",
+					"getsockname",
+					..
+					..
+					"execve",
+					"exit"
+				],
+				"action": "SCMP_ACT_ALLOW"
+			}
+		]
+	}
+	```
+
+	In contrast, if we write a seccomp profile similar to the following pattern that will help us to blacklist the system calls we want to restrict and all other calls will be allowed:
+	```
+	{
+		"defaultAction": "SCMP_ACT_ALLOW",
+		"architectures": [
+			"SCMP_ARCH_X86_64",
+			"SCMP_ARCH_X86",
+			"SCMP_ARCH_X32"
+		],
+		"syscalls": [
+			{
+				"names": [
+					"pselect6",
+					"getsockname",
+					..
+					.. 
+					..
+					"execve",
+					"exit"
+				],
+				"action": "SCMP_ACT_ERRNO" 
+			}
+		]
+	}
+	```
+
+	The default root directory of the kubelet is : `/var/lib/kubelet`. Now create new directory under kubelet root directory:
+	```
+	mkdir -p /var/lib/kubelet/seccomp/profiles
+	```
+
+	Store the config file inside that dir:
+	```
+	vim /var/lib/kubelet/seccomp/profiles/auditing.json
+	```
+
+	Inside your deployment or pod, adding config:
+	```
+	----
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	name: local-seccomp-profile
+	spec:
+	securityContext:
+		seccompProfile:
+		# Profile from local node
+		type: Localhost
+		localhostProfile: profiles/auditing.json
+	containers:
+	- name: container
+		image: nginx
+
+	----
+	apiVersion: v1
+	kind: Pod
+	metadata:
+	name: runtime-default-profile
+	spec:
+	securityContext:
+		# Container runtime default profile
+		seccompProfile:
+		type: RunTimeDefault
+	containers:
+	- name: test-container
+		image: nginx
+	```
+
+</details>
+
+- <details><summary>Example_2: Use strace:</summary>
+
+	For, example:
 	```
 	strace -c -f -S name chmod 2>&1 1>/dev/null | tail -n +3 | head -n -2 | awk '{print $(NF)}'
+	```
+
+</details>
+
+- <details><summary>Example_3: Use sysdig:</summary>
+
+	If you would like to use Sysdig:
+	```
+	sysdig proc.name=ls
 	```
 
 </details>
@@ -2760,6 +2934,8 @@ Examples:
 
 - [Seccomp]( https://kubernetes.io/docs/tutorials/security/seccomp/)
 - [Falco](https://falco.org/docs/)
+- [Sysdig docs](https://docs.sysdig.com/en/)
+- [Restrict a Container's Syscalls with seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/)
 
 **Useful non-official documentation**
 
@@ -2767,6 +2943,9 @@ Examples:
 - [Falco 101](https://learn.sysdig.com/falco-101)
 - [Helm-chart to deploy Falco](https://github.com/falcosecurity/charts/tree/master/falco)
 - [Detect CVE-2020 and CVE-8557](https://falco.org/blog/detect-cve-2020-8557/)
+- [Sysdig User Guide](https://github.com/draios/sysdig/wiki/Sysdig%20User%20Guide#filtering)
+- [Secure Computing with Seccomp](https://levelup.gitconnected.com/seccomp-secure-computing-mode-kubernetes-docker-97130516662c)
+- [Kubernetes Security Tools: Seccomp & AppArmor](https://medium.com/@noah_h/kubernetes-security-tools-seccomp-apparmor-586fdc61e6d9)
 
 ### 2. Detect threats within a physical infrastructure, apps, networks, data, users, and workloads
 
