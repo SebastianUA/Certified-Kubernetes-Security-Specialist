@@ -614,7 +614,7 @@ Examples:
 		............
 	</details>
 
-	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--anonymous-auth=false` into `KUBELET_SYSTEM_PODS_ARGS`.
+	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--anonymous-auth=false` into `KUBELET_SYSTEM_PODS_ARGS` if kubelet in your cluster using kubeadm.
 	
 	Make restart service of kubelet:
 	```
@@ -720,7 +720,7 @@ Examples:
 		.........
 	</details>
 
-	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--protect-kernel-defaults=true` into `KUBELET_SYSTEM_PODS_ARGS`.
+	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--protect-kernel-defaults=true` into `KUBELET_SYSTEM_PODS_ARGS` if kubelet in your cluster using kubeadm.
 	
 	Make restart service of kubelet after your change(s):
 	```
@@ -1032,7 +1032,7 @@ Examples:
 
 </details>
 
- - <details><summary>Example_10: Enable `readOnlyPort` for `kubelet`:</summary>
+ - <details><summary>Example_10: Enable readOnlyPort for kubelet:</summary>
 
 	First of all, check where the configuration is:
 	```
@@ -1061,7 +1061,7 @@ Examples:
 		.........
 	</details>
 
-	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `–-read-only-ports=0` into `KUBELET_SYSTEM_PODS_ARGS`.
+	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `–-read-only-ports=0` into `KUBELET_SYSTEM_PODS_ARGS` if kubelet in your cluster using kubeadm.
 	
 	Make restart service of kubelet after your change(s):
 	```
