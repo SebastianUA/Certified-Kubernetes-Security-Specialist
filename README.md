@@ -382,11 +382,10 @@ Examples:
   		egress:
   		- to:
   		  - ipBlock:
-  	  		cidr: 0.0.0.0/0
-  	        except:
-  	  		- 1.1.1.1/32
+  	    	  cidr: 0.0.0.0/0
+  	    	  except:
+  	    	  - 1.1.1.1/32
   	```
-
 </details>
 
 **Useful official documentation**
@@ -606,7 +605,7 @@ Examples:
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
 
-	<details><summary>Fix if it's enabled, oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	<details><summary>Fix if it's enabled, oppening /var/lib/kubelet/config.yaml file:</summary>
 	
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
@@ -624,6 +623,7 @@ Examples:
 	systemctl restart kubelet.service
 	```
 	
+
 </details>
 
  - <details><summary>Example_2: Changing authentication mode to Webhook for kubelet:</summary>
@@ -633,7 +633,7 @@ Examples:
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
 
-	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	<details><summary>Oppening /var/lib/kubelet/config.yaml file:</summary>
 	
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
@@ -648,7 +648,6 @@ Examples:
 	```
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
-	
 
 </details>
 
@@ -659,7 +658,7 @@ Examples:
 	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
 	```
 
-	<details><summary>Oppening `/etc/kubernetes/manifests/kube-apiserver.yaml` file:</summary>
+	<details><summary>Oppening /etc/kubernetes/manifests/kube-apiserver.yaml file:</summary>
 	
 		---
 		apiVersion: v1
@@ -699,7 +698,7 @@ Examples:
 	ps -ef | grep kubelet | grep -Ei "config"
 	```
 
-	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
+	<details><summary>Oppening /var/lib/kubelet/config.yaml file:</summary>
 
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
@@ -780,29 +779,33 @@ Examples:
 
 - <details><summary>Example_6: Kubernetes API troubleshooting:</summary>
 
-	<details><summary>First al all, checking:</summary>
+	1. First al all, checking:
+	```
+	cat /var/log/syslog | grep kube-apiserver
+	```	
+	Or, better try to find line with error:
+	```	
+	cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
+	```
 	
-		cat /var/log/syslog | grep kube-apiserver
-		
-		or
-		
-		cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
+	2. Secondly, checking:
+	```
+	journalctl -xe | grep apiserver
+	```
 
-	</details>
+	3. Lastly, getting ID of container:
+	```
+	crictl ps -a | grep api
+	```
 
-	<details><summary>Secondly, checking:</summary>
+	Check logs:
+	```
+	crictl logs fbb80dac7429e
+	```
+
+	Where:
+	- `fbb80dac7429e` - ID of container.
 	
-		journalctl -xe | grep apiserver
-
-	</details>
-
-	<details><summary>Lastly, checking:</summary>
-	
-		crictl ps -a | grep api
-		crictl logs fbb80dac7429e
-
-	</details>
-
 </details>
 
 - <details><summary>Example_7: Certificate signing requests sign manually:</summary>
@@ -817,7 +820,7 @@ Examples:
 	openssl req -new -key iuser.key -out iuser.csr
 	```
 
-	Note: set Common Name = iuser@internal.users
+	Note: set `Common Name` to `iuser@internal.users`
 
 	<details><summary>Certificate signing requests sign manually (manually sign the CSR with the K8s CA file to generate the CRT):</summary>
 	
@@ -858,12 +861,11 @@ Examples:
 
 	Note: set Common Name = iuser@internal.users
 
-	<details><summary>Convert the CSR file into base64:</summary>
+	Convert the CSR file into base64:
+	```
+	cat iuser.csr | base64 -w 0
+	```
 	
-		cat iuser.csr | base64 -w 0
-
-	</details>
-
 	<details><summary>Copy it into the YAML:</summary>
 	
 		apiVersion: certificates.k8s.io/v1
@@ -880,36 +882,37 @@ Examples:
 
 	</details>
 
-	<details><summary>Create and approve:</summary>
-	
-		k -f csr.yaml create
+	Create and approve:
+	```
+	k -f csr.yaml create
 		
-		k get csr # pending
+	k get csr
 		
-		k certificate approve iuser@internal.users
-		
-		k get csr # approved
-		
-		k get csr iuser@internal.users -ojsonpath="{.status.certificate}" | base64 -d > iuser.crt
+	k certificate approve iuser@internal.users
+	```
 
-	</details>
+	Now, check the status one more time (should be `approved`):
+	```
+	k get csr
+	```
 
-	<details><summary>Set credentials & context:</summary>
-	
-		k config set-credentials iuser@internal.users --client-key=iuser.key --client-certificate=iuser.crt
-		k config set-context iuser@internal.users --cluster=kubernetes --user=iuser@internal.users
-		k config get-contexts
-		k config use-context iuser@internal.users
+	Download signed certificate:
+	```
+	k get csr iuser@internal.users -ojsonpath="{.status.certificate}" | base64 -d > iuser.crt
+	```
 
-	</details>
+	Now, set credentials & context:
+	```
+	k config set-credentials iuser@internal.users --client-key=iuser.key --client-certificate=iuser.crt
+	k config set-context iuser@internal.users --cluster=kubernetes --user=iuser@internal.users
+	k config get-contexts
+	k config use-context iuser@internal.users
+	```
 
-	<details><summary>Checks:</summary>
-	
-		k get ns
-		
-		k get po
-
-	</details>
+	Checks:
+	```
+	k get ns && k get po
+	```
 
 </details>
 
@@ -1021,7 +1024,7 @@ Examples:
 
 		Checking kube-apiserver:
 		```
-		systemctl status tart kubelet.service
+		systemctl status start kubelet.service
 		```
 
 		To check cipher:
@@ -1141,6 +1144,18 @@ Examples:
 	kubectl get rolebindings -A -o json | jq '.items[] | select(.subjects? // [] | any(.kind == "User" and .name == "system:anonymous" or .kind == "Group" and .name == "system:unauthenticated"))'
 	```
 
+	As workaround, use `jsonpath` examples:
+	```
+	kubectl get rolebinding,clusterrolebinding -A -o jsonpath='{range .items[?(@.subjects[0].name == "system:anonymous")]}'{.roleRef.name}
+	kubectl get rolebinding,clusterrolebinding -A -o jsonpath='{range .items[?(@.subjects[0].name == "system:unauthenticated")]}' - {.roleRef.name}
+	```
+
+	Super minimal style, however - not fully finished:
+	```
+	kubectl get rolebinding,clusterrolebinding -A -o yaml | grep -Ei 'anonymous|unauthenticated'
+	kubectl get rolebinding,clusterrolebinding -A -ojson | grep -Ei 'anonymous|unauthenticated' -A15 -B10
+	```
+
 	If needed, you can delete them!
 	
 
@@ -1238,37 +1253,37 @@ Examples:
 
  - <details><summary>Example_2: Working with RBAC (cluster roles and cluster role bindings):</summary>
 
-	<details><summary>Create clusterrole & clusterrolebinding:</summary>
+	Create clusterrole & clusterrolebinding:
+	```
+	k create clusterrole cluster_role --verb=get,list,watch --resource=pods
+	k create clusterrolebinding cluster_role_binding --clusterrole=cluster_role --user=cap
+	```
 	
-		k create clusterrole cluster_role --verb=get,list,watch --resource=pods
-		k create clusterrolebinding cluster_role_binding --clusterrole=cluster_role --user=cap
-
-	</details>
-
-	<details><summary>Verify:</summary>
-	
-		k auth can-i list pods --as cap -n kube-public
-		k auth can-i list pods --as cap -n default
-
-	</details>
+	Verify:
+	```
+	k auth can-i list pods --as cap -n kube-public
+	k auth can-i list pods --as cap -n default
+	```
 
 </details>
 
  - <details><summary>Example_3: Working with Service Account and RBAC:</summary>
 
-	<details><summary> Create Service Account and RBAC:</summary>
-	
-		k -n name_space_1 create sa ser_acc
-		k create clusterrolebinding ser_acc-view --clusterrole view --serviceaccount name_space_1:ser_acc
+	Create Service Account and RBAC:
+	```
+	k -n name_space_1 create sa ser_acc
+	k create clusterrolebinding ser_acc-view --clusterrole view --serviceaccount name_space_1:ser_acc
+	```
 
-	</details>
+	Where: 
+	- `name_space_1` - NS name.
+	- `ser_acc` - Service account name.
 
-	<details><summary> Verify:</summary>
-	
-		k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n default
-		k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n name_space_1
-
-	</details>	
+	Verify:
+	```
+	k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n default
+	k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n name_space_1
+	```	
 
 </details>
 
@@ -2894,7 +2909,7 @@ Examples:
 	containers:
 	- name: container
 		image: nginx
-
+	
 	----
 	apiVersion: v1
 	kind: Pod
@@ -3118,25 +3133,25 @@ Examples:
 	```
 	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/summary
 	```
-
+	
 	Or:
 	```
 	sysdig -pc "container.name=myredis and evt.type in (execve, execveat) and evt.dir=<" -p '%evt.time,%user.uid,%proc.name' >> /opt/incidents/summary
 	```
-
+	
 	*NOTE*: To get list of events, you can use:
 	```
 	sysdig --list
-
+	
 	sysdig --list | grep time
 	```
-
+	
 	For testing, create container:
 	```
 	k run myredis --image=redis
 	k exec -ti myredis -- sh
 	```
-
+	
 	Then, run some command(s) insode the container.
 
 </details>
