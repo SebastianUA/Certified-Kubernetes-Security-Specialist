@@ -276,7 +276,7 @@ Examples:
 
 </details>
 
- - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service. You should open use `app1` path</summary>
+ - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service. You should open use <b>app1</b> path as prefix</summary>
 	
 	```
 	---
@@ -1234,20 +1234,17 @@ Allowing unnecessary cluster-wide access to everyone is a common mistake done du
 Examples:
  - <details><summary>Example_1: Working with RBAC (roles and role bindings):</summary>
 
-	<details><summary>Create role & rolebinding:</summary>
-	
-		k create role role_name --verb=get,list,watch --resource=pods
-		k create rolebinding role_name_binding --role=role_name --user=captain --group=group1
+	Create role & rolebinding:
+	```
+	k create role role_name --verb=get,list,watch --resource=pods
+	k create rolebinding role_name_binding --role=role_name --user=captain --group=group1
+	```
 
-	</details>
-
-	<details><summary>Verify:</summary>
-	
-		k auth can-i get pods --as captain -n kube-public
-		k auth can-i list pods --as captain -n default
-
-	</details>
-	
+	Verify:
+	```
+	k auth can-i get pods --as captain -n kube-public
+	k auth can-i list pods --as captain -n default
+	```
 
 </details>
 
@@ -1999,7 +1996,7 @@ Examples:
 	k run non-root-pod --image=nginx:alpine --dry-run=client -o yaml > non-root-pod.yaml
 	```
 
-	<details><summary> Edit that `non-root-pod.yaml` file to:</summary>
+	<details><summary> Edit that non-root-pod.yaml file to:</summary>
 	
 		---
 		apiVersion: v1
@@ -2783,7 +2780,7 @@ Examples:
 
 </details>
 
-- <details><summary>Example_2: Using trivy to scan images in `default` namespace:</summary>
+- <details><summary>Example_2: Using trivy to scan images in default namespace:</summary>
 
 	Getting images from all pods in `default` NS:
 	```
@@ -2794,7 +2791,6 @@ Examples:
 	```
 	trivy --severity HIGH,CRITICAL nginx:1.19.2
 	```
-	
 
 </details>
 
@@ -2966,6 +2962,7 @@ Examples:
 
 Examples:
 - <details><summary>Example_1 Detect shell exec in all containers with Falco</summary>
+	
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
 	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
@@ -3152,7 +3149,7 @@ Examples:
 	k exec -ti myredis -- sh
 	```
 	
-	Then, run some command(s) insode the container.
+	Then, run some command(s) inside the container to get output.
 
 </details>
 
@@ -3455,11 +3452,10 @@ Examples:
 Examples:
  - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
 	
-	<details><summary> Generate configuration :</summary>
-	
-		k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
-
-	</details>
+	Generate configuration:
+	```
+	k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
+	```
 
 	<details><summary> Edit it to:</summary>
 	
