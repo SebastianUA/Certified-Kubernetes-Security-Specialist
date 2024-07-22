@@ -782,7 +782,7 @@ Examples:
 	1. First al all, checking:
 	```
 	cat /var/log/syslog | grep kube-apiserver
-	```	
+	```
 	Or, better try to find line with error:
 	```	
 	cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
@@ -806,6 +806,7 @@ Examples:
 	Where:
 	- `fbb80dac7429e` - ID of container.
 	
+
 </details>
 
 - <details><summary>Example_7: Certificate signing requests sign manually:</summary>
@@ -1215,6 +1216,7 @@ Examples:
 - [Extensible admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
 - [Kubelet authn/authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
 - [Kubelet config](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/)
+- [ETCd security](https://etcd.io/docs/v3.4/op-guide/security/#Common%20options)
 
 **Useful non-official documentation**
 
@@ -1280,7 +1282,7 @@ Examples:
 	```
 	k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n default
 	k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n name_space_1
-	```	
+	```
 
 </details>
 
@@ -1851,7 +1853,7 @@ Also, implement Network Policies - [hands-on with Kubernetes network policy](htt
 ### 4. Appropriately use kernel hardening tools such as AppArmor, and Secсomp
 
 Examples:
- - <details><summary>Example_1: Working with Apparmor:</summary>
+ - <details><summary>Example_1: Working with Apparmor (up to Kubernetes 1.30):</summary>
 	
 	<details><summary> An example of configuration:</summary>
 	
@@ -1898,7 +1900,49 @@ Examples:
 	```
 	</details>
 
-- <details><summary>Example_2: Working with Seccomp:</summary>
+- <details><summary>Example_2: Working with Apparmor (from Kubernetes 1.30):</summary>
+	
+	Create pod with `pod-with-apparmor` name and use `docker-default` apparmor profile.
+	
+	<details><summary> An example of configuration:</summary>
+	
+		---
+		apiVersion: v1
+		kind: Pod
+		metadata:
+		  name: pod-with-apparmor
+		spec:
+		  securityContext:
+		    appArmorProfile:
+		      type: Localhost
+		      localhostProfile: docker-default
+		  containers:
+		  - name: hello
+		    image: busybox:1.28
+		    command: [ "sh", "-c", "echo 'Hello AppArmor!' && sleep 1h" ]
+	
+	</details>
+	
+	Apply the prepared configuration file:
+	```
+	k apply -f pod-with-apparmor.yaml
+	```
+	
+	Getting ID of container:
+	```
+	crictl ps -a | grep pod-with-apparmor
+	```
+	
+	Then, run the command:
+	```
+	crictl inspect e428e2a3e9324 | grep apparmor
+		"apparmor_profile": "localhost/docker-default"
+	  	"apparmorProfile": "docker-default",
+	```
+	</details>
+
+
+- <details><summary>Example_3: Working with Seccomp:</summary>
 
 	The example is already described in `Minimize host OS footprint (reduce attack surface)` section.
 
@@ -2760,6 +2804,15 @@ Examples:
 	image: docker.io/library/nginx:1.19.1-alpine-perl
 	```
 
+	Or, use the best solution:
+	```
+	k get pod -n applications -o=custom-columns="NAME:.metadata.name,IMAGE:.spec.containers[*].image"
+	NAME                    IMAGE
+	web1-54bf97c787-dk4zs   nginx:1.19.1-alpine-perl
+	web1-54bf97c787-dmhrh   nginx:1.19.1-alpine-perl
+	web2-5c8d4f8969-s27v9   nginx:1.20.2-alpine
+	```
+
 	Let's scan first deployment:
 	```
 	trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
@@ -2776,7 +2829,6 @@ Examples:
 	```
 	k -n applications scale deploy web1 --replicas 0
 	```
-	
 
 </details>
 
@@ -2787,9 +2839,19 @@ Examples:
 	k get po -o yaml | grep image: | sort -rn | uniq
 	```
 
+	Or, use:
+	```
+	k get pod -n default -o=custom-columns="NAME:.metadata.name,IMAGE:.spec.containers[*].image"
+	```
+
 	Let's scan second `nginx:1.19.2`:
 	```
-	trivy --severity HIGH,CRITICAL nginx:1.19.2
+	trivy image --severity="HIGH,CRITICAL" nginx:1.19.2
+	```
+	
+	Or:
+	```
+	trivy image -s HIGH,CRITICAL nginx:1.19.2
 	```
 
 </details>
@@ -2879,7 +2941,7 @@ Examples:
 	}
 	```
 
-	The default root directory of the kubelet is : `/var/lib/kubelet`. Now create new directory under kubelet root directory:
+	The default root directory of the kubelet is `/var/lib/kubelet`. Now create new directory under kubelet root directory:
 	```
 	mkdir -p /var/lib/kubelet/seccomp/profiles
 	```
@@ -3175,7 +3237,7 @@ Examples:
 	priority: CRITICAL
 	```
 
-	Or, cna re-use macros:
+	Or, can re-use macros:
 	```
 	- rule: spawned_process_in_container
 	desc: A process was spawned in the container.
@@ -3205,6 +3267,40 @@ Examples:
 	Or, you can run the below command for running falco every 30 seconds and store data in file:
 	```
 	falco -M 30 -r /etc/falco/falco_rules.local.yaml > /var/log/falco.txt
+	```
+
+</details>
+
+- <details><summary>Example_5 detect spawned processes in container with Falco</summary>
+	The sriteria is to detect spawned processes in container only for `pod` POD with the next format `TIMESTAMP,USER,SPAWNED_PROCESS` line. The output should be stored in `/var/log/spawned_processes.txt` file.
+
+	Open `/etc/falco/falco_rules.local.yaml` file and put the next rule:
+	```
+	- rule: spawned_process_in_container_by_user_name
+	  desc: spawned_process_in_container_by_user_name
+	  condition: container.name = "pod"
+	  output: "%evt.time,%user.uid,%proc.name"
+	  priority: WARNING
+	
+	- rule: spawned_process_in_container_by_uid
+	  desc: spawned_process_in_container_by_uid
+	  condition: container.name = "pod"
+	  output: "%evt.time,%user.uid,%proc.name"
+	  priority: WARNING
+	```
+
+	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
+
+	Now, run falco command every 30 seconds and store data in file:
+	```
+	falco -M 31 -r /etc/falco/falco_rules.local.yaml >> /var/log/spawned_processes.txt
+	```
+
+	Enter inside your pod and run some commamnds (ls, pwd, etc):
+	```
+	k run nginx --image=nginx:alpine
+	
+	k exec -it nginx -- sh
 	```
 
 </details>
