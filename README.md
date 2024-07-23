@@ -1903,7 +1903,7 @@ Examples:
 - <details><summary>Example_2: Working with Apparmor (from Kubernetes 1.30):</summary>
 	
 	Create pod with `pod-with-apparmor` name and use `docker-default` apparmor profile.
-	
+
 	<details><summary> An example of configuration:</summary>
 	
 		---
@@ -2240,7 +2240,44 @@ Examples:
 
 </details>
 
-- <details><summary>Example_3: Secret etcd encryption. Use aesgcm encryption for etcd:</summary>
+- <details><summary>Example_3: Get secret(s), decode and strore dat into the file:</summary>
+
+	For the test, let's create secret:
+	```
+	k create ns my-ns && \
+	k -n my-ns create secret generic db1-test --from-literal=username=db1 --from-literal=password=Ipassworden
+	```
+
+	Now, get `opaque` secret from `my-ns` ns:
+	```
+	kubectl -n my-ns get secrets db1-test -o yaml
+	```
+
+	Output:
+	```
+	apiVersion: v1
+	data:
+	  password: SXBhc3N3b3JkZW4=
+	  username: ZGIx
+	kind: Secret
+	metadata:
+	  creationTimestamp: "2024-07-23T13:07:31Z"
+	  name: db1-test
+	  namespace: my-ns
+	  resourceVersion: "1435"
+	  uid: f6d14247-728a-4487-ab18-dda5be0ee046
+	type: Opaque
+	```
+
+	Then, we can get secrets `password` and `username`, decode it and store into file, for example:
+	```
+	echo -n "ZGIx" | base64 -d > username.txt
+	echo -n "SXBhc3N3b3JkZW4=" | base64 -d > password.txt
+	```
+
+</details>
+
+- <details><summary>Example_4: Secret etcd encryption. Use aesgcm encryption for etcd:</summary>
 
 	Creating folder for this task:
 	```
@@ -3272,14 +3309,14 @@ Examples:
 </details>
 
 - <details><summary>Example_5 detect spawned processes in container with Falco</summary>
-	The sriteria is to detect spawned processes in container only for `pod` POD with the next format `TIMESTAMP,USER,SPAWNED_PROCESS` line. The output should be stored in `/var/log/spawned_processes.txt` file.
+	The sriteria is to detect spawned processes in container only for `pod` POD with the next format `TIMESTAMP,USER or UID,SPAWNED_PROCESS` line. The output should be stored in `/var/log/spawned_processes.txt` file.
 
 	Open `/etc/falco/falco_rules.local.yaml` file and put the next rule:
 	```
 	- rule: spawned_process_in_container_by_user_name
 	  desc: spawned_process_in_container_by_user_name
 	  condition: container.name = "pod"
-	  output: "%evt.time,%user.uid,%proc.name"
+	  output: "%evt.time,%user.name,%proc.name"
 	  priority: WARNING
 	
 	- rule: spawned_process_in_container_by_uid
