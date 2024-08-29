@@ -342,13 +342,13 @@ Examples:
 				number: 80
 	```
 
-</details>
+	**NOTE:** You should create the needed <b>local-domain-tls</b> secret for Ingress with certifications:
+	```
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=local.domail.name/O=local.domail.name"
+	kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
+	```
 
-**NOTE:** You should create the needed <b>local-domain-tls</b> secret for Ingress with certifications:
-```
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=local.domail.name/O=local.domail.name"
-kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
-```
+</details>
 
 **Useful official documentation**
 
@@ -397,7 +397,6 @@ Examples:
 
 - [Restricting cloud metadata api access](https://kubernetes.io/docs/tasks/administer-cluster/securing-a-cluster/#restricting-cloud-metadata-api-access)
 - [Kubelet authn/authz](https://kubernetes.io/docs/reference/access-authn-authz/kubelet-authn-authz/)
-
 
 ### 5. Minimize the use of and access to, GUI elements
 
