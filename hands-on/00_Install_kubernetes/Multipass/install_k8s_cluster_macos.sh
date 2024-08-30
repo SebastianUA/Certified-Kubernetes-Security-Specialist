@@ -15,9 +15,12 @@ SETCOLOR_NUMBERS="echo -en \\033[0;34m" # BLUE
 # ------------------------------------------------------------
 function preinstall {
 
-	$SETCOLOR_TITLE
-	echo "Install multipass per Unix/Linux OS: https://multipass.run/install"
-	$SETCOLOR_NORMAL
+	if ! which multipass > /dev/null 2>&1; then
+		$SETCOLOR_TITLE
+		echo "Install multipass per Unix/Linux OS: https://multipass.run/install"
+		$SETCOLOR_NORMAL
+		exit -1
+	fi
 
 	ssh-keygen -q -N "" -t rsa -b 2048 -C "vmuser" -f ./multipass-ssh-key
 
@@ -264,6 +267,7 @@ EOF'
 	multipass exec -n kubemaster01 -- sudo bash -c 'chown $(id -u):$(id -g) $HOME/.kube/config'
 
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl -n kube-system get pods'
+	# TODO: add/replace to cilium
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.30/net.yaml'
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl -n kube-system get pods'
 
@@ -460,6 +464,9 @@ function uninstall_all {
 
 # ------------------------------------------------------------
 case "$1" in
+	preinstall)
+    preinstall
+    ;;
 	install_k8s_cluster|install_k8s|install)
     install_k8s_cluster
 		configure_k8s_cluster
@@ -482,6 +489,7 @@ case "$1" in
     ;;
   help|h|-h)
 		$SETCOLOR_NUMBERS
+		echo "Set 'preinstall' as ARG to pre-install some stuff for K8S cluster"
     echo "Set 'install' as ARG to install K8S cluster"
     echo "Set 'postinstall' as ARG to postinstall something else"
     echo "Set 'context' as ARG to postinstall something else"

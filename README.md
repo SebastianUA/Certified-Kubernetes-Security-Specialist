@@ -23,6 +23,70 @@ A Certified Kubernetes Security Specialist (CKS) is an accomplished Kubernetes p
 - [Verify Certification](https://training.linuxfoundation.org/certification/verify/)
 
 
+# Global Tips
+
+## Shortcuts / Aliases
+
+- `po` = Pods
+- `rs` = ReplicaSets
+- `deploy` = Deployments
+- `svc` = Services
+- `ns` = Namespaces
+- `netpol` = Network Policies
+- `sa` = Service Accounts
+- `cm` = ConfigMaps
+
+## Get all resources in Kubernetes cluster
+
+To get all resources in all namespaces: 
+
+```shell
+kubectl get all --all-namespaces
+```
+
+Or, for specific namespace:
+```shell
+kubectl get all -n my-test-ns
+```
+
+## Formatting Output with kubectl
+
+The default output format for all kubectl commands is the human-readable plain-text format. The `-o` flag allows us to output the details in several different formats. An example of command:
+```shell
+kubectl [command] [TYPE] [NAME] -o <output_format>
+```
+
+Here are some of the commonly used formats:
+- `-o json` - Output a JSON formatted API object.
+- `-o name` - Print only the resource name and nothing else.
+- `-o wide` - Output in the plain-text format with any additional information.
+- `-o yaml` - Output a YAML formatted API object.
+
+## Kubectl Autocomple and Alias
+
+Configure the Kubectl autocomplete and the `alias k=kubectl`:
+```shell
+source <(kubectl completion bash)  # setup autocomplete in bash into the current shell, bash-completion package should be installed first.
+echo "source <(kubectl completion bash)" >> ~/.bashrc  # add autocomplete permanently to your bash shell.
+```
+
+NOTE: If you use `ZSH` or another shell, modify the correct path to configuration if so.
+
+You can also use a shorthand alias for kubectl that also works with completion:
+```shell
+alias k=kubectl
+complete -F __start_kubectl k
+```
+
+## Install Kubernetes cluster in Unix/Linux
+
+First of all, getting `multipass` from official site:
+- [Install on Linux](https://multipass.run/install#linux).
+- [Install on MacOS](https://multipass.run/download/macos).
+
+In [hands-on/00_Installers](https://github.com/SebastianUA/Certified-Kubernetes-Security-Specialist/tree/main/hands-on/00_Install_kubernetes) folder you can find some simple installers.
+
+
 # Structure of certification
 
 ## Cluster Setup - 10%
