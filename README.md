@@ -103,7 +103,7 @@ In [hands-on/00_Installers](https://github.com/SebastianUA/Certified-Kubernetes-
 Examples:
  - <details><summary>Example_1: Create default deny networking policy with <b>deny-all</b> name in <b>monitoring</b> namespace:</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
@@ -121,7 +121,7 @@ Examples:
 
  - <details><summary>Example_2: Create networking policy with <b>api-allow</b> name and create a restriction access to <b>api-allow</b> application that has deployed on <b>default</b> namespace and allow access only from <b>app2</b> pods:</summary>
 	
-	```
+	```yaml
 	---
 	kind: NetworkPolicy
 	apiVersion: networking.k8s.io/v1
@@ -142,7 +142,7 @@ Examples:
 
  - <details><summary>Example_3: Define an allow-all policy which overrides the deny all policy on <b>default</b> namespace:</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
@@ -162,7 +162,7 @@ Examples:
 
  - <details><summary>Example_4: Create default deny networking policy for ingress only. Use netpol in <b>monitoring</b> namespace:</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
@@ -179,7 +179,7 @@ Examples:
 
 - <details><summary>Example_5: Create default deny networking policy for egress only. Use netpol in <b>monitoring</b> namespace:</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
@@ -213,7 +213,7 @@ Other examples you can find in [hands-on with Kubernetes network policy](https:/
 Examples:
  - <details><summary>Example_1: Fix issues that provided in CIS file (some example of the file). That file got from kube-banch output report:</summary>
 	
-	```
+	```tex
 	[INFO] 1 Master Node Security Configuration
 	[INFO] 1.2 API Server
 	[FAIL] 1.2.20 Ensure that the --profiling argument is set to false (Automated)
@@ -222,8 +222,7 @@ Examples:
 	1.2.20 Edit the API server pod specification file /etc/kubernetes/manifests/kube-apiserver.yaml
 	on the master node and set the below parameter.
 	--profiling=false
-
-
+	
 	== Summary master ==
 	0 checks PASS
 	1 checks FAIL
@@ -236,17 +235,18 @@ Examples:
 	0 checks WARN
 	0 checks INFO
 	```
+
 </details>
 
  - <details><summary>Example_2: Fix issues of 1.3.2 part with <b>kube-bench</b>:</summary>
 	
 	Run `kube-bench` command, for example - only for master host:
-	```
+	```shell
 	kube-bench run --targets master --check 1.3.2 
 	```
 
 	The output will be something like the next one:
-	```
+	```shell
 	[INFO] 1 Master Node Security Configuration
 	[INFO] 1.3 Controller Manager
 	[FAIL] 1.3.2 Ensure that the --profiling argument is set to false (Automated)
@@ -255,8 +255,7 @@ Examples:
 	1.3.2 Edit the Controller Manager pod specification file /etc/kubernetes/manifests/kube-controller-manager.yaml
 	on the master node and set the below parameter.
 	--profiling=false
-
-
+	
 	== Summary master ==
 	0 checks PASS
 	1 checks FAIL
@@ -271,7 +270,7 @@ Examples:
 	```
 	
 	Then, going to fix:
-	```
+	```shell
 	...
 	containers:
 	- command:
@@ -286,7 +285,7 @@ Examples:
 
 **Useful official documentation**
 
-- None 
+- None
 
 **Useful non-official documentation**
 
@@ -298,15 +297,15 @@ Examples:
 ### 3. Properly set up Ingress objects with security control
 
 Examples:
- - <details><summary>Install ingress</summary>
+ - <details><summary>Install Ingress Controller</summary>
 	
 	Deploy the stack:
-	```
+	```shell
 	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
 	```
 
 	After a while, they should all be running. The following command will wait for the ingress controller pod to be up, running, and ready:
-	```
+	```shell
 	kubectl wait --namespace ingress-nginx \
 	--for=condition=ready pod \
 	--selector=app.kubernetes.io/component=controller \
@@ -314,25 +313,24 @@ Examples:
 	```
 
 	Let's create a simple web server and the associated service:
-	```
+	```shell
 	kubectl create deployment demo --image=httpd --port=80
 	kubectl expose deployment demo
 	```
 
 	Then create an ingress resource. The following example uses a host that maps to localhost:
-	```
-	kubectl create ingress demo-localhost --class=nginx \
-
-  	--rule="demo.localdev.me/*=demo:80"
+	```shell
+		kubectl create ingress demo-localhost --class=nginx \
+		--rule="demo.localdev.me/*=demo:80"
   	```
   	
   	Now, forward a local port to the ingress controller:
-  	```
+  	```shell
   	kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
   	```
   	
   	At this point, you can access your deployment using curl:
-  	```
+  	```shell
   	curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
   	```
   	
@@ -342,7 +340,7 @@ Examples:
 
  - <details><summary>Example_1: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace for the <b>app1-svc</b> service. You should open use <b>app1</b> path as prefix</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: Ingress
@@ -366,12 +364,12 @@ Examples:
 	```
 
 	Also, you can generate it through CLI:
-	```
+	```shell
 	k create ingress ingress-app1 --class=nginx --rule="*/*=app1-svc:80" --annotation="nginx.ingress.kubernetes.io/rewrite-target=/" --dry-run=client -o yaml > ingress-app1.yaml
 	```
 
 	Apply the config:
-	```
+	```shell
 	k apply -f ingress-app1.yaml
 	```
 
@@ -379,7 +377,7 @@ Examples:
 
  - <details><summary>Example_2: Create ingress with <b>ingress-app1</b> name in <b>app1</b> namespace (with TLS):</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: Ingress
@@ -407,7 +405,7 @@ Examples:
 	```
 
 	**NOTE:** You should create the needed <b>local-domain-tls</b> secret for Ingress with certifications:
-	```
+	```shell
 	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=local.domail.name/O=local.domail.name"
 	kubectl -n app1 create secret tls local-domain-tls --key cert.key --cert cert.crt
 	```
@@ -431,7 +429,7 @@ It's part of networking policy where you can restrict access to metadata/endpoin
 Examples:
  - <details><summary>Create metadata restriction with networking policy of <b>deny-all-allow-metadata-access</b> name in <b>monitoring</b> namespace to deny all except <b>1.1.1.1</b> IP:</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: networking.k8s.io/v1
 	kind: NetworkPolicy
@@ -469,104 +467,113 @@ Restricting the Kubernetes GUI can be accomplished through proper Role-Based Acc
 A second way to secure the GUI is via Token authentication. Token authentication is prioritized by the Kubernetes Dashboard. The token is in the format Authorization: Bearer `token` and it is located in the request header itself. Bearer Tokens are created through the use of Service Account Tokens. These are just a few of the K8s dashboard concepts that will wind up on the CKS. Make sure you have a thorough understanding of service accounts and how they relate to the Kubernetes Dashboard prior to taking the exam.
 
 To install web-ui dashboard, use:
-```
+```shell
 helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
 
 "kubernetes-dashboard" has been added to your repositories
 ```
 
-To install web-ui dashboard, use:
-```
-helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+- <details><summary>To install web-ui dashboard, use:</summary>
 
-Release "kubernetes-dashboard" does not exist. Installing it now.
-NAME: kubernetes-dashboard
-LAST DEPLOYED: Mon Jun 24 23:10:08 2024
-NAMESPACE: kubernetes-dashboard
-STATUS: deployed
-REVISION: 1
-TEST SUITE: None
-NOTES:
-*************************************************************************************************
-*** PLEASE BE PATIENT: Kubernetes Dashboard may need a few minutes to get up and become ready ***
-*************************************************************************************************
+	```shell
+	helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+	
+	Release "kubernetes-dashboard" does not exist. Installing it now.
+	NAME: kubernetes-dashboard
+	LAST DEPLOYED: Mon Jun 24 23:10:08 2024
+	NAMESPACE: kubernetes-dashboard
+	STATUS: deployed
+	REVISION: 1
+	TEST SUITE: None
+	NOTES:
+	*************************************************************************************************
+	*** PLEASE BE PATIENT: Kubernetes Dashboard may need a few minutes to get up and become ready ***
+	*************************************************************************************************
+	
+	Congratulations! You have just installed Kubernetes Dashboard in your cluster.
+	
+	To access Dashboard run:
+	kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+	
+	NOTE: In case port-forward command does not work, make sure that kong service name is correct.
+		Check the services in Kubernetes Dashboard namespace using:
+			kubectl -n kubernetes-dashboard get svc
+	
+	Dashboard will be available at:
+	https://localhost:8443
+	```
 
-Congratulations! You have just installed Kubernetes Dashboard in your cluster.
+</details>
 
-To access Dashboard run:
-  kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443
+- <details><summary>Let's get dashboard's resources:</summary>
 
-NOTE: In case port-forward command does not work, make sure that kong service name is correct.
-      Check the services in Kubernetes Dashboard namespace using:
-        kubectl -n kubernetes-dashboard get svc
+	```shell
+	k -n kubernetes-dashboard get pod,deploy,svc
+	
+	NAME                                                        READY   STATUS              RESTARTS   AGE
+	pod/kubernetes-dashboard-api-fcb98d6fd-jpztk                1/1     Running             0          22s
+	pod/kubernetes-dashboard-auth-67d784b9c7-5fhnk              0/1     ContainerCreating   0          22s
+	pod/kubernetes-dashboard-kong-7696bb8c88-wg2dh              1/1     Running             0          22s
+	pod/kubernetes-dashboard-metrics-scraper-5485b64c47-f97ng   1/1     Running             0          22s
+	pod/kubernetes-dashboard-web-84f8d6fff4-kdrch               1/1     Running             0          22s
+	
+	NAME                                                   READY   UP-TO-DATE   AVAILABLE   AGE
+	deployment.apps/kubernetes-dashboard-api               1/1     1            1           22s
+	deployment.apps/kubernetes-dashboard-auth              0/1     1            0           22s
+	deployment.apps/kubernetes-dashboard-kong              1/1     1            1           22s
+	deployment.apps/kubernetes-dashboard-metrics-scraper   1/1     1            1           22s
+	deployment.apps/kubernetes-dashboard-web               1/1     1            1           22s
+	
+	NAME                                           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                         AGE
+	service/kubernetes-dashboard-api               ClusterIP   10.101.228.206   <none>        8000/TCP                        22s
+	service/kubernetes-dashboard-auth              ClusterIP   10.98.91.18      <none>        8000/TCP                        22s
+	service/kubernetes-dashboard-kong-manager      NodePort    10.99.35.114     <none>        8002:30410/TCP,8445:30211/TCP   22s
+	service/kubernetes-dashboard-kong-proxy        ClusterIP   10.98.25.235     <none>        443/TCP                         22s
+	service/kubernetes-dashboard-metrics-scraper   ClusterIP   10.101.105.50    <none>        8000/TCP                        22s
+	service/kubernetes-dashboard-web               ClusterIP   10.108.39.226    <none>        8000/TCP                        22s
+	```
 
-Dashboard will be available at:
-  https://localhost:8443
-```
-
-Let's get dashboard's resources:
-```
-k -n kubernetes-dashboard get pod,deploy,svc
-
-NAME                                                        READY   STATUS              RESTARTS   AGE
-pod/kubernetes-dashboard-api-fcb98d6fd-jpztk                1/1     Running             0          22s
-pod/kubernetes-dashboard-auth-67d784b9c7-5fhnk              0/1     ContainerCreating   0          22s
-pod/kubernetes-dashboard-kong-7696bb8c88-wg2dh              1/1     Running             0          22s
-pod/kubernetes-dashboard-metrics-scraper-5485b64c47-f97ng   1/1     Running             0          22s
-pod/kubernetes-dashboard-web-84f8d6fff4-kdrch               1/1     Running             0          22s
-
-NAME                                                   READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/kubernetes-dashboard-api               1/1     1            1           22s
-deployment.apps/kubernetes-dashboard-auth              0/1     1            0           22s
-deployment.apps/kubernetes-dashboard-kong              1/1     1            1           22s
-deployment.apps/kubernetes-dashboard-metrics-scraper   1/1     1            1           22s
-deployment.apps/kubernetes-dashboard-web               1/1     1            1           22s
-
-NAME                                           TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                         AGE
-service/kubernetes-dashboard-api               ClusterIP   10.101.228.206   <none>        8000/TCP                        22s
-service/kubernetes-dashboard-auth              ClusterIP   10.98.91.18      <none>        8000/TCP                        22s
-service/kubernetes-dashboard-kong-manager      NodePort    10.99.35.114     <none>        8002:30410/TCP,8445:30211/TCP   22s
-service/kubernetes-dashboard-kong-proxy        ClusterIP   10.98.25.235     <none>        443/TCP                         22s
-service/kubernetes-dashboard-metrics-scraper   ClusterIP   10.101.105.50    <none>        8000/TCP                        22s
-service/kubernetes-dashboard-web               ClusterIP   10.108.39.226    <none>        8000/TCP                        22s
-```
+</details>
 
 As most of you notice, default Kubernetes Dashboard service is exposed as Cluster IP and it would not be possible for administrators to access this IP address without getting inside a shell inside a Pod. For most cases, administrators use “kubectl proxy” to proxy an endpoint within the working machine to the actual Kubernetes Dashboard service.
 In some testing environments in less security concern, we could make Kubernetes Dashboard deployments and services to be exposed with Node Port, so administrators could use nodes’ IP address, public or private, and assigned port to access the service. We edit the actual running deployment YAML:
-```
+```shell
 kubectl edit deployment kubernetes-dashboard-web -n kubernetes-dashboard
 ```
 
-Then, add `--insecure-port=9999` and tune it, likes:
-```
-.....
-spec:
-    containers:
-    - args:
-      - --namespace=kubernetes-dashboard
-      - --insecure-port=9999
-	image: docker.io/kubernetesui/dashboard-web:1.4.0
-	imagePullPolicy: Always
-	livenessProbe:
-		failureThreshold: 3
-		httpGet:
-			path: /
-			port: 9999
-			scheme: HTTP
-		initialDelaySeconds: 30
-		periodSeconds: 10
-		successThreshold: 1
-		timeoutSeconds: 30
-.....
-```
+- <details><summary>Then, add `--insecure-port=9999` and tune it, likes:</summary>
 
-NOTE: 
-- Delete the `auto-generate-certificates` from config.
-- Change `port` of `livenessProbe`  to `9999`.
-- Change `scheme` of `livenessProbe` to `HTTP`.
+	```
+	.....
+	spec:
+		containers:
+		- args:
+		- --namespace=kubernetes-dashboard
+		- --insecure-port=9999
+		image: docker.io/kubernetesui/dashboard-web:1.4.0
+		imagePullPolicy: Always
+		livenessProbe:
+			failureThreshold: 3
+			httpGet:
+				path: /
+				port: 9999
+				scheme: HTTP
+			initialDelaySeconds: 30
+			periodSeconds: 10
+			successThreshold: 1
+			timeoutSeconds: 30
+	.....
+	```
+
+	NOTE: 
+	- Delete the `auto-generate-certificates` from config.
+	- Change `port` of `livenessProbe`  to `9999`.
+	- Change `scheme` of `livenessProbe` to `HTTP`.
+
+</details>
 
 After that, we make changes on Kubernetes Dashboard services:
-```
+```shell
 kubectl edit service kubernetes-dashboard-web -n kubernetes-dashboard
 ```
 
@@ -576,7 +583,7 @@ And:
 - Change type to `NodePort`.
 
 The config should be likes:
-```
+```yaml
 .....
 ports:
   - nodePort: 30142
@@ -589,8 +596,9 @@ ports:
   type: NodePort
 .....
 ```
+
 Then, runnning the next command to forward port to:
-```
+```shell
 kubectl port-forward deployments/kubernetes-dashboard 9999:30142 -n kubernetes-dashboard
 ```
 
@@ -613,7 +621,7 @@ In this section, we will take a look at Verify platform binaries before deployin
 Examples:
  - <details><summary>Compare binary file of kubelet on the current host and with kubelet 1.27 that you must download from official release:</summary>
 	
-	```
+	```shell
 	sha512sum $(which kubelet) | cut -c-10
 	wget -O kubelet https://dl.k8s.io/$(/usr/bin/kubelet --version | cut -d " " -f2)/bin/linux/$(uname -m)/kubelet 
 	sha512sum ./kubelet | cut -c -10
@@ -624,12 +632,12 @@ Examples:
  - <details><summary>Compare binary file of kubectl on the current host and with kubectl 1.30 that you must download from official release. The 2d example:</summary>
 	
 	Download SHA256 of kubelet:
-	```
+	```shell
 	curl -LO "https://dl.k8s.io/v1.30.0/bin/linux/amd64/kubectl.sha256"
 	```
 
 	Checking SHA with current kubectl that has been installed on host:
-	```
+	```shell
 	echo "$(cat kubectl.sha256)  $(which kubectl)" | shasum -a 256 --check
 	/usr/bin/kubectl: OK
 	```
@@ -645,6 +653,89 @@ Examples:
 **Useful non-official documentation**
 
 - [Kubernetes releases](https://github.com/kubernetes/kubernetes/releases)
+
+### 7. Working with Cilium
+
+Cilium is a powerful open-source networking and security solution for cloud-native environments, built on eBPF (extended Berkeley Packet Filter). It is designed specifically for Kubernetes, microservices, and containerized workloads. By leveraging eBPF, Cilium provides high-performance, dynamic, and programmable networking, load balancing, and security controls at the kernel level, without requiring kernel changes or modules.
+
+Examples:
+ - <details><summary>Install Cilium:</summary>
+	
+	```shell
+	helm repo add cilium https://helm.cilium.io/
+	helm install cilium cilium/cilium --version 1.13.0 --namespace kube-system
+	```
+
+</details>
+
+- <details><summary>Working with Cilium:</summary>
+	
+	Create a few test services and pods to simulate real-world applications.
+
+	Example mock services:
+	- A frontend service communicating with a backend service.
+	- A database pod (e.g., MongoDB, Postgres) for backend interaction.
+
+	Use Kubernetes YAMLs to define these services and deployments:
+	```yaml
+	apiVersion: apps/v1
+	kind: Deployment
+	metadata:
+	name: frontend
+	spec:
+	replicas: 2
+	selector:
+		matchLabels:
+		app: frontend
+	template:
+		metadata:
+		labels:
+			app: frontend
+		spec:
+		containers:
+		- name: frontend
+			image: nginx
+	---
+	apiVersion: v1
+	kind: Service
+	metadata:
+	name: frontend
+	spec:
+	selector:
+		app: frontend
+	ports:
+	- protocol: TCP
+		port: 80
+		targetPort: 80
+	```
+
+	Create mock CiliumNetworkPolicies (CNP) to enforce security controls, demonstrating how Cilium handles security.
+	Example Cilium policy to allow only the frontend to communicate with the backend:
+	```yaml
+	apiVersion: "cilium.io/v2"
+	kind: CiliumNetworkPolicy
+	metadata:
+	name: allow-frontend-to-backend
+	spec:
+	endpointSelector:
+		matchLabels:
+		app: backend
+	ingress:
+	- fromEndpoints:
+		- matchLabels:
+			app: frontend
+	```
+	This policy restricts communication such that only traffic from the frontend pods can reach the backend.
+
+</details>
+
+**Useful official documentation**
+
+- [Cilium Quick Installation](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/)
+
+**Useful non-official documentation**
+
+- None
 
 
 ## Cluster Hardening - 15%
@@ -664,48 +755,46 @@ Examples:
  - <details><summary>Example_1: Blocking anonymous access to use API in Kubelet:</summary>
 
 	Checking, where the config is:
-	```
+	```shell
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
 
-	<details><summary>Fix if it's enabled, oppening /var/lib/kubelet/config.yaml file:</summary>
-	
+	Fix if it's enabled, oppening /var/lib/kubelet/config.yaml file:
+	```yaml
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		authentication:
 		anonymous:
 			enabled: false
 		............
-	</details>
+	```
 
 	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--anonymous-auth=false` into `KUBELET_SYSTEM_PODS_ARGS` if kubelet in your cluster using kubeadm.
 	
 	Make restart service of kubelet:
-	```
+	```shell
 	systemctl daemon-reload && \
 	systemctl restart kubelet.service
 	```
-	
 
 </details>
 
  - <details><summary>Example_2: Changing authentication mode to Webhook for kubelet:</summary>
 	
 	Getting `kubeconfig` path:
-	```
+	```shell
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
 
-	<details><summary>Oppening /var/lib/kubelet/config.yaml file:</summary>
-	
+	Oppening /var/lib/kubelet/config.yaml file:
+	```yaml
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		.....
 		authorization:
 			mode: Webhook
 		.....
-
-	</details>
+	```
 
 	Make restart service of kubelet:
 	```
@@ -717,12 +806,12 @@ Examples:
  - <details><summary>Example_3: Blocking insecure port for kube-apiserver:</summary>
 
 	First, checking:
-	```
+	```shell
 	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "insecure-port"
 	```
 
-	<details><summary>Oppening /etc/kubernetes/manifests/kube-apiserver.yaml file:</summary>
-	
+	Oppening /etc/kubernetes/manifests/kube-apiserver.yaml file:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -743,26 +832,24 @@ Examples:
 			- --insecure-port=0
 			- --secure-port=443
 			.........
-
-	</details>
-	
+	```
 
 </details>
 
  - <details><summary>Example_4: Enable protect kernel defaults for kube-apiserver:</summary>
 
 	First, checking:
-	```
+	```shell
 	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "protect-kernel-defaults"
 	```
 
 	So, we can put `protectKernelDefaults` parameter into `kubelet`, but first of all, check where the configuration is:
-	```
+	```shell
 	ps -ef | grep kubelet | grep -Ei "config"
 	```
 
-	<details><summary>Oppening /var/lib/kubelet/config.yaml file:</summary>
-
+	Oppening /var/lib/kubelet/config.yaml file:
+	```yaml
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		authentication:
@@ -781,7 +868,7 @@ Examples:
 		cgroupDriver: systemd
 		protectKernelDefaults: true
 		.........
-	</details>
+	```
 
 	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `--protect-kernel-defaults=true` into `KUBELET_SYSTEM_PODS_ARGS` if kubelet in your cluster using kubeadm.
 	
@@ -789,22 +876,20 @@ Examples:
 	```
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
-	
 
 </details>
 
  - <details><summary>Example_5: NodeRestriction enabling:</summary>
 
-	<details><summary>Check if Node restriction is enabled (if so, - it should NodeRestriction):</summary>
-	
+	Check if Node restriction is enabled (if so, - it should NodeRestriction):
+	```shell
 		cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "enable-admission-plugins"
-
-	</details>
+	```
 
 	Open the `/etc/kubernetes/manifests/kube-apiserver.yaml` file with some editor.
 
-	<details><summary>Let's enable NodeRestriction on Controlplane node</summary>
-
+	Let's enable NodeRestriction on Controlplane node:
+	```yaml
 		spec:
 			containers:
 			- command:
@@ -815,11 +900,10 @@ Examples:
 				- --client-ca-file=/etc/kubernetes/pki/ca.crt
 				- --enable-admission-plugins=NodeRestriction
 				- --enable-bootstrap-token-auth=true
-	
-	</details>
+	```
 
 	Let's check the configurations:
-	```
+	```shell
 	ssh node01
 	
     export KUBECONFIG=/etc/kubernetes/kubelet.conf
@@ -829,13 +913,15 @@ Examples:
 	```
 
 	*NOTE*: If you don't know how to find proper parameter (at that case - NodeRestriction), you can use:
-	```
+	```shell
 	ps -ef | grep apiserver
 	```
+	
 	Getting plugins:
-	```
+	```shell
 	/proc/15501/exe -h | grep -Ei plugins
 	```
+
 	Where `15501` - PID ID of the process. 
 
 </details>
@@ -843,26 +929,26 @@ Examples:
 - <details><summary>Example_6: Kubernetes API troubleshooting:</summary>
 
 	1. First al all, checking:
-	```
+	```shell
 	cat /var/log/syslog | grep kube-apiserver
 	```
 	Or, better try to find line with error:
-	```	
+	```shell
 	cat /var/log/syslog | grep -Ei "apiserver" | grep -Ei "line"
 	```
 	
 	2. Secondly, checking:
-	```
+	```shell
 	journalctl -xe | grep apiserver
 	```
 
 	3. Lastly, getting ID of container:
-	```
+	```shell
 	crictl ps -a | grep api
 	```
 
 	Check logs:
-	```
+	```shell
 	crictl logs fbb80dac7429e
 	```
 
@@ -875,63 +961,60 @@ Examples:
 - <details><summary>Example_7: Certificate signing requests sign manually:</summary>
 
 	First of all, we should have key. Let's get it through openssl:
-	```
+	```shell
 	openssl genrsa -out iuser.key 2048
 	```
 
 	Next, runnning the next command to generate certificate:
-	```
+	```shell
 	openssl req -new -key iuser.key -out iuser.csr
 	```
 
 	Note: set `Common Name` to `iuser@internal.users`
 
-	<details><summary>Certificate signing requests sign manually (manually sign the CSR with the K8s CA file to generate the CRT):</summary>
-	
+	Certificate signing requests sign manually (manually sign the CSR with the K8s CA file to generate the CRT):
+	```shell
 		openssl x509 -req -in iuser.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out iuser.crt -days 500
-
-	</details>
-
-	<details><summary>Set credentials & context:</summary>
+	```
 	
+	Set credentials & context:
+	```shell
 		k config set-credentials iuser@internal.users --client-key=iuser.key --client-certificate=iuser.crt
 		k config set-context iuser@internal.users --cluster=kubernetes --user=iuser@internal.users
 		k config get-contexts
 		k config use-context iuser@internal.users
-
-	</details>
-
-	<details><summary>Checks:</summary>
+	```
 	
+	Checks:
+	```shell
 		k get ns
 		
 		k get po
-
-	</details>
+	```
 
 </details>
 
 - <details><summary>Example_8: Certificate signing requests sign K8S:</summary>
 
 	First of all, we should have key. Let's get it through openssl:
-	```
+	```shell
 	openssl genrsa -out iuser.key 2048
 	```
 
 	Next, runnning the next command to generate certificate:
-	```
+	```shell
 	openssl req -new -key iuser.key -out iuser.csr
 	```
 
 	Note: set Common Name = iuser@internal.users
 
 	Convert the CSR file into base64:
-	```
+	```shell
 	cat iuser.csr | base64 -w 0
 	```
 	
-	<details><summary>Copy it into the YAML:</summary>
-	
+	Copy it into the YAML:
+	```yaml
 		apiVersion: certificates.k8s.io/v1
 		kind: CertificateSigningRequest
 		metadata:
@@ -943,11 +1026,10 @@ Examples:
 		signerName: kubernetes.io/kube-apiserver-client
 		usages:
 			- client auth
-
-	</details>
+	```
 
 	Create and approve:
-	```
+	```shell
 	k -f csr.yaml create
 		
 	k get csr
@@ -956,17 +1038,17 @@ Examples:
 	```
 
 	Now, check the status one more time (should be `approved`):
-	```
+	```shell
 	k get csr
 	```
 
 	Download signed certificate:
-	```
+	```shell
 	k get csr iuser@internal.users -ojsonpath="{.status.certificate}" | base64 -d > iuser.crt
 	```
 
 	Now, set credentials & context:
-	```
+	```shell
 	k config set-credentials iuser@internal.users --client-key=iuser.key --client-certificate=iuser.crt
 	k config set-context iuser@internal.users --cluster=kubernetes --user=iuser@internal.users
 	k config get-contexts
@@ -974,7 +1056,7 @@ Examples:
 	```
 
 	Checks:
-	```
+	```shell
 	k get ns && k get po
 	```
 
@@ -1016,43 +1098,43 @@ Examples:
 		```
 
 		Checking ETCD:
-		```
+		```shell
 		crictl ps -a | grep etcd
 		```
 
 		NOTE: To get logs, you can use:
-		```
+		```shell
 		cat /var/log/syslog | grep etcd
 		```
 
 		To check cipher:
-		```
+		```shell
 		nmap --script ssl-enum-ciphers -p 2379 127.0.0.1
 		```
 
 	- kube-apiserver side, open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and put the next:
-		```
+		```shell
 		- --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
 		- --tls-min-version=VersionTLS12
 		```
 
 		Checking kube-apiserver:
-		```
+		```shell
 		crictl ps -a | grep apiserver
 		```
 
 		NOTE: To get logs, you can use:
-		```
+		```shell
 		cat /var/log/syslog | grep apiserver
 		```
 
 		To check cipher:
-		```
+		```shell
 		nmap --script ssl-enum-ciphers -p 6443 127.0.0.1
 		```
 	
 	- kubelet side, open `/var/lib/kubelet/config.yaml` file and put the next:
-		```
+		```yaml
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		authentication:
 		anonymous:
@@ -1077,22 +1159,22 @@ Examples:
 		```
 		
 		Reload daemon:
-		```
+		```shell
 		systemctl daemon-reload
 		```
 
 		Restart kubelet service:
-		```
+		```shell
 		systemctl restart kubelet.service
 		```
 
 		Checking kube-apiserver:
-		```
+		```shell
 		systemctl status start kubelet.service
 		```
 
 		To check cipher:
-		```
+		```shell
 		nmap --script ssl-enum-ciphers -p 10250 127.0.0.1
 		```
 
@@ -1100,15 +1182,15 @@ Examples:
 
 </details>
 
- - <details><summary>Example_10: Enable readOnlyPort for kubelet:</summary>
+- <details><summary>Example_10: Enable readOnlyPort for kubelet:</summary>
 
 	First of all, check where the configuration is:
-	```
+	```shell
 	ps -ef | grep kubelet | grep -Ei "config"
 	```
 
-	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
-
+	Oppening `/var/lib/kubelet/config.yaml` file:
+	```yaml
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		authentication:
@@ -1127,57 +1209,56 @@ Examples:
 		cgroupDriver: systemd
 		readOnlyPort: 0
 		.........
-	</details>
+	```
 
 	NOTE: As workaround, you can use the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file and add `–-read-only-ports=0` into `KUBELET_SYSTEM_PODS_ARGS` if kubelet in your cluster using kubeadm.
 	
 	Make restart service of kubelet after your change(s):
-	```
+	```shell
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 
 </details>
 
- - <details><summary>Example_11: Enable rotation of certificates for kubelet:</summary>
+- <details><summary>Example_11: Enable rotation of certificates for kubelet:</summary>
 
 	Getting `kubeconfig` path, for example you can use:
-	```
+	```shell
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
 
-	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
-	
+	Oppening `/var/lib/kubelet/config.yaml` file:
+	```yaml
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		.....
 		rotateCertificates: true
 		.....
-
-	</details>
-
-	Make restart service of kubelet:
 	```
+	
+	Make restart service of kubelet:
+	```shell
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 
 </details>
 
- - <details><summary>Example_12: Blocking anonymous access to use API in kube-apiserver and getting clusterrolebindings and rolebindings:</summary>
+- <details><summary>Example_12: Blocking anonymous access to use API in kube-apiserver and getting clusterrolebindings and rolebindings:</summary>
 	
 	You can check it like:
-	```
+	```shell
 	ps -ef | grep kube-apiserver
 	```
 
 	First that need to check is:
-	```
+	```shell
 	cat /etc/kubernetes/manifests/kube-apiserver.yaml | grep -Ei "anonymous-auth"
 	```
 
 	*NOTE*: `--anonymous-auth` argument shows as `false`. This setting ensures that requests not rejected by other authentication methods are not treated as anonymous and therefore allowed against policy.
 
 	Open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and adding the `--anonymous-auth=false` parameter, something like:
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Pod
@@ -1199,23 +1280,23 @@ Examples:
 	```
 
 	Identify affected resources. Also, a review of RBAC items for clusterrolebindings which provide access to `system:anonymous` or `system:unauthenticated` will help, this can be done using a command like:
-	```
+	```shell
 	kubectl get clusterrolebindings -o json | jq '.items[] | select(.subjects? // [] | any(.kind == "User" and .name == "system:anonymous" or .kind == "Group" and .name == "system:unauthenticated"))'
 	```
 
 	Similarly for RoleBindings, the following command can be used:
-	```
+	```shell
 	kubectl get rolebindings -A -o json | jq '.items[] | select(.subjects? // [] | any(.kind == "User" and .name == "system:anonymous" or .kind == "Group" and .name == "system:unauthenticated"))'
 	```
 
 	As workaround, use `jsonpath` examples:
-	```
+	```shell
 	kubectl get rolebinding,clusterrolebinding -A -o jsonpath='{range .items[?(@.subjects[0].name == "system:anonymous")]}'{.roleRef.name}
 	kubectl get rolebinding,clusterrolebinding -A -o jsonpath='{range .items[?(@.subjects[0].name == "system:unauthenticated")]}' - {.roleRef.name}
 	```
 
 	Super minimal style, however - not fully finished:
-	```
+	```shell
 	kubectl get rolebinding,clusterrolebinding -A -o yaml | grep -Ei 'anonymous|unauthenticated'
 	kubectl get rolebinding,clusterrolebinding -A -ojson | grep -Ei 'anonymous|unauthenticated' -A15 -B10
 	```
@@ -1228,12 +1309,12 @@ Examples:
 - <details><summary>Example_13: Read-only port for kubelet:</summary>
 
 	Getting `kubeconfig` path, for example you can use:
-	```
+	```shell
 	ps -ef | grep kubelet | grep -Ei "kubeconfig"
 	```
 
-	<details><summary>Oppening `/var/lib/kubelet/config.yaml` file:</summary>
-	
+	Oppening `/var/lib/kubelet/config.yaml` file:
+	```
 		---
 		apiVersion: kubelet.config.k8s.io/v1beta1
 		authentication:
@@ -1251,14 +1332,14 @@ Examples:
 			cacheUnauthorizedTTL: 0s
 		readOnlyPort:0
 		.....
-	</details>
+	```
 
 	Kubelet uses two ports:
 	- `10250`: Serves API that allows full access
 	- `10255`: Servers API that allow unauthenticated read-only access
 
 	Make restart service of kubelet:
-	```
+	```shell
 	systemctl daemon-reload && systemctl restart kubelet.service
 	```
 
@@ -1297,42 +1378,42 @@ Allowing unnecessary cluster-wide access to everyone is a common mistake done du
 - ClusterRoleBindings = the binding of user/service account and cluster roles
 
 Examples:
- - <details><summary>Example_1: Working with RBAC (roles and role bindings):</summary>
+- <details><summary>Example_1: Working with RBAC (roles and role bindings):</summary>
 
 	Create role & rolebinding:
-	```
+	```shell
 	k create role role_name --verb=get,list,watch --resource=pods
 	k create rolebinding role_name_binding --role=role_name --user=captain --group=group1
 	```
 
 	Verify:
-	```
+	```shell
 	k auth can-i get pods --as captain -n kube-public
 	k auth can-i list pods --as captain -n default
 	```
 
 </details>
 
- - <details><summary>Example_2: Working with RBAC (cluster roles and cluster role bindings):</summary>
+- <details><summary>Example_2: Working with RBAC (cluster roles and cluster role bindings):</summary>
 
 	Create clusterrole & clusterrolebinding:
-	```
+	```shell
 	k create clusterrole cluster_role --verb=get,list,watch --resource=pods
 	k create clusterrolebinding cluster_role_binding --clusterrole=cluster_role --user=cap
 	```
 	
 	Verify:
-	```
+	```shell
 	k auth can-i list pods --as cap -n kube-public
 	k auth can-i list pods --as cap -n default
 	```
 
 </details>
 
- - <details><summary>Example_3: Working with Service Account and RBAC:</summary>
+- <details><summary>Example_3: Working with Service Account and RBAC:</summary>
 
 	Create Service Account and RBAC:
-	```
+	```shell
 	k -n name_space_1 create sa ser_acc
 	k create clusterrolebinding ser_acc-view --clusterrole view --serviceaccount name_space_1:ser_acc
 	```
@@ -1342,7 +1423,7 @@ Examples:
 	- `ser_acc` - Service account name.
 
 	Verify:
-	```
+	```shell
 	k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n default
 	k auth can-i update deployments --as system:serviceaccount:name_space_1:ser_acc -n name_space_1
 	```
@@ -1368,9 +1449,9 @@ You must know to how:
 ### 3. Exercise caution in using service accounts e.g. disable defaults, minimize permissions on newly created ones
 
 Examples:
- - <details><summary>Example_1: Opt out of automounting API credentials for a service account (Opt out at service account scope):</summary>
+- <details><summary>Example_1: Opt out of automounting API credentials for a service account (Opt out at service account scope):</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: ServiceAccount
@@ -1382,9 +1463,9 @@ Examples:
 
 </details>
 
- - <details><summary>Example_2: Opt out of automounting API credentials for a service account (Opt out at pod scope):</summary>
+- <details><summary>Example_2: Opt out of automounting API credentials for a service account (Opt out at pod scope):</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Pod
@@ -1397,9 +1478,9 @@ Examples:
 
 </details>
 
- - <details><summary>Example_3: Disable automountServiceAccountToken on namespace side:</summary>
+- <details><summary>Example_3: Disable automountServiceAccountToken on namespace side:</summary>
 	
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Namespace
@@ -1441,56 +1522,57 @@ You must know to how:
 There may be an upgrade question as the documentation about upgrading with kubeadm has been significantly better in recent releases. Also, you should have mechanisms to validate the cluster components, security configurations, and application status post-upgrade.
 
 Examples:
- - <details><summary>Example_1: K8S upgrades (Controlplane):</summary>
+- <details><summary>Example_1: K8S upgrades (Controlplane):</summary>
 	
 	First of all, draing the node:
-	```
+	```shell
 	k drain master --ignore-deamonsets
 	```
 
 	Update OS:
-	```
+	```shell
 	apt update -y
 	```
+	
 	Install packages:
-	```
+	```shell
 	apt-cache show kubeadm | grep 1.22
 	apt install kubeadm=1.22.5-00 kubelet=1.22.5-00 kubectl=1.22.5-00
 	```
 
 	Applying updates:
-	```
+	```shell
 	kubeadm upgrade plan
 	kubeadm upgrade apply v1.22.5
 	```
 
 	Adding master workloads back:
-	```
+	```shell
 	k uncordon master
 	```
 
 </details>
 
- - <details><summary>Example_2: K8S upgrades (Nodes):</summary>
+- <details><summary>Example_2: K8S upgrades (Nodes):</summary>
 	
 	First of all, draing the node:
-	```
+	```shell
 	k drain node --ignore-deamonsets
 	```
 
 	Update OS:
-	```
+	```shell
 	apt update -y
 	```
 
 	Install packages:
-	```
+	```shell
 	apt-cache show kubeadm | grep 1.22
 	apt install kubeadm=1.22.5-00 kubelet=1.22.5-00 kubectl=1.22.5-00
 	```
 	
 	Upgrade node with kubeadm:
-	```
+	```shell
 	kubeadm upgrade node
 	```
 
@@ -1500,7 +1582,7 @@ Examples:
 	```
 
 	Then, adding master back:
-	```
+	```shell
 	k uncordon node
 	```
 
@@ -1530,7 +1612,7 @@ Examples:
 	By default, the folder for seccomp is located in the `/var/lib/kubelet/seccomp` location.
 
 	Checking if seccomp is on host:
-	```
+	```shell
 	grep -i seccomp /boot/config-$(uname -r)
 	
 	CONFIG_SECCOMP=y
@@ -1539,7 +1621,7 @@ Examples:
 	```
 
 	Open `/var/lib/kubelet/seccomp/custom.json` file and put the next:
-	```
+	```json
 	{
 		"defaultAction": "SCMP_ACT_ERRNO",
 		"architectures": [
@@ -1568,7 +1650,7 @@ Examples:
 	```
 
 	Going to start using seccomp with pod, for example:
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Pod
@@ -1587,110 +1669,106 @@ Examples:
 
 </details>
 
- - <details><summary>Example_2: Use AppArmor:</summary>
+- <details><summary>Example_2: Use AppArmor:</summary>
 	
 	Get AppArmor profiles:
-	```
+	```shell
 	apparmor_status
 	```
 
 	Or, run this:
-	```
+	```shell
 	aa-status | grep some_apparmor_profile_name
 	```
 
 	Load AppArmor profile:
-	```
+	```shell
 	apparmor_parser -q apparmor_config
 	```
 
 </details>
 
- - <details><summary>Example_3: PSA enforces:</summary>
+- <details><summary>Example_3: PSA enforces:</summary>
 	
-	```
 	Pod Security admissions (PSA) support has been added for clusters with Kubernetes v1.23 and above. PSA defines security restrictions for a broad set of workloads and replace Pod Security Policies in Kubernetes v1.25 and above. The Pod Security Admission controller is enabled by default in Kubernetes clusters v1.23 and above. To configure its default behavior, you must provide an admission configuration file to the kube-apiserver when provisioning the cluster.
-	```
 
 </details>
 
- - <details><summary>Example_4: Apply host updates:</summary>
+- <details><summary>Example_4: Apply host updates:</summary>
 	
-	```
+	```shell
 	sudo apt update && sudo apt install unattended-upgrades -y
 	systemctl status unattended-upgrades.service
 	```
 
 </details>
 
- - <details><summary>Example_5: Install minimal required OS fingerprint:</summary>
+- <details><summary>Example_5: Install minimal required OS fingerprint:</summary>
 	
-	```
 	It is best practice to install only the packages you will use because each piece of software on your computer could possibly contain a vulnerability. Take the opportunity to select exactly what packages you want to install during the installation. If you find you need another package, you can always add it to the system later.
-	```
 
 </details>
 
- - <details><summary>Example_6: Identify and address open ports:</summary>
+- <details><summary>Example_6: Identify and address open ports:</summary>
 
 	1. Using lsof command and check if 8080 is open or not:
-	```
+	```shell
 	lsof -i :8080
 	```
 
 	Check where the file is:
-	```
+	```shell
 	ls -l /proc/22797/exe
 	```
 
 	To remove file:
-	```
+	```shell
 	rm -f /usr/bin/app1
 	```
 
 	Now, kill the `8080` port:
-	```
+	```shell
 	kill -9 22797
 	```
 
 	2. Using netstat command - check if `66` is oppen and kill the process and delete the binary:
 
 	Install `netstat` on Ubuntu:
-	```
+	```shell
 	apt install net-tools
 	```
 
 	Getting process (the port is 66):
-	```
+	```shell
 	netstat -natpl | grep 66
 	```
 
 	Check where the file located:
-	```
+	```shell
 	ls -l /proc/22797/exe
 	```
 
 	To remove file, use:
-	```
+	```shell
 	rm -f /usr/bin/app1
 	```
 
 	Now, kill that port:
-	```
+	```shell
 	kill -9 22797
 	```
 
 </details>
 
- - <details><summary>Example_7: Remove unnecessary packages. For example, find and delete apache2 package on the host:</summary>
+- <details><summary>Example_7: Remove unnecessary packages. For example, find and delete apache2 package on the host:</summary>
 	
 	Check details of the package:
-	```
+	```shell
 	apt show httpd
 	```
 
 	Simple output:
-	```
+	```shell
 	Package: apache2
 	Version: 2.4.41-4ubuntu3.17
 	Priority: optional
@@ -1725,132 +1803,132 @@ Examples:
 	```
 
 	Remove `apache2` pkg:
-	```
+	```shell
 	apt remove apache2 -y
 	```
 
 </details>
 
- - <details><summary>Example_8: Find service that runs on the host and stop it. For example, find and stop httpd service on the host:</summary>
+- <details><summary>Example_8: Find service that runs on the host and stop it. For example, find and stop httpd service on the host:</summary>
 	
 	First of all, check status of the service:
-	```
+	```shell
 	service httpd status
 	```
 
 	Then, to stop service use:
-	```
+	```shell
 	service httpd stop
 	```
 
 	One more check:
-	```
+	```shell
 	service httpd status
 	```
 
 </details>
 
- - <details><summary>Example_9: Working with users (Create, delete, add user to needed groups. Grant some permission):</summary>
+- <details><summary>Example_9: Working with users (Create, delete, add user to needed groups. Grant some permission):</summary>
 	
 	To get all users on host:
-	```
+	```shell
 	cat /etc/passwd
 	```
 
 	If you want to display only the username you can use either awk or cut commands to print only the first field containing the username:
-	```
+	```shell
 	awk -F: '{print $1}' /etc/passwd
 	
 	cut -d: -f1 /etc/passwd
 	```
 	
 	The /etc/group file contains information on all local user groups configured on a Linux machine. With the /etc/group file, you can view group names, passwords, group IDs, and members associated with each group:
-	```
+	```shell
 	cat /etc/group
 	```
 
 	If you want to get goups of specific use:
-	```
+	```shell
 	groups root
 	```
 
 	Creating group:
-	```
+	```shell
 	groupadd developers
 	```
 
 	Creating user:
-	```
+	```shell
 	useradd -u 1005 -g mygroup test_user
 	```
 
 	Add a User to Multiple Groups:
-	```
+	```shell
 	usermod -a -G admins,mygroup,developers test_user
 	```
 
 	Add a User with a Specific Home Directory, Default Shell, and Custom Comment:
-	```
+	```shell
 	useradd -m -d /var/www/user1 -s /bin/bash -c "Test user 1" -U user1
 	```
 
 </details>
 
- - <details><summary>Example_10: Working with kernel modules on the host (get, load, unload, etc):</summary>
+- <details><summary>Example_10: Working with kernel modules on the host (get, load, unload, etc):</summary>
 	
 	To get all modules, use:
-	```
+	```shell
 	lsmod
 	```
 
 	Or: 
-	```
+	```shell
 	lsmod | grep ^pppol2tp && echo "The module is loaded" || echo "The module is not loaded"
 	```
 
 	Also, you can use:
-	```
+	```shell
 	cat /proc/modules
 	```
 
 	Loading a Module:
-	```
+	```shell
 	modprobe wacom
 	```
 
 	You can blacklisting a module, open the file `/etc/modprobe.d/blacklist.conf` and put:
-	```
+	```shell
 	blacklist evbug
 	```
 
 </details>
 
- - <details><summary>Example_11: Working with UFW on Linux:</summary>
+- <details><summary>Example_11: Working with UFW on Linux:</summary>
 	
 	To allow 22 port:
-	```
+	```shell
 	ufw allow 22
 	```
 
 	To close an opened port:
-	```
+	```shell
 	ufw deny 22
 	```
 
 	It is also possible to allow access from specific hosts or networks to a port. The following example allows SSH access from host 192.168.0.2 to any IP address on this host:
-	```
+	```shell
 	ufw allow proto tcp from 192.168.0.2 to any port 22
 	```
 
 	To see the firewall status, enter:
-	```
+	```shell
 	ufw status
 	ufw status verbose
 	ufw status numbered
 	```
 
 	Enamble UFW service on Linux host:
-	```
+	```shell
 	ufw enable
 	```
 
@@ -1863,7 +1941,7 @@ Examples:
 	Disable password login `PasswordAuthentication no`
 
 	Restart SSHD restart:
-	```
+	```shell
 	service sshd restart
 	```
 
@@ -1916,10 +1994,10 @@ Also, implement Network Policies - [hands-on with Kubernetes network policy](htt
 ### 4. Appropriately use kernel hardening tools such as AppArmor, and Secсomp
 
 Examples:
- - <details><summary>Example_1: Working with Apparmor (up to Kubernetes 1.30):</summary>
+- <details><summary>Example_1: Working with Apparmor (up to Kubernetes 1.30):</summary>
 	
-	<details><summary> An example of configuration:</summary>
-	
+	An example of configuration:
+	```yaml
 		---
 		apiVersion: apps/v1
 		kind: Deployment
@@ -1942,21 +2020,20 @@ Examples:
 			containers:
 			- image: httpd:latest
 				name: pod-with-apparmor
-
-	</details>
+	```
 
 	Apply the prepared configuration file:
-	```
+	```shell
 	k apply -f pod-with-apparmor.yaml
 	```
 
 	Getting ID of container:
-	```
+	```shell
 	crictl ps -a | grep pod-with-apparmor
 	```
 
 	Then, run the command:
-	```
+	```shell
 	crictl inspect e428e2a3e9324 | grep apparmor
 		"apparmor_profile": "localhost/docker-default"
     	"apparmorProfile": "docker-default",
@@ -1967,8 +2044,8 @@ Examples:
 	
 	Create pod with `pod-with-apparmor` name and use `docker-default` apparmor profile.
 
-	<details><summary> An example of configuration:</summary>
-	
+	An example of configuration:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -1983,27 +2060,25 @@ Examples:
 		  - name: hello
 		    image: busybox:1.28
 		    command: [ "sh", "-c", "echo 'Hello AppArmor!' && sleep 1h" ]
-	
-	</details>
+	```
 	
 	Apply the prepared configuration file:
-	```
+	```shell
 	k apply -f pod-with-apparmor.yaml
 	```
 	
 	Getting ID of container:
-	```
+	```shell
 	crictl ps -a | grep pod-with-apparmor
 	```
 	
 	Then, run the command:
-	```
+	```shell
 	crictl inspect e428e2a3e9324 | grep apparmor
 		"apparmor_profile": "localhost/docker-default"
 	  	"apparmorProfile": "docker-default",
 	```
 	</details>
-
 
 - <details><summary>Example_3: Working with Seccomp:</summary>
 
@@ -2031,10 +2106,10 @@ Run containers as non-root users: Specify a non-root user in your Dockerfile or 
 Avoid privileged containers: Don’t run privileged containers with unrestricted access to host resources. Instead, use Linux kernel capabilities to grant specific privileges when necessary.
 
 Examples:
- - <details><summary>Example_1: Working with Privilege Escalation:</summary>
+- <details><summary>Example_1: Working with Privilege Escalation:</summary>
 	
-	<details><summary> An example of configuration:</summary>
-	
+	An example of configuration:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -2055,21 +2130,19 @@ Examples:
 				allowPrivilegeEscalation: false
 			dnsPolicy: ClusterFirst
 			restartPolicy: Always
-
-	</details>
-	
+	```
 
 </details>
 
  - <details><summary>Example_2: Working with Privileged containers:</summary>
 	
 	Run a pod through CLI:
-	```	
+	```shell
 	k run privileged-pod --image=nginx:alpine --privileged
 	```
 
-	<details><summary> An example of configuration:</summary>
-	
+	An example of configuration:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -2089,22 +2162,20 @@ Examples:
 				privileged: true
 			dnsPolicy: ClusterFirst
 			restartPolicy: Always
-
-	</details>
+	```
 
 	*NOTE*: When you set runAsNonRoot: true you require that the container will run with a user with any UID other than 0. No matter which UID your user has. So, that parameter must set to `false` for security context.
-	
 
 </details>
 
 - <details><summary>Example_3: Working with non-root user in containers (runAsNonRoot):</summary>
 	
-	```
+	```shell
 	k run non-root-pod --image=nginx:alpine --dry-run=client -o yaml > non-root-pod.yaml
 	```
 
-	<details><summary> Edit that non-root-pod.yaml file to:</summary>
-	
+	Edit that non-root-pod.yaml file to:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -2121,25 +2192,23 @@ Examples:
 			resources: {}
 			dnsPolicy: ClusterFirst
 			restartPolicy: Always
-
-	</details>
+	```
 
 	Apply generated yaml file:
-	```
+	```shell
 	k apply -f non-root-pod.yaml
 	```
-	
 
 </details>
 
 - <details><summary>Example_4: Run container as user:</summary>
 	
-	```
+	```shell
 	k run run-as-user-pod --image=nginx:alpine --dry-run=client -o yaml > run-as-user-pod.yaml
 	```
 
-	<details><summary> Edit that run-as-user-pod.yaml file to:</summary>
-	
+	Edit that run-as-user-pod.yaml file to:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -2159,14 +2228,12 @@ Examples:
 				allowPrivilegeEscalation: false
 			dnsPolicy: ClusterFirst
 			restartPolicy: Always
-
-	</details>
+	```
 
 	Apply the YAML:
-	```
+	```shell
 	k apply -f run-as-user-pod.yaml
 	```
-	
 
 </details>
 
@@ -2191,22 +2258,22 @@ Examples:
 - <details><summary>Example_1: Working with Open Policy Agent (OPA)/Gatekeeper:</summary>
 
 	To install:
-	```
+	```shell
 	kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/deploy/gatekeeper.yaml
 	```
 
 	Deploy some example (k8srequiredlabels):
-	```
+	```shell
 	kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/demo/basic/templates/k8srequiredlabels_template.yaml
 	```
 
 	You can install this Constraint with the following command:
-	```
+	```shell
 	kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/demo/basic/constraints/all_ns_must_have_gatekeeper.yaml
 	```
 
 	To check constraints:
-	```
+	```shell
 	kubectl get constraints
 	```
 
@@ -2244,7 +2311,7 @@ Examples:
 	```
 
 	Create a new secret with `file-secret` name through `file-secret.yaml` file:
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Secret
@@ -2255,12 +2322,12 @@ Examples:
 	```
 
 	Apply it:
-	```
+	```shell
 	k apply -f file-secret.yaml
 	```
 
 	Then, create a new pod with `pod-secrets` name. Make Secret `literal-secret` available as environment variable `literal-secret`. Mount Secret `file-secret` as volume. The file should be available under `/etc/file-secret/hosts`:
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Pod
@@ -2286,7 +2353,7 @@ Examples:
 	```
 
 	Verify:
-	```
+	```shell
 	kubectl exec pod-secrets -- env | grep "secret=secret12345"
 	
 	kubectl exec pod-secrets -- cat /etc/file-secret/hosts
@@ -2297,7 +2364,7 @@ Examples:
 - <details><summary>Example_2: Secret Read and Decode:</summary>
 
 	Get the secret that created in `opaque` ns and store it into `opaque_secret.txt` file:
-	```
+	```shell
 	kubectl -n opaque get secret test-sec-1 -ojsonpath="{.data.data}" | base64 -d > opaque_secret.txt
 	```
 
@@ -2306,18 +2373,18 @@ Examples:
 - <details><summary>Example_3: Get secret(s), decode and strore dat into the file:</summary>
 
 	For the test, let's create secret:
-	```
+	```shell
 	k create ns my-ns && \
 	k -n my-ns create secret generic db1-test --from-literal=username=db1 --from-literal=password=Ipassworden
 	```
 
 	Now, get `opaque` secret from `my-ns` ns:
-	```
+	```shell
 	kubectl -n my-ns get secrets db1-test -o yaml
 	```
 
 	Output:
-	```
+	```yaml
 	apiVersion: v1
 	data:
 	  password: SXBhc3N3b3JkZW4=
@@ -2333,7 +2400,7 @@ Examples:
 	```
 
 	Then, we can get secrets `password` and `username`, decode it and store into file, for example:
-	```
+	```shell
 	echo -n "ZGIx" | base64 -d > username.txt
 	echo -n "SXBhc3N3b3JkZW4=" | base64 -d > password.txt
 	```
@@ -2343,18 +2410,18 @@ Examples:
 - <details><summary>Example_4: Secret etcd encryption. Use aesgcm encryption for etcd:</summary>
 
 	Creating folder for this task:
-	```
+	```shell
 	mkdir -p /etc/kubernetes/enc
 	```
 
 	Encrypt secret phrase, for example:
-	```
+	```shell
 	echo -n Secret-ETCD-Encryption | base64
 		U2VjcmV0LUVUQ0QtRW5jcnlwdGlvbg==
 	```
 
 	Create EncryptionConfiguration `/etc/kubernetes/enc/encryption.yaml` file:
-	```
+	```yaml
 	---
 	apiVersion: apiserver.config.k8s.io/v1
 	kind: EncryptionConfiguration
@@ -2370,7 +2437,7 @@ Examples:
 	```
 
 	Open `/etc/kubernetes/manifests/kube-apiserver.yaml` file and put `encryption-provider-config` parameter. Also add volume and volumeMount, for example:
-	```
+	```yaml
 	spec:
 		containers:
 		- command:
@@ -2392,18 +2459,19 @@ Examples:
 			name: enc
 		...
 	```
+	
 	Wait till apiserver was restarted:
-	```
+	```shell
 	watch crictl ps
 	```
 
 	When `apiserver` will be re-created, we can encrypt all existing secrets. For example, let's do it fort all secrets in `one1` NS:
-	```
+	```shell
 	kubectl -n one1 get secrets -o json | kubectl replace -f -
 	```
 
 	To check you can do for example:
-	```
+	```shell
 	ETCDCTL_API=3 etcdctl \
 	--cert /etc/kubernetes/pki/apiserver-etcd-client.crt \
 	--key /etc/kubernetes/pki/apiserver-etcd-client.key \
@@ -2435,7 +2503,7 @@ Examples:
  - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
 	
 	Create RuntimeClass class, something like. Put the next data to `rtc.yaml` file:
-	```
+	```yaml
 	---
 	apiVersion: node.k8s.io/v1
 	kind: RuntimeClass
@@ -2445,12 +2513,12 @@ Examples:
 	```
 
 	Then, apply the file: 
-	```
+	```shell
 	k apply -f rtc.yaml
 	```
 
 	Deploy a new pod with created RuntimeClass, an example `sec_pod.yaml`:
-	```
+	```yaml
 	---
 	apiVersion: v1
 	kind: Pod
@@ -2466,12 +2534,12 @@ Examples:
 	```
 
 	Then, apply the file: 
-	```
+	```shell
 	k apply -f sec_pod.yaml
 	```
 
 	Checks:
-	```
+	```shell
 	k exec sec -- dmesg
 	```
 
@@ -2535,7 +2603,7 @@ The smaller the base image footprint, the less vulnerable your containers are. U
 Examples:
 - <details><summary>Example_1: Create a Pod named nginx-sha-pod which uses the image digest nginx@sha256:ca045ecbcd423cec50367a194d61fd846a6f0964f4999e8d692e5fcf7ebc903f:</summary>
 
-	```
+	```shell
 	k run nginx-sha-pod --image=nginx@sha256:ca045ecbcd423cec50367a194d61fd846a6f0964f4999e8d692e5fcf7ebc903f
 	```
 
@@ -2544,12 +2612,12 @@ Examples:
 - <details><summary>Example_2: Convert the existing Deployment nginx-sha-deployment to use the image digest of the current tag instead of the tag:</summary>
 
 	Getting labels of deployment:
-	```
+	```shell
 	k get deploy nginx-sha-deployment --show-labels
 	```
 	
 	Get pod with labels:
-	```
+	```shell
 	k get pod -l app=nginx-sha-deployment -oyaml | grep imageID
 	```
 
@@ -2559,7 +2627,7 @@ Examples:
 	```
 
 	Checks:
-	```
+	```shell
 	k get pod -l app=nginx-sha-deployment -oyaml | grep image:
 	```
 
@@ -2568,12 +2636,12 @@ Examples:
 - <details><summary>Example_3: Container Image Footprint:</summary>
 
 	In the current folder you have Dockerfile, let's build it with `golden-image` name:
-	```
+	```shell
 	docker build -t golden-image .
 	```
 
 	Run a container with `cointainer-1` name:
-	```
+	```shell
 	docker run --name cointainer-1 -d golden-image
 	```
 
@@ -2588,7 +2656,7 @@ Examples:
 	- Make it impossible to docker exec , podman exec or kubectl exec into the container using bash
 
 	Dockerfile (before):
-	```
+	```shell
 	FROM ubuntu
 	RUN apt-get update
 	RUN apt-get -y install curl
@@ -2597,7 +2665,7 @@ Examples:
 	```
 
 	Dockerfile (after):
-	```
+	```shell
 	FROM ubuntu:20.04
 	RUN apt-get update && apt-get -y install curl
 	ENV URL https://google.com/this-will-fail?secret-token=
@@ -2606,7 +2674,7 @@ Examples:
 	```
 
 	Testing:
-	```
+	```shell
 	podman build -t app .
 	podman run -d -e TOKEN=6666666-5555555-444444-33333-22222-11111 app sleep 1d
 	podman ps | grep app
@@ -2642,8 +2710,8 @@ Securing the images that are allowed to run in your cluster is essential. It’s
 Examples:
  - <details><summary>Example_1: Use ImagePolicyWebhook:</summary>
 
-	<details><summary>First of all, let's create admission /etc/kubernetes/policywebhook/admission_config.json config</summary>
-	
+	First of all, let's create admission /etc/kubernetes/policywebhook/admission_config.json config:
+	```json
 		{
 			"apiVersion": "apiserver.config.k8s.io/v1",
 			"kind": "AdmissionConfiguration",
@@ -2662,13 +2730,13 @@ Examples:
 				}
 			]
 		}
-	
-	</details>
+	```
 
-	<details><summary>Then, create /etc/kubernetes/policywebhook/kubeconf with the settings. For example:</summary>
+	Then, create /etc/kubernetes/policywebhook/kubeconf with the settings. For example:
+	```yaml
 		apiVersion: v1
 		kind: Config
-
+	
 		# clusters refers to the remote service.
 		clusters:
 		- cluster:
@@ -2690,11 +2758,10 @@ Examples:
 		user:
 			client-certificate: /etc/kubernetes/policywebhook/apiserver-client-cert.pem     # cert for the webhook admission controller to use
 			client-key:  /etc/kubernetes/policywebhook/apiserver-client-key.pem             # key matching the cert
-	
-	</details>
+	```
 
-	<details><summary>The /etc/kubernetes/manifests/kube-apiserver.yaml configuration of kube-apiserver, for example:</summary>
-
+	The /etc/kubernetes/manifests/kube-apiserver.yaml configuration of kube-apiserver, for example:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -2834,11 +2901,10 @@ Examples:
 			type: DirectoryOrCreate
 			name: usr-share-ca-certificates
 		status: {}
-
-	</details>
+	```
 
 	Checks:
-	```
+	```shell
 	crictl ps -a | grep api
 	crictl logs 91c61357ef147
 	
@@ -2896,7 +2962,7 @@ Examples:
 - <details><summary>Example_1: Using trivy to scan images in applications and infra namespaces and define if the images has CVE-2021-28831 and/or CVE-2016-9841 vulnerabilities. Scale down those Deployments to 0 if you will find something:</summary>
 
 	Getting images:
-	```
+	```shell
 	k -n applications get pod -oyaml | grep image: | sort -rn | uniq
 	- image: nginx:1.20.2-alpine
 	- image: nginx:1.19.1-alpine-perl
@@ -2905,7 +2971,7 @@ Examples:
 	```
 
 	Or, use the best solution:
-	```
+	```shell
 	k get pod -n applications -o=custom-columns="NAME:.metadata.name,IMAGE:.spec.containers[*].image"
 	NAME                    IMAGE
 	web1-54bf97c787-dk4zs   nginx:1.19.1-alpine-perl
@@ -2914,19 +2980,19 @@ Examples:
 	```
 
 	Let's scan first deployment:
-	```
+	```shell
 	trivy image nginx:1.19.1-alpine-perl | grep CVE-2021-28831
 	trivy image nginx:1.19.1-alpine-perl | grep CVE-2016-9841
 	```
 
 	Let's scan second deployment:
-	```
+	```shell
 	trivy image nginx:1.20.2-alpine | grep CVE-2021-28831
 	trivy image nginx:1.20.2-alpine | grep CVE-2016-9841
 	```
 
 	Hit on the first one, so we scale down:
-	```
+	```shell
 	k -n applications scale deploy web1 --replicas 0
 	```
 
@@ -2935,12 +3001,12 @@ Examples:
 - <details><summary>Example_2: Using trivy to scan images in default namespace:</summary>
 
 	Getting images from all pods in `default` NS:
-	```
+	```shell
 	k get po -o yaml | grep image: | sort -rn | uniq
 	```
 
 	Or, use:
-	```
+	```shell
 	k get pod -n default -o=custom-columns="NAME:.metadata.name,IMAGE:.spec.containers[*].image"
 	```
 
@@ -2950,7 +3016,7 @@ Examples:
 	```
 	
 	Or:
-	```
+	```shell
 	trivy image -s HIGH,CRITICAL nginx:1.19.2
 	```
 
@@ -2977,7 +3043,7 @@ Examples:
  - <details><summary>Example_1: Use seccomp:</summary>
 	
 	There is a JSON format for writing custom seccomp profiles: A fundamental seccomp profile has three main elements: defaultAction, architectures and syscalls:
-	```
+	```json
 	{
 		"defaultAction": "",
 		"architectures": [],
@@ -2991,7 +3057,7 @@ Examples:
 	```
 
 	Using the following pattern we can whitelist only those system calls we want to allow from a process:
-	```
+	```json
 	{
 		"defaultAction": "SCMP_ACT_ERRNO",
 		"architectures": [
@@ -3016,7 +3082,7 @@ Examples:
 	```
 
 	In contrast, if we write a seccomp profile similar to the following pattern that will help us to blacklist the system calls we want to restrict and all other calls will be allowed:
-	```
+	```shell
 	{
 		"defaultAction": "SCMP_ACT_ALLOW",
 		"architectures": [
@@ -3042,7 +3108,7 @@ Examples:
 	```
 
 	The default root directory of the kubelet is `/var/lib/kubelet`. Now create new directory under kubelet root directory:
-	```
+	```shell
 	mkdir -p /var/lib/kubelet/seccomp/profiles
 	```
 
@@ -3052,7 +3118,7 @@ Examples:
 	```
 
 	Inside your deployment or pod, adding config:
-	```
+	```yaml
 	----
 	apiVersion: v1
 	kind: Pod
@@ -3088,7 +3154,7 @@ Examples:
 - <details><summary>Example_2: Use strace:</summary>
 
 	For, example:
-	```
+	```shell
 	strace -c -f -S name chmod 2>&1 1>/dev/null | tail -n +3 | head -n -2 | awk '{print $(NF)}'
 	```
 
@@ -3097,7 +3163,7 @@ Examples:
 - <details><summary>Example_3: Use sysdig:</summary>
 
 	If you would like to use Sysdig:
-	```
+	```shell
 	sysdig proc.name=ls
 	```
 
@@ -3128,7 +3194,7 @@ Examples:
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
 	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
-	```
+	```shell
 	file_output:
 	enabled: true
 	keep_alive: false
@@ -3136,7 +3202,7 @@ Examples:
 	```
 
 	Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
-	```
+	```yaml
 	---
   
   	# macros
@@ -3191,12 +3257,12 @@ Examples:
 	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 	
 	Restart Falco service:
-	```
+	```shell
 	service falco restart && service falco status
 	```
 	
 	Checks:
-	```
+	```shell
 	k run nginx --image=nginx:alpine
 	
 	k exec -it nginx -- sh
@@ -3211,7 +3277,7 @@ Examples:
 	Create a new rule to detect shell inside container only for `nginx` PODs with the next format `Shell in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
 	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
-	```
+	```shell
 	file_output:
 	enabled: true
 	keep_alive: false
@@ -3219,7 +3285,7 @@ Examples:
 	```
 
 	Now, lets configure custom output commands for "Terminal shell in container" rule. So, open `/etc/falco/falco_rules.local.yaml` file and put the next:
-	```
+	```yaml
 	- macro: app_nginx
   	  condition: container and container.image contains "nginx"
 	
@@ -3243,12 +3309,12 @@ Examples:
 	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 
 	Restart Falco service:
-	```
+	```shell
 	service falco restart && service falco status
 	```
 
 	Checks:
-	```
+	```shell
 	k run nginx --image=nginx:alpine
 	
 	k exec -it nginx -- sh
@@ -3269,19 +3335,19 @@ Examples:
 	NOTE: Ensure that the events file is stored on a working node in the cluster.
 	
 	The output example of formatted events should be like:
-	```
+	```shell
 	01:33:19.601363716,root,init
 	01:33:20.606013716,nobody,bash
 	01:33:21.137163716,1000,tar
 	```
 	
 	Use for all pods:
-	```
+	```shell
 	sysdig -M 10 -p "%evt.time,%user.uid,%proc.name"
 	```
 	
 	Use for specific container ID (`myredis`):
-	```
+	```shell
 	sysdig -M 60 -p "%evt.time,%user.name,%proc.name" container.name=myredis >> /opt/incidents/summary
 	
 	Or:
@@ -3289,24 +3355,24 @@ Examples:
 	```
 	
 	Use for specific container name - `myredis`:
-	```
+	```shell
 	sysdig -M 60 -p "%evt.time,%user.uid,%proc.name" container.name=myredis >> /opt/incidents/summary
 	```
 	
 	Or:
-	```
+	```shell
 	sysdig -pc "container.name=myredis and evt.type in (execve, execveat) and evt.dir=<" -p '%evt.time,%user.uid,%proc.name' >> /opt/incidents/summary
 	```
 	
 	*NOTE*: To get list of events, you can use:
-	```
+	```shell
 	sysdig --list
 	
 	sysdig --list | grep time
 	```
 	
 	For testing, create container:
-	```
+	```shell
 	k run myredis --image=redis
 	k exec -ti myredis -- sh
 	```
@@ -3319,7 +3385,7 @@ Examples:
 	The sriteria is to detect spawned processes in container only for `nginx` PODs with the next format `Spawned process in container: TIMESTAMP,USER,COMMAND/SHELL` line. Set the priority to `CRITICAL`. Enable file output into `/var/log/falco.txt` file.
 
 	First of all, let's start from file output, so - open `/etc/falco/falco.yaml` file, find the lines and put something like:
-	```
+	```shell
 	file_output:
 	enabled: true
 	keep_alive: false
@@ -3327,7 +3393,7 @@ Examples:
 	```
 
 	Now, open `/etc/falco/falco_rules.local.yaml` file and put the next rule:
-	```
+	```yaml
 	- rule: spawned_process_in_container
 	desc: A process was spawned in the container.
 	condition: >
@@ -3338,7 +3404,7 @@ Examples:
 	```
 
 	Or, can re-use macros:
-	```
+	```yaml
 	- rule: spawned_process_in_container
 	desc: A process was spawned in the container.
 	condition: >
@@ -3351,12 +3417,12 @@ Examples:
 	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 
 	Restart Falco service:
-	```
+	```shell
 	service falco restart && service falco status
 	```
 
 	Checks:
-	```
+	```shell
 	k run nginx --image=nginx:alpine
 	
 	k exec -it nginx -- sh
@@ -3365,7 +3431,7 @@ Examples:
 	```
 
 	Or, you can run the below command for running falco every 30 seconds and store data in file:
-	```
+	```shell
 	falco -M 30 -r /etc/falco/falco_rules.local.yaml > /var/log/falco.txt
 	```
 
@@ -3375,7 +3441,7 @@ Examples:
 	The sriteria is to detect spawned processes in container only for `pod` POD with the next format `TIMESTAMP,USER or UID,SPAWNED_PROCESS` line. The output should be stored in `/var/log/spawned_processes.txt` file.
 
 	Open `/etc/falco/falco_rules.local.yaml` file and put the next rule:
-	```
+	```yaml
 	- rule: spawned_process_in_container_by_user_name
 	  desc: spawned_process_in_container_by_user_name
 	  condition: container.name = "pod"
@@ -3392,12 +3458,12 @@ Examples:
 	NOTE: if you want to get syscalls for your output (text format), you can use the enxt command: `falco --list=syscall`.
 
 	Now, run falco command every 30 seconds and store data in file:
-	```
+	```shell
 	falco -M 31 -r /etc/falco/falco_rules.local.yaml >> /var/log/spawned_processes.txt
 	```
 
 	Enter inside your pod and run some commamnds (ls, pwd, etc):
-	```
+	```shell
 	k run nginx --image=nginx:alpine
 	
 	k exec -it nginx -- sh
@@ -3455,7 +3521,7 @@ Probably Falco can help to take care of it. You can easily put some Falco's rule
 ### 5. Ensure immutability of containers at runtime
 
 Immutability of Volumes (Secrets, ConfigMaps, VolumeMounts) can be achieved with `readOnly`: true field on the mount.
-```
+```yaml
 volumeMounts:
 - name: instance-creds
   mountPath: /secrets/creds
@@ -3493,7 +3559,7 @@ Examples:
 	Let's create policy, where you must log logs of PODs inside `prod` NS when you created them. Other requests should not be logged at all.
 
 	Create `/etc/kubernetes/auditing/policy.yaml` policy file with the next configuration:
-	```
+	```yaml
 	---
 	apiVersion: audit.k8s.io/v1 # This is required.
 	kind: Policy
@@ -3525,12 +3591,12 @@ Examples:
 	```
 
 	Next, edit kube-api configuration:
-	```	
+	```shell
 	vim /etc/kubernetes/manifests/kube-apiserver.yaml
 	```
 
-	<details><summary> Add the next line to enable auditing:</summary>
-	
+	Add the next line to enable auditing:
+	```yaml
 		---
 		spec:
 			containers:
@@ -3540,11 +3606,10 @@ Examples:
 				- --audit-log-path=/etc/kubernetes/audit-logs/audit.log
 				- --audit-log-maxsize=3
 				- --audit-log-maxbackup=4
+	```
 
-	</details>
-
-	<details><summary> Add the new Volumes:</summary>
-	
+	Add the new Volumes:
+	```yaml
 		volumes:
 		- name: audit-policy
 			hostPath:
@@ -3554,11 +3619,10 @@ Examples:
 			hostPath:
 			path: /etc/kubernetes/audit-logs
 			type: DirectoryOrCreate
+	```
 
-	</details>
-
-	<details><summary> Add the new VolumeMounts:</summary>
-	
+	Add the new VolumeMounts:
+	```yaml
 		volumeMounts:
 		- mountPath: /etc/kubernetes/auditing/policy.yaml
 			name: audit-policy
@@ -3566,11 +3630,10 @@ Examples:
 		- mountPath: /etc/kubernetes/audit-logs
 			name: audit-logs
 			readOnly: false
-
-	</details>
+	```
 
 	Checks:
-	```
+	```shell
 	crictl ps -a | grep api
 	
 	tail -fn10 /etc/kubernetes/audit-logs/audit.log
@@ -3581,12 +3644,12 @@ Examples:
 - <details><summary>Example_2: Configure the Apiserver for Audit Logging. The log path should be /etc/kubernetes/audit-logs/audit.log on the host and inside the container. The existing Audit Policy to use is at /etc/kubernetes/auditing/policy.yaml. The path should be the same on the host and inside the container. Also, set argument --audit-log-maxsize=3 and set argument --audit-log-maxbackup=4:</summary>
 	
 	Edit kube-api configuration:
-	```	
+	```shell
 	vim /etc/kubernetes/manifests/kube-apiserver.yaml
 	```
 
-	<details><summary> Add the next line to enable auditing:</summary>
-	
+	Add the next line to enable auditing:
+	```yaml
 		---
 		spec:
 			containers:
@@ -3596,11 +3659,10 @@ Examples:
 				- --audit-log-path=/etc/kubernetes/audit-logs/audit.log
 				- --audit-log-maxsize=3
 				- --audit-log-maxbackup=4
+	```
 
-	</details>
-
-	<details><summary> Add the new Volumes:</summary>
-	
+	Add the new Volumes:
+	```yaml
 		volumes:
 		- name: audit-policy
 			hostPath:
@@ -3610,11 +3672,10 @@ Examples:
 			hostPath:
 			path: /etc/kubernetes/audit-logs
 			type: DirectoryOrCreate
+	```
 
-	</details>
-
-	<details><summary> Add the new VolumeMounts:</summary>
-	
+	Add the new VolumeMounts:
+	```yaml
 		volumeMounts:
 		- mountPath: /etc/kubernetes/auditing/policy.yaml
 			name: audit-policy
@@ -3622,15 +3683,13 @@ Examples:
 		- mountPath: /etc/kubernetes/audit-logs
 			name: audit-logs
 			readOnly: false
-
-	</details>
+	```
 
 	Checks:
-	```
+	```shell
 	crictl ps -a | grep api
 	tail -f /etc/kubernetes/audit-logs/audit.log
 	```
-	
 
 </details>
 
@@ -3649,12 +3708,12 @@ Examples:
  - <details><summary>Example_1: Use ReadOnly Root FileSystem. Create a new Pod named my-ro-pod in Namespace application of image busybox:1.32.0. Make sure the container keeps running, like using sleep 1d. The container root filesystem should be read-only:</summary>
 	
 	Generate configuration:
-	```
+	```shell
 	k -n application run my-ro-pod --image=busybox:1.32.0 -oyaml --dry-run=client --command -- sh -c 'sleep 1d' > my-ro-pod.yaml
 	```
 
-	<details><summary> Edit it to:</summary>
-	
+	Edit it to:
+	```yaml
 		---
 		apiVersion: v1
 		kind: Pod
@@ -3675,9 +3734,7 @@ Examples:
 				readOnlyRootFilesystem: true
 		dnsPolicy: ClusterFirst
 		restartPolicy: Always
-
-	</details>
-	
+	```
 
 </details>
 
