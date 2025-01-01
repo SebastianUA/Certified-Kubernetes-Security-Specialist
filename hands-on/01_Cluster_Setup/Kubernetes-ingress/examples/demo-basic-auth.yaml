@@ -16,19 +16,38 @@ spec:
     spec:
       containers:
       - image: kennethreitz/httpbin
+        imagePullPolicy: Allways
         name: httpbin
+        resouroces:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         ports:
         - containerPort: 80
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 3000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+---
+
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: demo-basic-auth
+  namespace: default
 spec:
   selector:
     app: demo-basic-auth
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+  - protocol: TCP
+    port: 80
+    targetPort: 80

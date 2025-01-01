@@ -16,21 +16,37 @@ spec:
     spec:
       containers:
       - image: hashicorp/http-echo
+        imagePullPolicy: Allways
         name: http-echo
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
         args:
         - -text="hello world"
         ports:
         - containerPort: 5678
-
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 3000
+          capabilities:
+            drop:
+            - ALL
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: demo-backend
+  namespace: default
 spec:
   selector:
     app: demo-backend
   ports:
-    - protocol: TCP
-      port: 8088
-      targetPort: 5678
+  - protocol: TCP
+    port: 8088
+    targetPort: 5678
