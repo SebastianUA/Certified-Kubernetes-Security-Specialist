@@ -15,7 +15,7 @@ spec:
         app: demo-basic-auth
     spec:
       containers:
-      - image: kennethreitz/httpbin
+      - image: dockerhub.com/library/httpbin
         imagePullPolicy: Allways
         name: httpbin
         resouroces:
