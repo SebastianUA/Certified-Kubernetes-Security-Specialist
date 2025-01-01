@@ -15,8 +15,8 @@ spec:
         app: demo-backend
     spec:
       containers:
-      - image: hashicorp/http-echo
-        imagePullPolicy: Allways
+      - image: hashicorp/http-echo:0.2.3
+        imagePullPolicy: Always
         name: http-echo
         resources:
           limits:
@@ -31,6 +31,7 @@ spec:
         - containerPort: 5678
         securityContext:
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 1000
           runAsGroup: 3000
