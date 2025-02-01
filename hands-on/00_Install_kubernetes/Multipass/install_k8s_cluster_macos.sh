@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -x
+#!/usr/bin/env bash
 
 # CREATED: vitaliy.natarov@yahoo.com
 # Unix/Linux blog: http://linux-notes.org
@@ -21,19 +21,19 @@ function preinstall {
 		$SETCOLOR_NORMAL
 		exit -1
 	fi
+	mkdir -p ./k8s_cluster/
+	ssh-keygen -q -N "" -t rsa -b 2048 -C "vmuser" -f ./k8s_cluster/multipass-ssh-key
 
-	ssh-keygen -q -N "" -t rsa -b 2048 -C "vmuser" -f ./multipass-ssh-key
-
-	cat << EOF > ./cloud-init.yaml
+	cat << EOF > ./k8s_cluster/cloud-init.yaml
 users:
   - default
   - name: vmuser
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:
-    - $(cat multipass-ssh-key.pub)
+    - $(cat ./k8s_cluster/multipass-ssh-key.pub)
 EOF
-	
-	# cat ./cloud-init.yaml
+
+	# cat ./k8s_cluster/cloud-init.yaml
 }
 
 function install_kubemaster01 {
@@ -52,20 +52,20 @@ function install_kubemaster01 {
 		multipass launch \
 			--name ${host_name} \
 			--disk 10G \
-			--memory 3G \
+			--memory 2G \
 			--cpus 2 \
 			--network name=en0,mode=manual,mac="52:54:00:4b:ab:cd" \
-			--cloud-init cloud-init.yaml \
+			--cloud-init ./k8s_cluster/cloud-init.yaml \
 			noble
 	fi
-	
+
 	get_host_name=$(multipass info ${host_name} | grep -Ei "Name" | awk '{print $2}')
 	get_host_ip=$(multipass info ${host_name} | grep IPv4 | awk '{print $2}')
 
 	$SETCOLOR_SUCCESS
 	echo "${get_host_name} - ${get_host_ip}"
 	$SETCOLOR_NORMAL
-	
+
 
 	multipass exec -n ${host_name} -- sudo bash -c 'cat << EOF > /etc/netplan/10-custom.yaml
 network:
@@ -99,20 +99,20 @@ function install_kubeworker01 {
 		multipass launch \
 			--name ${host_name} \
 			--disk 10G \
-			--memory 3G \
+			--memory 1G \
 			--cpus 2 \
 			--network name=en0,mode=manual,mac="52:54:00:4b:ba:dc" \
-			--cloud-init cloud-init.yaml \
+			--cloud-init ./k8s_cluster/cloud-init.yaml \
 			noble
 	fi
-	
+
 	get_host_name=$(multipass info ${host_name} | grep -Ei "Name" | awk '{print $2}')
 	get_host_ip=$(multipass info ${host_name} | grep IPv4 | awk '{print $2}')
 
 	$SETCOLOR_SUCCESS
 	echo "${get_host_name} - ${get_host_ip}"
 	$SETCOLOR_NORMAL
-	
+
 
 	multipass exec -n ${host_name} -- sudo bash -c 'cat << EOF > /etc/netplan/10-custom.yaml
 network:
@@ -127,7 +127,7 @@ EOF'
 
 	multipass exec -n ${host_name} -- sudo bash -c 'netplan apply 2> /dev/null'
 	multipass info ${host_name} | grep IPv4 -A1
-	
+
 }
 
 function install_kubeworker02 {
@@ -146,20 +146,20 @@ function install_kubeworker02 {
 		multipass launch \
 			--name ${host_name} \
 			--disk 10G \
-			--memory 3G \
+			--memory 1G \
 			--cpus 2 \
 			--network name=en0,mode=manual,mac="52:54:00:4b:cd:ab" \
-			--cloud-init cloud-init.yaml \
+			--cloud-init ./k8s_cluster/cloud-init.yaml \
 			noble
 	fi
-	
+
 	get_host_name=$(multipass info ${host_name} | grep -Ei "Name" | awk '{print $2}')
 	get_host_ip=$(multipass info ${host_name} | grep IPv4 | awk '{print $2}')
 
 	$SETCOLOR_SUCCESS
 	echo "${get_host_name} - ${get_host_ip}"
 	$SETCOLOR_NORMAL
-	
+
 
 	multipass exec -n ${host_name} -- sudo bash -c 'cat << EOF > /etc/netplan/10-custom.yaml
 network:
@@ -232,7 +232,7 @@ EOF'
 		multipass exec -n ${host} -- sudo bash -c 'systemctl daemon-reload'
 		multipass exec -n ${host} -- sudo bash -c 'systemctl enable --now containerd'
 		# multipass exec -n ${host} -- sudo bash -c 'systemctl status containerd'
-		
+
 
 		# Install runc
 		multipass exec -n ${host} -- sudo bash -c 'curl -LOs https://github.com/opencontainers/runc/releases/download/v1.1.13/runc.arm64'
@@ -248,11 +248,11 @@ EOF'
 		# TODO: Install kubeadm, kubelet and kubectl
 		multipass exec -n ${host} -- sudo bash -c 'apt-get update > /dev/null'
 		multipass exec -n ${host} -- sudo bash -c 'apt-get install -y apt-transport-https ca-certificates curl gpg > /dev/null'
-		multipass exec -n ${host} -- sudo bash -c 'curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg'
-		multipass exec -n ${host} -- sudo bash -c "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list"
+		multipass exec -n ${host} -- sudo bash -c 'curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg'
+		multipass exec -n ${host} -- sudo bash -c "echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | tee /etc/apt/sources.list.d/kubernetes.list"
 		multipass exec -n ${host} -- sudo bash -c 'apt-get update > /dev/null'
 		multipass exec -n ${host} -- sudo bash -c 'apt-get install -y kubelet kubeadm kubectl 2> /dev/null'
-		multipass exec -n ${host} -- sudo bash -c 'apt-mark hold kubelet kubeadm kubectl 2> /dev/null'  
+		multipass exec -n ${host} -- sudo bash -c 'apt-mark hold kubelet kubeadm kubectl 2> /dev/null'
 
 
 		# Configure crictl to work with containerd
@@ -260,7 +260,7 @@ EOF'
 	done;
 
 	# Configure controlplane node
-	multipass exec -n kubemaster01 -- sudo bash -c 'kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.73.101' 
+	multipass exec -n kubemaster01 -- sudo bash -c 'kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.73.101'
 
 	multipass exec -n kubemaster01 -- sudo bash -c 'mkdir -p $HOME/.kube'
 	multipass exec -n kubemaster01 -- sudo bash -c 'cp -i /etc/kubernetes/admin.conf $HOME/.kube/config'
@@ -268,22 +268,22 @@ EOF'
 
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl -n kube-system get pods'
 	# TODO: add/replace to cilium
-	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.30/net.yaml'
+	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.32/net.yaml'
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl -n kube-system get pods'
 
-	multipass exec -n kubemaster01 -- sudo bash -c 'kubeadm token create --print-join-command' > worker_join_command.sh
-	multipass exec -n kubemaster01 -- sudo bash -c 'cat /etc/kubernetes/admin.conf' > kubeconfig
+	multipass exec -n kubemaster01 -- sudo bash -c 'kubeadm token create --print-join-command' > ./k8s_cluster/worker_join_command.sh
+	multipass exec -n kubemaster01 -- sudo bash -c 'cat /etc/kubernetes/admin.conf' > ./k8s_cluster/kubeconfig
 
 
-	# Configure workers 
-	multipass transfer worker_join_command.sh kubeworker01:
-	multipass transfer worker_join_command.sh kubeworker02:
+	# Configure workers
+	multipass transfer ./k8s_cluster/worker_join_command.sh kubeworker01:
+	multipass transfer ./k8s_cluster/worker_join_command.sh kubeworker02:
 
 	multipass exec -n kubeworker01 -- sudo bash -c 'bash ./worker_join_command.sh'
 	multipass exec -n kubeworker02 -- sudo bash -c 'bash ./worker_join_command.sh'
 
-	multipass transfer kubeconfig kubeworker01:
-	multipass transfer kubeconfig kubeworker02:
+	multipass transfer ./k8s_cluster/kubeconfig kubeworker01:
+	multipass transfer ./k8s_cluster/kubeconfig kubeworker02:
 
 	multipass exec -n kubeworker01 -- sudo bash -c 'rm -rf ~/.kube && mkdir ~/.kube && mv ./kubeconfig ~/.kube/config'
 	multipass exec -n kubeworker02 -- sudo bash -c 'rm -rf ~/.kube && mkdir ~/.kube && mv ./kubeconfig ~/.kube/config'
@@ -295,7 +295,7 @@ EOF'
 }
 
 function postinstall {
-	
+
 	declare -a StringArray=(
 		"kubemaster01"
 	  "kubeworker01"
@@ -313,7 +313,7 @@ function postinstall {
 	echo "Tune SSH"
 	$SETCOLOR_NORMAL
 
-	# TODO: 
+	# TODO:
 		# https://www.digitalocean.com/community/tutorials/how-to-harden-openssh-on-ubuntu-20-04
 		# https://hostman.com/tutorials/how-to-install-and-configure-ssh-on-an-ubuntu-server/
 
@@ -332,39 +332,39 @@ function generate_context {
 
  	multipass exec -n kubemaster01 -- sudo bash -c "kubectl create clusterrolebinding cluster-admin-vmuser@kubernetes.local --user=vmuser@kubernetes.local --clusterrole='cluster-admin' --group='admins'"
 
-	openssl genrsa -out vmuser.key 2048
-	openssl req -new -key vmuser.key -out vmuser.csr -subj "/CN=vmuser@kubernetes.local"
+	openssl genrsa -out ./k8s_cluster/vmuser.key 2048
+	openssl req -new -key ./k8s_cluster/vmuser.key -out ./k8s_cluster/vmuser.csr -subj "/CN=vmuser@kubernetes.local"
 
-	cat << EOF > ./vmuser-csr.yaml
+	cat << EOF > ./k8s_cluster/vmuser-csr.yaml
 apiVersion: certificates.k8s.io/v1
 kind: CertificateSigningRequest
 metadata:
   name: vmuser@kubernetes.local
 spec:
-  request: $(cat ./vmuser.csr | base64)
+  request: $(cat ./k8s_cluster/vmuser.csr | base64)
   signerName: kubernetes.io/kube-apiserver-client
   expirationSeconds: 86400
   usages:
   - client auth
 EOF
 
-	multipass transfer vmuser-csr.yaml kubemaster01:
+	multipass transfer ./k8s_cluster/vmuser-csr.yaml kubemaster01:
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl create -f vmuser-csr.yaml'
 	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl certificate approve vmuser@kubernetes.local'
  	multipass exec -n kubemaster01 -- sudo bash -c 'kubectl get csr vmuser@kubernetes.local -ojsonpath="{.status.certificate}" | base64 -d > vmuser.crt'
-	multipass transfer kubemaster01:vmuser.crt ./vmuser.crt
+	multipass transfer kubemaster01:vmuser.crt ./k8s_cluster/vmuser.crt
 
 	# multipass exec -n kubemaster01 -- sudo bash -c "kubectl get cm -o jsonpath='{.items[0].data.ca\.crt}' > kubernetes.ca.crt"
-	# multipass transfer kubemaster01:kubernetes.ca.crt ./kubernetes.ca.crt
+	# multipass transfer kubemaster01:kubernetes.ca.crt ./k8s_cluster/kubernetes.ca.crt
 	# kubectl config set-cluster kubernetes.local --server=https://192.168.64.18 --certificate-authority="$(pwd)/kubernetes.ca.crt"
 
 	get_host_ip=$(multipass info kubemaster01 | grep IPv4 | awk '{print $2}')
 
 	kubectl config set-cluster kubernetes.local --server=https://${get_host_ip}:6443 --insecure-skip-tls-verify=true
-	kubectl config set-credentials vmuser@kubernetes.local --client-key=vmuser.key --client-certificate=vmuser.crt --username='vmuser@kubernetes.local'
+	kubectl config set-credentials vmuser@kubernetes.local --client-key=./k8s_cluster/vmuser.key --client-certificate=./k8s_cluster/vmuser.crt --username='vmuser@kubernetes.local'
  	kubectl config set-context vmuser@kubernetes.local --cluster=kubernetes.local --user=vmuser@kubernetes.local
  	kubectl config use-context vmuser@kubernetes.local
- 	kubectl get ns && kubectl get po
+ 	kubectl get ns && kubectl taint nodes kubemaster01 node-role.kubernetes.io/control-plane- && kubectl get po -A
 }
 
 function status_all {
@@ -383,9 +383,9 @@ function status_all {
 	done
 
 	echo -e "\nTo connect to host use SSH, for example: \n"
-	echo "ssh vmuser@192.168.73.101 -i ./multipass-ssh-key -o StrictHostKeyChecking=no"
-	echo "ssh vmuser@192.168.73.102 -i ./multipass-ssh-key -o StrictHostKeyChecking=no"
-	echo "ssh vmuser@192.168.73.103 -i ./multipass-ssh-key -o StrictHostKeyChecking=no"
+	echo "ssh vmuser@192.168.73.101 -i ./k8s_cluster/multipass-ssh-key -o StrictHostKeyChecking=no"
+	echo "ssh vmuser@192.168.73.102 -i ./k8s_cluster/multipass-ssh-key -o StrictHostKeyChecking=no"
+	echo "ssh vmuser@192.168.73.103 -i ./k8s_cluster/multipass-ssh-key -o StrictHostKeyChecking=no"
 }
 
 function start_all {
