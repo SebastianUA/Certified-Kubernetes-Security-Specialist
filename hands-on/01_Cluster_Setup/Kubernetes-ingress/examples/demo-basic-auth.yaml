@@ -15,20 +15,49 @@ spec:
         app: demo-basic-auth
     spec:
       containers:
-      - image: kennethreitz/httpbin
-        name: httpbin
+      - image: dockerhub.io/library/httpd:2.0-alpine
+        imagePullPolicy: Always
+        name: httpd:2.0-alpine
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
         ports:
         - containerPort: 80
-
+        livenessProbe:
+          httpGet:
+            path: /status/200
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /status/200
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        securityContext:
+          runAsUser: 10001
+          runAsGroup: 30000
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: demo-basic-auth
+  namespace: default
 spec:
   selector:
     app: demo-basic-auth
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
+  - protocol: TCP
+    port: 80
+    targetPort: 80
