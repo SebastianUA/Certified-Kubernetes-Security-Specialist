@@ -3766,6 +3766,7 @@ Examples:
 2. [Learn Kubernetes Security](https://www.youtube.com/playlist?list=PLeLcvrwLe1859Rje9gHrD1KEp4y5OXApB)
 3. [Let's Learn Kubernetes Security](https://youtu.be/VjlvS-qiz_U)
 4. [Webinar | Certified Kubernetes Security Specialist (CKS), January 2022](https://youtu.be/Qqoe-PbuQcs)
+5. [Webinar | Everything you need to know about Kubernetes certification, CNCF, June 2024](https://youtu.be/vFvelHoxeP0)
 
 ## Containers and Kubernetes Security Training
 
@@ -3777,6 +3778,7 @@ Examples:
 6. [Killer Shell CKS - Interactive Scenarios for Kubernetes Security](https://killercoda.com/killer-shell-cks)
 7. [Linux Foundation Kubernetes Certifications Now Include Exam Simulator](https://training.linuxfoundation.org/announcements/linux-foundation-kubernetes-certifications-now-include-exam-simulator)
 8. [k8simulator](https://k8simulator.com/product/certified-kubernetes-security-specialist-cks/)
+9. [CKS Self-Study Course (free)](https://rx-m.com/cks-self-study-course/)
 
 
 # Authors
