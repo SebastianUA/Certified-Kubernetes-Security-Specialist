@@ -360,7 +360,7 @@ Examples:
 			service:
 				name: app1
 				port:
-				number: 80
+				   number: 80
 	```
 
 	Also, you can generate it through CLI:
