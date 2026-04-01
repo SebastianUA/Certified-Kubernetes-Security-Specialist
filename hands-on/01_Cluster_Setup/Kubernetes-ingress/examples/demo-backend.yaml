@@ -14,23 +14,64 @@ spec:
       labels:
         app: demo-backend
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 3000
+        runAsNonRoot: true
+      volumes:
+        - name: demo-backend-volume
+        mountPath: /var/www/
+
       containers:
-      - image: hashicorp/http-echo
-        name: http-echo
+      - name: http-echo
+        image: hashicorp/http-echo:0.2.3
+        imagePullPolicy: Always
         args:
         - -text="hello world"
         ports:
         - containerPort: 5678
-
+        volumeMounts:
+        - name: demo-backend-volume
+        mountPath: /var/www/
+        readOnly: false
+        livenessProbe:
+          httpGet:
+            path: /var/www/html/index.html
+            port: 5678
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /var/www/logs/access.log
+            port: 5678
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          runAsGroup: 3000
+          capabilities:
+            drop:
+            - ALL
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: demo-backend
+  namespace: default
 spec:
   selector:
     app: demo-backend
   ports:
-    - protocol: TCP
-      port: 8088
-      targetPort: 5678
+  - protocol: TCP
+    port: 8088
+    targetPort: 5678
