@@ -2950,6 +2950,7 @@ Examples:
 **Useful non-official documentation**
 
 - [7 statically analyse yaml](https://kubernetes.io/blog/2018/07/18/11-ways-not-to-get-hacked/#7-statically-analyse-yaml)
+- [Darkmoon](https://github.com/ASCIT31/Dark-Moon) - Open source (GPL-3.0) autonomous AI penetration testing platform covering web, API, Active Directory and Kubernetes, orchestrating 80+ offensive tools as an MCP host with proof of exploitation and a local privacy gateway (the LLM never sees real IPs or credentials).
 - [Kubehunter](https://github.com/aquasecurity/kube-hunter)
 - [Kubesec](https://kubesec.io/)
 - [Checkov](https://bridgecrew.io/blog/kubernetes-static-code-analysis-with-checkov/)
